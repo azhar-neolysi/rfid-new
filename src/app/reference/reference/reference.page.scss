@@ -1,0 +1,47 @@
+ion-row{
+  text-align: center;
+  align-items: center;
+}
+ion-card{
+  border: 2px solid #3880ff;
+}
+.addbtn{
+  font-size: 25px;
+  color: white;
+}
+ion-label{
+  color: blue;
+}
+
+
+
+input {
+  margin-top: 10px;
+    width: 100%;
+    // height: 100%;
+    padding: 1em;
+    border: 1px solid #3880ff;
+    background-color: transparent;
+    color: #000000;
+    font-weight: bold;
+
+  }
+// ion-card:focus{
+//   border: 3px solid #3880ff;
+// }
+// input:focus{
+//   border: 1px solid #3880ff;
+// }
+// ion-card{
+//   ion-card-header{
+//     ion-row{
+//       ion-col{
+//         // width: 30%;
+//         ion-button{
+//           align-items: end;
+//         }
+//       }
+//     }
+//   }
+// }
+

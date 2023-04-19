@@ -1,0 +1,153 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button> </ion-menu-button>
+    </ion-buttons>
+    <ion-title>Device Master</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content [fullscreen]="true">
+  <div class="pagewrap">
+    <form class="form" id="form" [formGroup]="deviceForm">
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="deviceCode"
+          name="deviceCode"
+          value=""
+          required
+          formControlName="deviceCode"
+        />
+        <label id="deviceCode" for="deviceCode" class="container__label"
+          >Device ID</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="deviceName"
+          name="deviceName"
+          value=""
+          required
+          formControlName="deviceName"
+        />
+        <label id="deviceName" for="deviceName" class="container__label"
+          >Device Name</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="deviceIpaddress"
+          name="deviceIpaddress"
+          value=""
+          required
+          formControlName="deviceIpaddress"
+        />
+        <label
+          id="deviceIpaddress"
+          for="deviceIpaddress"
+          class="container__label"
+          >IP Address</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="deviceMacaddress"
+          name="deviceMacaddress"
+          value=""
+          required
+          formControlName="deviceMacaddress"
+        />
+        <label
+          id="deviceMacaddress"
+          for="deviceMacaddress"
+          class="container__label"
+          >MAC Address</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="deviceType"
+          name="deviceType"
+          value=""
+          required
+          formControlName="deviceType"
+        />
+        <label id="deviceType" for="deviceType" class="container__label"
+          >Device Type</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="refLocationId"
+          name="refLocationId"
+          value=""
+          required
+          formControlName="refLocationId"
+        />
+        <label id="refLocationId" for="refLocationId" class="container__label"
+          >Location</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="deviceManufacturer"
+          name="deviceManufacturer"
+          value=""
+          required
+          formControlName="deviceManufacturer"
+        />
+        <label
+          id="deviceManufacturer"
+          for="deviceManufacturer"
+          class="container__label"
+          >Device Manufacturer</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="description"
+          name="description"
+          value=""
+          required
+          formControlName="description"
+        />
+        <label id="description1" for="description" class="container__label"
+          >Description</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="password"
+          id="devicePassword"
+          name="devicePassword"
+          value=""
+          required
+          formControlName="devicePassword"
+        />
+        <label id="devicePassword" for="devicePassword" class="container__label"
+          >Password</label
+        >
+      </div>
+
+      <button class="form__submit" id="submit" type="button" value="submit" (click)="addDevice()">
+        Submit
+      </button>
+    </form>
+  </div>
+</ion-content>

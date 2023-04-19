@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
-  appName: 'rfid',
+  appId: 'com.neolysi.rfid',
+  appName: 'RFID',
   webDir: 'www',
   bundledWebRuntime: false
 };

@@ -1,0 +1,85 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button> </ion-menu-button>
+      <!-- <ion-icon name="add-sharp" slot="end"></ion-icon> -->
+    </ion-buttons>
+    <ion-title>Products</ion-title>
+    <ion-buttons slot="end" class="addbtn" (click)="addProduct()">
+      <!-- <ion-menu-button> </ion-menu-button> -->
+      <ion-icon name="add-sharp" slot="end"></ion-icon>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content [fullscreen]="true">
+  <ion-card>
+    <ion-input
+      (ionChange)="search($event)"
+      class="container__input"
+      type="text"
+      id="tagId"
+      name="tagId"
+      expand="full"
+      placeholder="Product Name"
+    />
+  </ion-card>
+
+  <ion-card *ngFor="let prod of products">
+    <ion-card-header>
+      <ion-row>
+        <ion-col
+          ><ion-card-title
+            ><b>Product Name:</b>
+            <ion-label>{{prod.productName}}</ion-label></ion-card-title
+          >
+          <ion-card-title
+            ><b>Print Name:</b
+            ><ion-label>{{prod.printName}}</ion-label></ion-card-title
+          >
+          <ion-card-title
+            ><b>Brand:</b> <ion-label>{{prod.brand}}</ion-label></ion-card-title
+          >
+          <ion-card-title
+            ><b>Category:</b>
+            <ion-label>{{prod.category}}</ion-label></ion-card-title
+          >
+          <ion-card-title
+            ><b>Sub Category:</b>
+            <ion-label>{{prod.subCategory}}</ion-label></ion-card-title
+          >
+          <ion-card-title
+            ><b>Type:</b> <ion-label>{{prod.type}}</ion-label></ion-card-title
+          >
+        </ion-col>
+        <ion-col size="auto"
+          ><ion-button
+            color="danger"
+            (click)="deleteProduct(prod.productMasterId)"
+            ><ion-icon name="trash-sharp"></ion-icon></ion-button
+        ></ion-col>
+      </ion-row>
+      <ion-grid>
+        <ion-row>
+          <ion-col>
+            <ion-card-title
+              ><b>MRP:</b> <ion-label>{{prod.mrp}}</ion-label></ion-card-title
+            >
+            <ion-card-title
+              ><b>Cost Rate:</b>
+              <ion-label>{{prod.costRate}}</ion-label></ion-card-title
+            >
+            <ion-card-title
+              ><b>Sales Rate:</b>
+              <ion-label>{{prod.salesRate}}</ion-label></ion-card-title
+            >
+          </ion-col>
+          <ion-col size="auto"
+            ><ion-button (click)="editProduct(prod.productMasterId)">
+              <ion-icon name="create-sharp"></ion-icon></ion-button
+          ></ion-col>
+        </ion-row>
+      </ion-grid>
+      <!-- <ion-card-subtitle></ion-card-subtitle> -->
+    </ion-card-header>
+  </ion-card>
+</ion-content>

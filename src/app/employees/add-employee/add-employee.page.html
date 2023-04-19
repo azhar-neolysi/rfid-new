@@ -1,0 +1,231 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button> </ion-menu-button>
+    </ion-buttons>
+    <ion-title>Add Employee</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content [fullscreen]="true">
+  <div class="pagewrap">
+    <form class="form" id="form" [formGroup]="empForm">
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="firstName"
+          name="firstName"
+          value=""
+          formControlName="firstName"
+          required
+        />
+        <label id="firstName" for="firstName" class="container__label"
+          >First Name</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="lastName"
+          name="lastName"
+          value=""
+          required
+          formControlName="lastName"
+        />
+        <label id="lastName" for="lastName" class="container__label"
+          >Last Name</label
+        >
+      </div>
+      <div class="container" *ngIf="!editEmpID">
+        <input
+          class="container__input"
+          type="text"
+          id="userName"
+          name="userName"
+          value=""
+          required
+          formControlName="userName"
+        />
+        <label id="userName" for="userName" class="container__label"
+          >User Name</label
+        >
+      </div>
+      <div class="container">
+        <select formControlName="gender" class="container__input">
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+        </select>
+        <label id="passLabel" for="pass" class="container__label">Gender</label>
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="date"
+          id="dob"
+          name="dob"
+          value=""
+          formControlName="dob"
+          required
+        />
+        <label id="dob" for="dob" class="container__label">DoB</label>
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="date"
+          id="doj"
+          name="doj"
+          value=""
+          formControlName="doj"
+          required
+        />
+        <label id="doj" for="doj" class="container__label">DoJ</label>
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="email"
+          id="username"
+          name="username"
+          value=""
+          required
+          formControlName="email"
+        />
+        <label id="userLabel" for="username" class="container__label"
+          >Email</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="number"
+          id="mobileNo"
+          name="mobileNo"
+          value=""
+          maxlength="10"
+          formControlName="mobileNo"
+          required
+        />
+        <label id="mobileNo" for="mobileNo" class="container__label"
+          >Mobile No</label
+        >
+      </div>
+      <div class="container">
+        <select formControlName="refRoleId" class="container__input">
+          <option [ngValue]="null" disabled selected="selected">
+            Select Role
+          </option>
+          <option *ngFor="let ref of role" [ngValue]="ref.referenceListId">
+            {{ref.referenceListIdName}}
+          </option>
+        </select>
+        <label id="passLabel" for="pass" class="container__label">Role</label>
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="refLocationId"
+          name="refLocationId"
+          value=""
+          formControlName="refLocationId"
+          required
+        />
+        <label id="refLocationId" for="pass" class="container__label"
+          >Location</label
+        >
+      </div>
+      <div class="container">
+        <select formControlName="status" class="container__input">
+          <option value="Working">Working</option>
+          <option value="Notice Period">Notice Period</option>
+        </select>
+        <label id="status" for="status" class="container__label"
+          >Emp Status</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="number"
+          id="notice"
+          name="notice"
+          value=""
+          required
+          formControlName="notice"
+        />
+        <label id="notice" for="notice" class="container__label"
+          >Notice Period</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="pass"
+          name="text"
+          value=""
+          required
+          formControlName="nationality"
+        />
+        <label id="passLabel" for="pass" class="container__label"
+          >Nationality</label
+        >
+      </div>
+
+      <div class="container" *ngIf="!editEmpID">
+        <input
+          class="container__input"
+          type="password"
+          id="password"
+          name="password"
+          value=""
+          required
+          formControlName="password"
+        />
+        <label id="password" for="password" class="container__label"
+          >Password</label
+        >
+      </div>
+      <div class="container" *ngIf="!editEmpID">
+        <input
+          class="container__input"
+          type="password"
+          id="cmfpassword"
+          name="cmfpassword"
+          value=""
+          formControlName="cmfpassword"
+          required
+        />
+        <label id="cmfpassword" for="cmfpassword" class="container__label"
+          >Confirm Password</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="description"
+          name="description"
+          value=""
+          formControlName="description"
+          required
+        />
+        <label id="description" for="description" class="container__label"
+          >Description</label
+        >
+      </div>
+
+      <button
+        class="form__submit"
+        id="submit"
+        type="button"
+        value="submit"
+        (click)="addEmployee()"
+      >
+        Submit
+      </button>
+    </form>
+  </div>
+</ion-content>

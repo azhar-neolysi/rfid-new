@@ -1,0 +1,139 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button> </ion-menu-button>
+    </ion-buttons>
+    <ion-title>Stock Transfer</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content [fullscreen]="true">
+  <div class="pagewrap">
+    <form class="form" id="form" [formGroup]="stockForm">
+      <div class="container">
+        <select formControlName="productMasterId" class="container__input">
+          <option *ngFor="let ref of products" [ngValue]="ref.productMasterId">
+            {{ref.productName}}
+          </option>
+        </select>
+        <label id="userLabel" for="productMasterId" class="container__label"
+          >Product</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="currentStock"
+          name="currentStock"
+          value=""
+          required
+          formControlName="currentStock"
+        />
+        <label id="currentStock" for="currentStock" class="container__label"
+          >Quantity</label
+        >
+      </div>
+      <div class="container">
+        <!-- <input
+          class="container__input"
+          type="text"
+          id="refRefListSourcePoint"
+          name="refRefListSourcePoint"
+          value=""
+          required
+          formControlName="refRefListSourcePoint"
+        /> -->
+        <select
+          formControlName="refRefListSourcePoint"
+          class="container__input"
+        >
+          <option *ngFor="let ref of refLists" [ngValue]="ref.referenceListId">
+            {{ref.referenceListIdName}}
+          </option>
+        </select>
+        <label
+          id="userLabel"
+          for="refRefListSourcePoint"
+          class="container__label"
+          >Source Point</label
+        >
+      </div>
+      <div class="container">
+        <!-- <input
+          class="container__input"
+          type="text"
+          id="refRefListDestinationPoint"
+          name="refRefListDestinationPoint"
+          value=""
+          required
+          formControlName="refRefListDestinationPoint"
+        /> -->
+        <select
+          formControlName="refRefListDestinationPoint"
+          class="container__input"
+        >
+          <option [ngValue]="null" disabled selected="selected">
+            Select Product
+          </option>
+          <option *ngFor="let ref of refLists" [ngValue]="ref.referenceListId">
+            {{ref.referenceListIdName}}
+          </option>
+        </select>
+        <label
+          id="refRefListDestinationPoint"
+          for="refRefListDestinationPoint"
+          class="container__label"
+          >Destination Point</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="approvedBy"
+          name="approvedBy"
+          value=""
+          required
+          formControlName="approvedBy"
+        />
+        <label id="approvedBy" for="approvedBy" class="container__label"
+          >Approved By</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="date"
+          id="date"
+          name="date"
+          value=""
+          required
+          formControlName="date"
+        />
+        <label id="date" for="date" class="container__label">Date</label>
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="reason"
+          name="reason"
+          value=""
+          formControlName="reason"
+          required
+        />
+        <label id="reason" for="reason" class="container__label">Reason</label>
+      </div>
+
+      <button
+        class="form__submit"
+        id="submit"
+        type="button"
+        value="submit"
+        (click)="transferEntry()"
+      >
+        Submit
+      </button>
+    </form>
+  </div>
+</ion-content>

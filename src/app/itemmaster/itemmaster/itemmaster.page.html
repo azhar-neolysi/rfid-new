@@ -1,0 +1,423 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button> </ion-menu-button>
+    </ion-buttons>
+    <ion-title>Product Master</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content [fullscreen]="true">
+  <div class="pagewrap">
+    <form class="form" id="form" [formGroup]="productForm">
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="productName"
+          name="productName"
+          value=""
+          required
+          formControlName="productName"
+        />
+        <label id="productName" for="productName" class="container__label"
+          >Name</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="printName"
+          name="printName"
+          value=""
+          required
+          formControlName="printName"
+        />
+        <label id="printName" for="printName" class="container__label"
+          >Print Name</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="rfidcode"
+          name="rfidcode"
+          value=""
+          required
+          formControlName="rfidcode"
+        />
+        <label id="rfidcode" for="rfidcode" class="container__label"
+          >RFID Code</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="itemCode"
+          name="itemCode"
+          value=""
+          required
+          formControlName="itemCode"
+        />
+        <label id="itemCode" for="itemCode" class="container__label"
+          >Item Code</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="barCode"
+          name="barCode"
+          value=""
+          required
+          formControlName="barCode"
+        />
+        <label id="userLabel" for="barCode" class="container__label"
+          >Barcode</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="brand"
+          name="brand"
+          value=""
+          formControlName="brand"
+          required
+        />
+        <label id="brand" for="brand" class="container__label"
+          >Brand</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="type"
+          name="type"
+          value=""
+          required
+          formControlName="type"
+        />
+        <label id="type" for="type" class="container__label"
+          >Type</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="style"
+          name="style"
+          value=""
+          required
+          formControlName="style"
+        />
+        <label id="style" for="style" class="container__label"
+          >Style</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="pattern"
+          name="pattern"
+          value=""
+          required
+          formControlName="pattern"
+        />
+        <label id="pattern" for="pattern" class="container__label"
+          >Pattern</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="size"
+          name="size"
+          value=""
+          required
+          formControlName="size"
+        />
+        <label id="size" for="size" class="container__label"
+          >Size</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="rack"
+          name="rack"
+          value=""
+          required
+          formControlName="rack"
+        />
+        <label id="rack" for="rack" class="container__label"
+          >Rack</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="eancode"
+          name="eancode"
+          value=""
+          required
+          formControlName="eancode"
+        />
+        <label id="eancode" for="eancode" class="container__label"
+          >EAN</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="date"
+          id="date"
+          name="date"
+          value=""
+          formControlName="date"
+          required
+        />
+        <label id="date" for="date" class="container__label"
+          >Date</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="category"
+          name="category"
+          value=""
+          formControlName="category"
+          required
+        />
+        <label id="category" for="category" class="container__label"
+          >Category</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="subCategory"
+          name="subCategory"
+          value=""
+          formControlName="subCategory"
+          required
+        />
+        <label id="subCategory" for="subCategory" class="container__label"
+          >Sub Category</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="hsnsaccode"
+          name="hsnsaccode"
+          value=""
+          formControlName="hsnsaccode"
+          required
+        />
+        <label id="hsnsaccode" for="hsnsaccode" class="container__label"
+          >Hsnsac Code</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="date"
+          id="manufactureDate"
+          name="manufactureDate"
+          value=""
+          formControlName="manufactureDate"
+          required
+        />
+        <label id="manufactureDate" for="manufactureDate" class="container__label"
+          >Manufacture Date</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="date"
+          id="expiryDate"
+          name="expiryDate"
+          value=""
+          formControlName="expiryDate"
+          required
+        />
+        <label id="expiryDate" for="expiryDate" class="container__label"
+          >Expiry Date</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="number"
+          id="itemWeight"
+          name="itemWeight"
+          value=""
+          formControlName="itemWeight"
+          required
+        />
+        <label id="itemWeight" for="itemWeight" class="container__label"
+          >Item Weight</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="gst"
+          name="gst"
+          value=""
+          formControlName="gst"
+          required
+        />
+        <label id="gst" for="gst" class="container__label"
+          >GST</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="number"
+          id="discount"
+          name="discount"
+          value=""
+          formControlName="discount"
+          required
+        />
+        <label id="discount" for="discount" class="container__label"
+          >Discount</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="number"
+          id="quantity"
+          name="quantity"
+          value=""
+          formControlName="quantity"
+          required
+        />
+        <label id="quantity" for="quantity" class="container__label"
+          >Quantity</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="number"
+          id="costRate"
+          name="costRate"
+          value=""
+          formControlName="costRate"
+          required
+        />
+        <label id="costRate" for="costRate" class="container__label"
+          >Cost Rate</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="number"
+          id="salesRate"
+          name="salesRate"
+          value=""
+          formControlName="salesRate"
+          required
+        />
+        <label id="salesRate" for="salesRate" class="container__label"
+          >Sales Rate</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="number"
+          id="mrp"
+          name="mrp"
+          value=""
+          formControlName="mrp"
+          required
+        />
+        <label id="mrp" for="mrp" class="container__label"
+          >MRP</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="number"
+          id="amount"
+          name="amount"
+          value=""
+          formControlName="amount"
+          required
+        />
+        <label id="amount" for="amount" class="container__label"
+          >Amount</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="description"
+          name="description"
+          value=""
+          formControlName="description"
+          required
+        />
+        <label id="description" for="description" class="container__label"
+          >Description</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="number"
+          id="openingQty"
+          name="openingQty"
+          value=""
+          formControlName="openingQty"
+          required
+        />
+        <label id="openingQty" for="openingQty" class="container__label"
+          >Opening Qty</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="number"
+          id="closingQty"
+          name="closingQty"
+          value=""
+          formControlName="closingQty"
+          required
+        />
+        <label id="closingQty" for="closingQty" class="container__label"
+          >Closing Qty</label
+        >
+      </div>
+         <button class="form__submit" id="submit" type="button" value="submit" (click)="addProduct()">
+        Submit
+      </button>
+    </form>
+  </div>
+</ion-content>

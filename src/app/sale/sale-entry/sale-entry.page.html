@@ -1,0 +1,83 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button> </ion-menu-button>
+    </ion-buttons>
+    <ion-title>Sale Entry</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content [fullscreen]="true">
+  <div class="pagewrap">
+    <form class="form" id="form" [formGroup]="salesForm">
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="productMasterId"
+          name="productMasterId"
+          value=""
+          required
+          formControlName="productMasterId"
+        />
+        <label
+          id="productMasterId"
+          for="productMasterId"
+          class="container__label"
+          >Product Id</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="currentStock"
+          name="currentStock"
+          value=""
+          required
+          formControlName="currentStock"
+        />
+        <label id="currentStock" for="currentStock" class="container__label"
+          >Current Stock</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="date"
+          id="salesDate"
+          name="salesDate"
+          value=""
+          required
+          formControlName="salesDate"
+        />
+        <label id="salesDate" for="salesDate" class="container__label"
+          >Sales Date</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="description"
+          name="description"
+          value=""
+          required
+          formControlName="description"
+        />
+        <label id="description" for="description" class="container__label"
+          >Description</label
+        >
+      </div>
+
+      <button
+        class="form__submit"
+        id="submit"
+        type="button"
+        value="submit"
+        (click)="saleEntry()"
+      >
+        Submit
+      </button>
+    </form>
+  </div>
+</ion-content>

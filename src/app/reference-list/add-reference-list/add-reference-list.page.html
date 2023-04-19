@@ -1,0 +1,71 @@
+
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button> </ion-menu-button>
+    </ion-buttons>
+    <ion-title>Add Reference List</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content [fullscreen]="true">
+  <div class="pagewrap">
+    <form class="form" id="form" [formGroup]="referenceListFrom">
+      <div class="container">
+        <!-- <input
+          class="container__input"
+          type="text"
+          id="refName"
+          name="refName"
+          required
+          formControlName="refName"
+        /> -->
+        <select formControlName="refReferenceId" class="container__input">
+          <option [ngValue]="null" disabled selected="selected">Select Reference</option>
+          <option *ngFor="let ref of references" [ngValue]="ref.referenceId">
+            {{ref.name}}
+          </option>
+        </select>
+        <label id="refName" for="refName" class="container__label"
+          >Ref Name</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="refName"
+          name="refName"
+          required
+          formControlName="refListName"
+        />
+        <label id="refName" for="refName" class="container__label"
+          >Ref List Name</label
+        >
+      </div>
+
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="refDescription"
+          name="refDescription"
+          required
+          formControlName="refDescription"
+        />
+        <label id="refDescription" for="refDescription" class="container__label"
+          >Description</label
+        >
+      </div>
+
+      <button
+        class="form__submit"
+        id="submit"
+        type="button"
+        value="submit"
+        (click)="addReferenceList()"
+      >
+        Submit
+      </button>
+    </form>
+  </div>
+</ion-content>
