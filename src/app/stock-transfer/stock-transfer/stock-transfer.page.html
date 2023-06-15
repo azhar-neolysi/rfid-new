@@ -4,21 +4,126 @@
       <ion-menu-button> </ion-menu-button>
     </ion-buttons>
     <ion-title>Stock Transfer</ion-title>
+    <ion-buttons slot="end" class="addbtn" (click)="transferList()">
+      <ion-icon name="list"></ion-icon>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 <ion-content [fullscreen]="true">
   <div class="pagewrap">
     <form class="form" id="form" [formGroup]="stockForm">
       <div class="container">
-        <select formControlName="productMasterId" class="container__input">
-          <option *ngFor="let ref of products" [ngValue]="ref.productMasterId">
+        <!-- <select formControlName="productEntryId" class="container__input">
+          <option *ngFor="let ref of products" [ngValue]="ref.productEntryId">
             {{ref.productName}}
           </option>
-        </select>
-        <label id="userLabel" for="productMasterId" class="container__label"
-          >Product</label
+        </select> -->
+        <input
+          class="container__input"
+          type="text"
+          id="barcode"
+          name="barcode"
+          value=""
+          required
+          formControlName="barcode"
+          (input)="calculateByteLength($event)"
+          autofocus="true"
+        />
+        <label id="userLabel" for="productEntryId" class="container__label"
+          >RFID Code</label
+        >
+        <ion-grid>
+          <ion-row>
+            <ion-col></ion-col>
+            <ion-col>
+              <!-- <ion-button color="danger"
+                ><ion-icon slot="end" name="star"></ion-icon>
+              </ion-button> -->
+              <ion-button color="danger"
+              (click)="clear()"><ion-icon name="close"></ion-icon
+            ></ion-button>
+            </ion-col>
+            <ion-col>
+
+              <ion-button (click)="getProduct()"><ion-icon name="arrow-redo"></ion-icon> </ion-button>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="productName"
+          name="productName"
+          value=""
+          required
+          formControlName="productName"
+
+        />
+        <label
+          id="productName"
+          for="productName"
+          class="container__label"
+          >Product Name</label
         >
       </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="printName"
+          name="printName"
+          value=""
+          required
+          formControlName="printName"
+
+        />
+        <label
+          id="printName"
+          for="printName"
+          class="container__label"
+          >Print Name</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="brand"
+          name="brand"
+          value=""
+          required
+          formControlName="brand"
+
+        />
+        <label
+          id="brand"
+          for="brand"
+          class="container__label"
+          >Brand</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="category"
+          name="category"
+          value=""
+          required
+          formControlName="category"
+
+        />
+        <label
+          id="category"
+          for="category"
+          class="container__label"
+          >Category</label
+        >
+      </div>
+
+
       <div class="container">
         <input
           class="container__input"

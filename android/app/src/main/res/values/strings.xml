@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">rfid</string>
-    <string name="title_activity_main">rfid</string>
+    <string name="app_name">RFID</string>
+    <string name="title_activity_main">RFID</string>
     <string name="package_name">com.neolysi.rfid</string>
     <string name="custom_url_scheme">com.neolysi.rfid</string>
 </resources>

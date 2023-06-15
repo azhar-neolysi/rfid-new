@@ -18,7 +18,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { File } from '@awesome-cordova-plugins/file/ngx';
 // import { FileTransfer } from '@awesome-cordova-plugins/file-transfer/ngx';
 import { DatePipe } from '@angular/common';
-
+// import { AutoFocusDirective } from './auto-focus.directive';
 @NgModule({
   declarations: [AppComponent],
   imports: [

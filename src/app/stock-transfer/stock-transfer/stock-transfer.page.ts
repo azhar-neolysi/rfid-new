@@ -26,16 +26,22 @@ export class StockTransferPage implements OnInit {
     isActive: [true],
     isDeleted: [false],
     date: ['', [Validators.required]],
-    productMasterId: [1, [Validators.required]],
+    productEntryId: [0, [Validators.required]],
     currentStock: [0, [Validators.required]],
     refRefListSourcePoint: [0, [Validators.required]],
     refRefListDestinationPoint: [0, [Validators.required]],
     approvedBy: ['', [Validators.required]],
     reason: ['', [Validators.required]],
+    barcode:[''],
+    productName:[''],
+    printName:[''],
+    brand:[''],
+    category:[''],
   });
   products: any = [];
   refLists: any = [];
   transferID: any;
+  byteLength: number;
   constructor(
     private formBuilder: FormBuilder,
     private product: ProductService,
@@ -64,15 +70,26 @@ export class StockTransferPage implements OnInit {
       this.products = res;
     });
   }
-  // selectProduct(productId: any) {
-  //   console.log(productId);
-  //   this.products.forEach((element: any) => {
-  //     console.log(element);
-  //     if(element.productMasterId === productId){
-  //       this.
-  //     }
-  //   });
-  // }
+  calculateByteLength(event:any){
+    const encoder = new TextEncoder();
+    const encodedData = encoder.encode(event.target.value);
+    this.byteLength = encodedData.length;
+    console.log('byteLength',this.byteLength);
+    console.log('RFID ID',event.target.value);
+    if(this.byteLength===48){
+      // this.tagId=event.target.value
+      this.getProduct();
+    }
+  }
+  clear(){
+    this.stockForm.controls.barcode.setValue(null);
+    this.stockForm.controls.productName.setValue(null);
+    this.stockForm.controls.productEntryId.setValue(null);
+    this.stockForm.controls.printName.setValue(null);
+    this.stockForm.controls.brand.setValue(null);
+    this.stockForm.controls.category.setValue(null);
+  }
+
   ref_List() {
     this.refList
       .getReferenceListbyRefName('Transfer Points')
@@ -80,6 +97,24 @@ export class StockTransferPage implements OnInit {
         console.log(res);
         this.refLists = res;
       });
+  }
+  getProduct() {
+    // console.log(event);
+    // console.log(event.target.value);
+    const data = {
+      barcode: null,
+      rfidcode: this.stockForm.value.barcode,
+    };
+    this.product.searchProduct(data).subscribe((res: any) => {
+      console.log(res);
+      this.products=res[0];
+      this.stockForm.controls.productName.setValue(res[0].productName);
+      this.stockForm.controls.productEntryId.setValue(res[0].productEntryId);
+      this.stockForm.controls.printName.setValue(res[0].printName);
+      this.stockForm.controls.brand.setValue(res[0].brand);
+      this.stockForm.controls.category.setValue(res[0].category);
+
+    });
   }
   transferEntry() {
     if (this.stockForm.valid) {
@@ -94,9 +129,8 @@ export class StockTransferPage implements OnInit {
         console.log('Enter Transfer Quantity');
         return;
       }
-      if (this.transferID) {
+
         const data = {
-          stockTransferId: this.stockForm.value.stockTransferId,
           refOrgId: this.stockForm.value.refOrgId,
           createdDate: this.stockForm.value.createdDate,
           refCreatedBy: this.stockForm.value.refCreatedBy,
@@ -105,31 +139,7 @@ export class StockTransferPage implements OnInit {
           isActive: this.stockForm.value.isActive,
           isDeleted: this.stockForm.value.isDeleted,
           date: this.stockForm.value.date,
-          productMasterId: String(this.stockForm.value.productMasterId),
-          currentStock: this.stockForm.value.currentStock,
-          refRefListSourcePoint: this.stockForm.value.refRefListSourcePoint,
-          refRefListDestinationPoint:
-            this.stockForm.value.refRefListDestinationPoint,
-          approvedBy: this.stockForm.value.approvedBy,
-          reason: this.stockForm.value.reason,
-        };
-        console.log(data);
-        this.stock.editStockTransfer(data).subscribe((res: any) => {
-          console.log(res);
-          this.router.navigate(['stock-transfer-list']);
-        });
-      } else {
-        const data = {
-          stockTransferId: this.stockForm.value.stockTransferId,
-          refOrgId: this.stockForm.value.refOrgId,
-          createdDate: this.stockForm.value.createdDate,
-          refCreatedBy: this.stockForm.value.refCreatedBy,
-          modifiedDate: this.stockForm.value.modifiedDate,
-          refModifiedBy: this.stockForm.value.refModifiedBy,
-          isActive: this.stockForm.value.isActive,
-          isDeleted: this.stockForm.value.isDeleted,
-          date: this.stockForm.value.date,
-          productMasterId: String(this.stockForm.value.productMasterId),
+          productEntryId: String(this.stockForm.value.productEntryId),
           currentStock: this.stockForm.value.currentStock,
           refRefListSourcePoint: this.stockForm.value.refRefListSourcePoint,
           refRefListDestinationPoint:
@@ -141,7 +151,7 @@ export class StockTransferPage implements OnInit {
           console.log(res);
           window.location.reload();
         });
-      }
+      // }
     } else {
       console.log('Form Invalid', this.stockForm);
     }
@@ -161,8 +171,8 @@ export class StockTransferPage implements OnInit {
       this.stockForm.controls.isActive.setValue(res.isActive);
       this.stockForm.controls.isDeleted.setValue(res.isDeleted);
       this.stockForm.controls.modifiedDate.setValue(res.modifiedDate);
-      this.stockForm.controls.productMasterId.setValue(
-        Number(res.productMasterId)
+      this.stockForm.controls.productEntryId.setValue(
+        Number(res.productEntryId)
       );
       this.stockForm.controls.reason.setValue(res.reason);
       this.stockForm.controls.refCreatedBy.setValue(res.refCreatedBy);
@@ -175,5 +185,34 @@ export class StockTransferPage implements OnInit {
         res.refRefListSourcePoint
       );
     });
+  }
+  search(event: any) {
+    console.log(event);
+    console.log(event.target.value);
+    const data = {
+      barcode: event.target.value,
+      rfidcode: null,
+    };
+    this.product.searchProduct(data).subscribe((res: any) => {
+      console.log(res[0]);
+      this.stockForm.controls.productEntryId.setValue(res[0].productEntryId);
+      console.log( this.stockForm.value);
+      // this.salesForm.controls.currentStock.setValue(res[0].closingQty);
+      // // this.salesForm.controls.description.setValue(res[0].description);
+      // this.salesForm.controls.isActive.setValue(res[0].isActive);
+      // this.salesForm.controls.isDeleted.setValue(res[0].isDeleted);
+      // this.salesForm.controls.modifiedDate.setValue(res[0].modifiedDate);
+      // this.salesForm.controls.productEntryId.setValue(res[0].productEntryId);
+      // this.salesForm.controls.refCreatedBy.setValue(res[0].refCreatedBy);
+      // this.salesForm.controls.refModifiedBy.setValue(res[0].refModifiedBy);
+      // this.salesForm.controls.refOrgId.setValue(res[0].refOrgId);
+      // this.salesForm.controls.rfidstatus.setValue(res[0].rfidstatus);
+      // this.salesForm.controls.salesDate.setValue(
+      //  new Date()
+      // );
+    });
+  }
+  transferList(){
+    this.router.navigate(['stock-transfer-list']);
   }
 }

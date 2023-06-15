@@ -7,6 +7,8 @@ import {
 } from '@angular/forms';
 import { DevicemasterService } from '../devicemaster.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import * as XLSX from 'xlsx';
+
 @Component({
   selector: 'app-devicemaster',
   templateUrl: './devicemaster.page.html',
@@ -52,6 +54,8 @@ export class DevicemasterPage implements OnInit {
     refLocationId: [null],
   });
   deviceId: any;
+  excelUpload=false;
+  excelData: any;
   constructor(private formBuilder: FormBuilder,private device:DevicemasterService,private route: ActivatedRoute,private router:Router) {}
 
   ngOnInit() {
@@ -63,6 +67,9 @@ export class DevicemasterPage implements OnInit {
         this.getDevice();
       }
     });
+  }
+  excelUploadEnable() {
+    this.excelUpload = !this.excelUpload ? true : false;
   }
   addDevice() {
     if (this.deviceForm.valid) {
@@ -141,5 +148,42 @@ export class DevicemasterPage implements OnInit {
       this.deviceForm.controls.refModifiedBy.setValue(res.refModifiedBy);
       this.deviceForm.controls.refOrgId.setValue(res.refOrgId);
     })
+  }
+  onFileSelected(event: any) {
+    this.excelData = [];
+    const file: any = event.target.files[0];
+    console.log(file);
+    let fileReader = new FileReader();
+    fileReader.readAsBinaryString(file);
+    fileReader.onload = (e) => {
+      var workbook = XLSX.read(fileReader.result, { type: 'binary' });
+      var sheetNames = workbook.SheetNames;
+      this.excelData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetNames[0]]);
+      console.log(this.excelData);
+    };
+  }
+  upload() {
+    console.log(this.excelData);
+    this.excelData.forEach((element: any) => {
+      console.log(element);
+      this.deviceForm.controls.createdDate.setValue(element.createdDate);
+      this.deviceForm.controls.description.setValue(element.description);
+      this.deviceForm.controls.deviceCode.setValue(element.deviceCode);
+      this.deviceForm.controls.deviceIpaddress.setValue(element.deviceIpaddress);
+      this.deviceForm.controls.deviceMacaddress.setValue(element.deviceMacaddress);
+      this.deviceForm.controls.deviceManufacturer.setValue(element.deviceManufacturer);
+      this.deviceForm.controls.deviceMasterId.setValue(element.deviceMasterId);
+      this.deviceForm.controls.deviceName.setValue(element.deviceName);
+      this.deviceForm.controls.devicePassword.setValue(element.devicePassword);
+      this.deviceForm.controls.deviceType.setValue(element.deviceType);
+      this.deviceForm.controls.isActive.setValue(element.isActive);
+      this.deviceForm.controls.isDeleted.setValue(element.isDeleted);
+      this.deviceForm.controls.modifiedDate.setValue(element.modifiedDate);
+      this.deviceForm.controls.refCreatedBy.setValue(element.refCreatedBy);
+      this.deviceForm.controls.refLocationId.setValue(element.refLocationId);
+      this.deviceForm.controls.refModifiedBy.setValue(element.refModifiedBy);
+      this.deviceForm.controls.refOrgId.setValue(element.refOrgId);
+      this.addDevice();
+    });
   }
 }

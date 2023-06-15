@@ -14,17 +14,23 @@
 <ion-content [fullscreen]="true">
   <ion-card>
     <ion-input
+      inputmode="none"
+      [(ngModel)]="barcodeScan"
       (ionChange)="search($event)"
       class="container__input"
       type="text"
       id="tagId"
       name="tagId"
       expand="full"
-      placeholder="Product Name"
+      placeholder="Barcode"
+      autofocus="true"
     />
+    <!-- <button type="reset" id="clear" class="close-icon"></button> -->
+    <!-- <button class="close-icon" type="reset"></button> -->
   </ion-card>
 
   <ion-card *ngFor="let prod of products">
+    <!-- <h2> {{prod.productEntryId}}</h2> -->
     <ion-card-header>
       <ion-row>
         <ion-col
@@ -32,11 +38,15 @@
             ><b>Product Name:</b>
             <ion-label>{{prod.productName}}</ion-label></ion-card-title
           >
+          <!-- <ion-card-title
+            ><b>productEntryId:</b>
+            <ion-label>{{prod.productEntryId}}</ion-label></ion-card-title
+          > -->
           <ion-card-title
             ><b>Print Name:</b
             ><ion-label>{{prod.printName}}</ion-label></ion-card-title
           >
-          <ion-card-title
+          <!-- <ion-card-title
             ><b>Brand:</b> <ion-label>{{prod.brand}}</ion-label></ion-card-title
           >
           <ion-card-title
@@ -49,12 +59,12 @@
           >
           <ion-card-title
             ><b>Type:</b> <ion-label>{{prod.type}}</ion-label></ion-card-title
-          >
+          > -->
         </ion-col>
         <ion-col size="auto"
           ><ion-button
             color="danger"
-            (click)="deleteProduct(prod.productMasterId)"
+            (click)="deleteProduct(prod.productEntryId)"
             ><ion-icon name="trash-sharp"></ion-icon></ion-button
         ></ion-col>
       </ion-row>
@@ -74,7 +84,7 @@
             >
           </ion-col>
           <ion-col size="auto"
-            ><ion-button (click)="editProduct(prod.productMasterId)">
+            ><ion-button (click)="editProduct(prod.barCode)">
               <ion-icon name="create-sharp"></ion-icon></ion-button
           ></ion-col>
         </ion-row>

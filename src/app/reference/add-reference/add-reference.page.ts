@@ -17,12 +17,12 @@ export class AddReferencePage implements OnInit {
     referenceId:[null],
     refName: ['', [Validators.required]],
     refDescription: [''],
-    refOrgId: [0],
+    refOrgId: [null],
     isActive: [true],
     isDeleted: [false],
-    refCreatedBy: [0],
+    refCreatedBy: [null],
     createdDate: [new Date()],
-    refModifiedBy: [0],
+    refModifiedBy: [null],
     modifiedDate: [null],
   });
   refId: any;
@@ -65,16 +65,16 @@ export class AddReferencePage implements OnInit {
         });
       }else{
         const data = {
-          referenceId:this.referenceForm.value.referenceId,
+          // referenceId:this.referenceForm.value.referenceId,
           name: this.referenceForm.value.refName,
           description: this.referenceForm.value.refDescription,
           refOrgId:this.referenceForm.value.refOrgId,
-          isActive: this.referenceForm.value.isActive,
-          isDeleted: this.referenceForm.value.isDeleted,
+          // isActive: this.referenceForm.value.isActive,
+          // isDeleted: this.referenceForm.value.isDeleted,
           refCreatedBy:this.referenceForm.value.refCreatedBy,
-          createdDate: this.referenceForm.value.createdDate,
+          // createdDate: this.referenceForm.value.createdDate,
           refModifiedBy:this.referenceForm.value.refModifiedBy,
-          modifiedDate: this.referenceForm.value.modifiedDate,
+          // modifiedDate: this.referenceForm.value.modifiedDate,
         };
         this.reference.addReference(data).subscribe((res: any) => {
           console.log(res);

@@ -8,6 +8,7 @@ import {
 import { ReferenceService } from 'src/app/reference/reference.service';
 import { ReferenceListService } from '../reference-list.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { SegmentService } from 'src/app/segment/segment.service';
 
 @Component({
   selector: 'app-add-reference-list',
@@ -17,25 +18,29 @@ import { ActivatedRoute, Router } from '@angular/router';
 export class AddReferenceListPage implements OnInit {
   referenceListFrom = this.formBuilder.group({
     refNo: [],
-    refOrgId: [0],
+    refOrgId: [null],
     refReferenceId: ['', [Validators.required]],
+    refReferenceListId: [],
     isActive: [true],
     isDeleted: [false],
-    refCreatedBy: [0],
+    refCreatedBy: [null],
     createdDate: [new Date()],
-    refModifiedBy: [0],
+    refModifiedBy: [null],
+    segment: [''],
     modifiedDate: [null],
     refListName: ['', [Validators.required]],
     refDescription: ['', [Validators.required]],
   });
   references: any = [];
   refListNo: any;
+  segments: any = [];
   constructor(
     private formBuilder: FormBuilder,
     private reference: ReferenceService,
     private referenceList: ReferenceListService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private segment: SegmentService
   ) {}
 
   ngOnInit() {
@@ -48,6 +53,7 @@ export class AddReferenceListPage implements OnInit {
       }
     });
     this.getReference();
+    this.getSegment();
   }
   getReference() {
     this.reference.getReference().subscribe((res: any) => {
@@ -55,11 +61,33 @@ export class AddReferenceListPage implements OnInit {
       this.references = res;
     });
   }
+  getSegment() {
+    this.segment.getSegment().subscribe((res: any) => {
+      console.log(res);
+      this.segments = res;
+    });
+  }
   addReferenceList() {
     console.log(this.referenceListFrom.value);
     console.log(this.referenceListFrom);
     if (this.referenceListFrom.valid) {
       if (this.refListNo) {
+        const data = {
+          refReferenceId: this.referenceListFrom.value.refReferenceId,
+          name: this.referenceListFrom.value.refListName,
+          description: this.referenceListFrom.value.refDescription,
+          refOrgId: this.referenceListFrom.value.refOrgId,
+
+          refCreatedBy: this.referenceListFrom.value.refCreatedBy,
+
+          refModifiedBy: this.referenceListFrom.value.refModifiedBy,
+        };
+        console.log(data);
+        this.referenceList.updateReferenceList(data).subscribe((res: any) => {
+          console.log(res);
+          this.router.navigate(['reference']);
+        });
+      } else {
         const data = {
           refReferenceId: this.referenceListFrom.value.refReferenceId,
           name: this.referenceListFrom.value.refListName,
@@ -73,31 +101,30 @@ export class AddReferenceListPage implements OnInit {
           modifiedDate: this.referenceListFrom.value.modifiedDate,
         };
         console.log(data);
-        this.referenceList.updateReferenceList(data).subscribe((res: any) => {
-          console.log(res);
-          this.router.navigate(['reference']);
-        });
-      } else {
-        const data = {
-          // refReferenceId: this.referenceListFrom.value.refReferenceId,
-          name: this.referenceListFrom.value.refListName,
-          description: this.referenceListFrom.value.refDescription,
-          refOrgId: this.referenceListFrom.value.refOrgId,
-          isActive: this.referenceListFrom.value.isActive,
-          isDeleted: this.referenceListFrom.value.isDeleted,
-          refCreatedBy: this.referenceListFrom.value.refCreatedBy,
-          createdDate: this.referenceListFrom.value.createdDate,
-          refModifiedBy: this.referenceListFrom.value.refModifiedBy,
-          modifiedDate: this.referenceListFrom.value.modifiedDate,
-        };
         this.referenceList.addReferenceList(data).subscribe((res: any) => {
           console.log(res);
-          window.location.reload();
+          this.referenceListFrom.controls.refReferenceListId.setValue(res.referenceListId);
+          this.segmentMapping();
+          // return;
+          // window.location.reload();
         });
       }
     } else {
       console.log('Form Not Valid');
     }
+  }
+  segmentMapping() {
+    const data = {
+      RefOrgid: this.referenceListFrom.value.refOrgId,
+      RefCreatedBy: this.referenceListFrom.value.refCreatedBy,
+      RefModifiedBy: this.referenceListFrom.value.refModifiedBy,
+      RefSegmentId: this.referenceListFrom.value.segment,
+      RefReferenceListId: this.referenceListFrom.value.refReferenceListId,
+    };
+    this.segment.addSegmentMapping(data).subscribe((res:any)=>{
+      console.log(res);
+      window.location.reload();
+    })
   }
   getRefList() {
     this.referenceList

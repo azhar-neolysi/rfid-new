@@ -1,12 +1,23 @@
-<ion-header>
+<!-- <ion-header>
   <ion-toolbar color="primary">
     <ion-buttons slot="start">
       <ion-menu-button> </ion-menu-button>
     </ion-buttons>
     <ion-title>Add Employee</ion-title>
   </ion-toolbar>
+</ion-header> -->
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button> </ion-menu-button>
+    </ion-buttons>
+    <ion-title>Add Employee</ion-title>
+    <ion-buttons slot="end" (click)="excelUploadEnable()">
+      <ion-icon name="cloud-upload-sharp" id="upload"></ion-icon>
+    </ion-buttons>
+  </ion-toolbar>
 </ion-header>
-<ion-content [fullscreen]="true">
+<ion-content [fullscreen]="true" *ngIf="!excelUpload">
   <div class="pagewrap">
     <form class="form" id="form" [formGroup]="empForm">
       <div class="container">
@@ -225,6 +236,30 @@
         (click)="addEmployee()"
       >
         Submit
+      </button>
+    </form>
+  </div>
+</ion-content>
+<ion-content [fullscreen]="true" *ngIf="excelUpload">
+  <div class="pagewrap">
+    <form class="form" id="form">
+      <div class="container">
+        <input
+          class="container__input"
+          type="file"
+          id=""
+          name="tagId"
+          value=""
+          required
+          (change)="onFileSelected($event)"
+        />
+        <label id="userLabel" for="tagId" class="container__label"
+          >Excel</label
+        >
+      </div>
+
+      <button class="form__submit" id="submit" type="button" value="submit" (click)="upload()">
+        Upload
       </button>
     </form>
   </div>

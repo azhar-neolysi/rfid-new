@@ -1,14 +1,21 @@
-import { Component, ViewChild } from '@angular/core';
-import { Platform, AlertController, MenuController } from '@ionic/angular';
+import { Component, OnInit, Optional, ViewChild } from '@angular/core';
+import {
+  Platform,
+  AlertController,
+  MenuController,
+  NavController,
+  IonRouterOutlet,
+} from '@ionic/angular';
 import { Location } from '@angular/common';
 import { Router } from '@angular/router';
+import { App } from '@capacitor/app';
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss'],
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   pages = [
     {
       title: 'Dashboard',
@@ -43,7 +50,7 @@ export class AppComponent {
           icon: 'laptop',
         },
         {
-          title: 'Product Master',
+          title: 'Product Entry',
           url: '/item-list',
           icon: 'color-filter',
         },
@@ -71,6 +78,7 @@ export class AppComponent {
         },
       ],
     },
+
     {
       title: 'Setting',
       open: false,
@@ -93,7 +101,14 @@ export class AppComponent {
         },
       ],
     },
-
+    {
+      title: 'Mapping',
+      open: false,
+      icon: 'radio',
+      url: '/taging',
+      // <ion-icon name="radio"></ion-icon>
+      children: [],
+    },
     {
       title: 'Sale',
       open: false,
@@ -106,95 +121,155 @@ export class AppComponent {
       title: 'Stock Ttransfer',
       open: false,
       icon: 'arrow-redo-sharp',
-      url: '/stock-transfer-list',
+      url: '/stock-transfer',
       // <ion-icon name="arrow-redo-sharp"></ion-icon>
+      children: [],
+    },
+    {
+      title: 'Segment',
+      open: false,
+      icon: 'grid-sharp',
+      url: '/add-segment',
+      // <ion-icon name="grid-sharp"></ion-icon>
+      children: [],
+    },
+
+    {
+      title: 'Find Tags',
+      open: false,
+      icon: 'search-sharp',
+      url: '/find-tag',
+      // <ion-icon name="search-sharp"></ion-icon>
       children: [],
     },
   ];
   backNo = 0;
+  backButtonPressed: number = 0;
   constructor(
-    private platform: Platform,
+    // private platform: Platform,
     // private splashScreen: SplashScreen,
 
     private menuCtrl: MenuController,
     private router: Router,
-    public alertController: AlertController,
-    private location: Location
+    // public alertController: AlertController,
+    private location: Location,
+    private platform: Platform,
+    private navCtrl: NavController,
+    private alertController: AlertController,
+    @Optional() private routerOutlet?: IonRouterOutlet
   ) {
     console.log('initializeApp');
-    this.initializeApp();
-  }
-  initializeApp() {
-
-    this.platform.ready().then(() => {
-      // this.statusBar.styleDefault();
-      // this.splashScreen.hide();
-    });
-
-    this.platform.backButton.subscribeWithPriority(0, (processNextHandler) => {
-      console.log('Back press handler!');
-      console.log(this.backNo);
-      if (
-        this.location.isCurrentPathEqualTo('/dashboard') ||
-        this.backNo === 2
-      ) {
-        // Show Exit Alert!
-        console.log('Show Exit Alert!');
-        this.showExitConfirm();
-        processNextHandler();
-      } else {
-        // Navigate to back page
-        console.log('Navigate to back page');
-        this.backNo++;
-        this.location.back();
-        // this.showExitConfirm();
-        // processNextHandler();
+    // this.initializeApp();
+    this.platform.backButton.subscribeWithPriority(-1, () => {
+      if (!this.routerOutlet?.canGoBack()) {
+        App.exitApp();
       }
     });
-
-    this.platform.backButton.subscribeWithPriority(5, () => {
-      console.log('Handler called to force close!');
-      this.alertController
-        .getTop()
-        .then((r) => {
-          if (r) {
-            (navigator as any).app.exitApp();
-          }
-        })
-        .catch((e) => {
-          console.log(e);
-        });
+  }
+  ngOnInit(): void {
+    this.platform.backButton.subscribeWithPriority(9999, () => {
+      if (this.backButtonPressed === 0) {
+        this.backButtonPressed++;
+        setTimeout(() => (this.backButtonPressed = 0), 2000); // Reset the counter after 2 seconds
+      } else {
+        this.exitApp();
+      }
     });
   }
-  showExitConfirm() {
-    this.alertController
-      .create({
-        header: 'App termination',
-        message: 'Do you want to close the app?',
-        backdropDismiss: false,
-        // mode:'ios',
-        cssClass: 'custom-alert',
-        buttons: [
-          {
-            text: 'Stay',
-            role: 'cancel',
-            cssClass: 'alert-button-cancel',
-            handler: () => {
-              this.backNo = 0;
-              console.log('Application exit prevented!');
-            },
-          },
-          {
-            text: 'Exit',
-            cssClass: 'alert-button-confirm',
-            handler: () => {
-              (navigator as any).app.exitApp();
-            },
-          },
-        ],
-      })
-      .then((alert) => {
-        alert.present();
-      });
+  ionViewWillLeave() {
+    this.platform.backButton.unsubscribe();
   }
+  async exitApp() {
+    const alert = await this.alertController.create({
+      header: 'Confirm Exit',
+      message: 'Are you sure you want to exit the app?',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+        },
+        {
+          text: 'Exit',
+          handler: () => {
+            (navigator as any)['app'].exitApp();
+          },
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+  // initializeApp() {
+
+  //   this.platform.ready().then(() => {
+  //     // this.statusBar.styleDefault();
+  //     // this.splashScreen.hide();
+  //   });
+
+  //   this.platform.backButton.subscribeWithPriority(0, (processNextHandler) => {
+  //     console.log('Back press handler!');
+  //     console.log(this.backNo);
+  //     if (
+  //       this.location.isCurrentPathEqualTo('/dashboard') ||
+  //       this.backNo === 2
+  //     ) {
+  //       // Show Exit Alert!
+  //       console.log('Show Exit Alert!');
+  //       this.showExitConfirm();
+  //       processNextHandler();
+  //     } else {
+  //       // Navigate to back page
+  //       console.log('Navigate to back page');
+  //       this.backNo++;
+  //       this.location.back();
+  //       // this.showExitConfirm();
+  //       // processNextHandler();
+  //     }
+  //   });
+
+  //   this.platform.backButton.subscribeWithPriority(5, () => {
+  //     console.log('Handler called to force close!');
+  //     this.alertController
+  //       .getTop()
+  //       .then((r) => {
+  //         if (r) {
+  //           (navigator as any).app.exitApp();
+  //         }
+  //       })
+  //       .catch((e) => {
+  //         console.log(e);
+  //       });
+  //   });
+  // }
+  // showExitConfirm() {
+  //   this.alertController
+  //     .create({
+  //       header: 'App termination',
+  //       message: 'Do you want to close the app?',
+  //       backdropDismiss: false,
+  //       // mode:'ios',
+  //       cssClass: 'custom-alert',
+  //       buttons: [
+  //         {
+  //           text: 'Ok',
+  //           role: 'cancel',
+  //           cssClass: 'alert-button-cancel',
+  //           handler: () => {
+  //             this.backNo = 0;
+  //             console.log('Application exit prevented!');
+  //           },
+  //         },
+  //         {
+  //           text: 'Exit',
+  //           cssClass: 'alert-button-confirm',
+  //           handler: () => {
+  //             (navigator as any).app.exitApp();
+  //           },
+  //         },
+  //       ],
+  //     })
+  //     .then((alert) => {
+  //       alert.present();
+  //     });
+  // }
 }

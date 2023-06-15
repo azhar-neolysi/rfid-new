@@ -10,6 +10,7 @@ import { ReferenceListService } from 'src/app/reference-list/reference-list.serv
 import { UserService } from '../user.service';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import * as XLSX from 'xlsx';
 @Component({
   selector: 'app-add-employee',
   templateUrl: './add-employee.page.html',
@@ -42,33 +43,35 @@ export class AddEmployeePage implements OnInit {
     refModifiedBy: [null],
   });
 
-  data = {
-    employeeId: 0,
-    refOrgId: 0,
-    refLocationId: 0,
-    refRoleId: 0,
-    isActive: true,
-    isDeleted: true,
-    refCreatedBy: 0,
-    createdDate: '2023-04-18T08:06:44.763Z',
-    refModifiedBy: 0,
-    modifiedDate: '2023-04-18T08:06:44.763Z',
-    value: 'string',
-    firstName: 'string',
-    lastName: 'string',
-    gender: 'string',
-    dob: '2023-04-18T08:06:44.763Z',
-    doj: '2023-04-18T08:06:44.763Z',
-    email: 'string',
-    mobileNo: 'string',
-    empStatus: 'string',
-    noticePeriod: 0,
-    nationality: 'string',
-  };
+  // data = {
+  //   employeeId: 0,
+  //   refOrgId: 0,
+  //   refLocationId: 0,
+  //   refRoleId: 0,
+  //   isActive: true,
+  //   isDeleted: true,
+  //   refCreatedBy: 0,
+  //   createdDate: '2023-04-18T08:06:44.763Z',
+  //   refModifiedBy: 0,
+  //   modifiedDate: '2023-04-18T08:06:44.763Z',
+  //   value: 'string',
+  //   firstName: 'string',
+  //   lastName: 'string',
+  //   gender: 'string',
+  //   dob: '2023-04-18T08:06:44.763Z',
+  //   doj: '2023-04-18T08:06:44.763Z',
+  //   email: 'string',
+  //   mobileNo: 'string',
+  //   empStatus: 'string',
+  //   noticePeriod: 0,
+  //   nationality: 'string',
+  // };
   role: any = [];
   empID: any;
   editEmpID: any;
   userID: any;
+  excelUpload: boolean;
+  excelData: never[];
   // datePipe = new DatePipe('en-US');
   // return datePipe.transform(date, format);
   constructor(
@@ -260,6 +263,51 @@ export class AddEmployeePage implements OnInit {
       this.empForm.controls.refRoleId.setValue(res.refRoleId);
       this.empForm.controls.status.setValue(res.status);
       // this.empForm.controls.userName.setValue(res.userName);
+    });
+  }
+  excelUploadEnable() {
+    this.excelUpload = !this.excelUpload ? true : false;
+  }
+  onFileSelected(event: any) {
+    this.excelData = [];
+    const file: any = event.target.files[0];
+    console.log(file);
+    let fileReader = new FileReader();
+    fileReader.readAsBinaryString(file);
+    fileReader.onload = (e) => {
+      var workbook = XLSX.read(fileReader.result, { type: 'binary' });
+      var sheetNames = workbook.SheetNames;
+      this.excelData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetNames[0]]);
+      console.log(this.excelData);
+    };
+  }
+  upload() {
+    console.log(this.excelData);
+    this.excelData.forEach((element: any) => {
+      console.log(element);
+      this.empForm.controls.employeeId.setValue(element.employeeId);
+      this.empForm.controls.description.setValue(element.description);
+      this.empForm.controls.dob.setValue(
+        this.datePipe.transform(element.dob, 'yyyy-MM-dd')
+      );
+      this.empForm.controls.doj.setValue(
+        this.datePipe.transform(element.doj, 'yyyy-MM-dd')
+      );
+      this.empForm.controls.email.setValue(element.email);
+      this.empForm.controls.firstName.setValue(element.firstName);
+      this.empForm.controls.gender.setValue(element.gender);
+      this.empForm.controls.isActive.setValue(element.isActive);
+      this.empForm.controls.lastName.setValue(element.lastName);
+      this.empForm.controls.mobileNo.setValue(element.mobileNo);
+      this.empForm.controls.nationality.setValue(element.nationality);
+      this.empForm.controls.notice.setValue(element.noticePeriod);
+      this.empForm.controls.refCreatedBy.setValue(element.refCreatedBy);
+      this.empForm.controls.refLocationId.setValue(element.refLocationId);
+      this.empForm.controls.refModifiedBy.setValue(element.refModifiedBy);
+      this.empForm.controls.refOrgId.setValue(element.refOrgId);
+      this.empForm.controls.refRoleId.setValue(element.refRoleId);
+      this.empForm.controls.status.setValue(element.status);
+      this.addEmployee();
     });
   }
 }

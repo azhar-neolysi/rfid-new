@@ -1,12 +1,23 @@
-<ion-header>
+<!-- <ion-header>
   <ion-toolbar color="primary">
     <ion-buttons slot="start">
       <ion-menu-button> </ion-menu-button>
     </ion-buttons>
     <ion-title>Product Master</ion-title>
   </ion-toolbar>
+</ion-header> -->
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button> </ion-menu-button>
+    </ion-buttons>
+    <ion-title>Product Entry</ion-title>
+    <ion-buttons slot="end" (click)="excelUploadEnable()">
+      <ion-icon name="cloud-upload-sharp" id="upload"></ion-icon>
+    </ion-buttons>
+  </ion-toolbar>
 </ion-header>
-<ion-content [fullscreen]="true">
+<ion-content [fullscreen]="true" *ngIf="!excelUpload">
   <div class="pagewrap">
     <form class="form" id="form" [formGroup]="productForm">
       <div class="container">
@@ -39,6 +50,7 @@
       </div>
       <div class="container">
         <input
+        inputmode="none"
           class="container__input"
           type="text"
           id="rfidcode"
@@ -46,10 +58,29 @@
           value=""
           required
           formControlName="rfidcode"
+          autofocus="true"
+          (input)="calculateByteLength($event)"
         />
+        <!-- <button (click)="clearRfid()" ></button> -->
         <label id="rfidcode" for="rfidcode" class="container__label"
           >RFID Code</label
         >
+        <ion-grid>
+          <ion-row>
+            <ion-col></ion-col>
+            <ion-col>
+              <!-- <ion-button color="danger"
+                ><ion-icon slot="end" name="star"></ion-icon>
+              </ion-button> -->
+            </ion-col>
+            <ion-col>
+              <ion-button color="danger"
+                (click)="clear()"><ion-icon name="close"></ion-icon
+              ></ion-button>
+              <!-- <ion-button (click)="editSale()"><ion-icon name="arrow-redo"></ion-icon> </ion-button> -->
+            </ion-col>
+          </ion-row>
+        </ion-grid>
       </div>
       <div class="container">
         <input
@@ -74,12 +105,13 @@
           value=""
           required
           formControlName="barCode"
+          inputmode="none"
         />
         <label id="userLabel" for="barCode" class="container__label"
           >Barcode</label
         >
       </div>
-      <div class="container">
+      <!-- <div class="container">
         <input
           class="container__input"
           type="text"
@@ -92,8 +124,8 @@
         <label id="brand" for="brand" class="container__label"
           >Brand</label
         >
-      </div>
-      <div class="container">
+      </div> -->
+      <!-- <div class="container">
         <input
           class="container__input"
           type="text"
@@ -148,7 +180,7 @@
         <label id="size" for="size" class="container__label"
           >Size</label
         >
-      </div>
+      </div> -->
       <div class="container">
         <input
           class="container__input"
@@ -191,7 +223,7 @@
           >Date</label
         >
       </div>
-      <div class="container">
+      <!-- <div class="container">
         <input
           class="container__input"
           type="text"
@@ -204,8 +236,8 @@
         <label id="category" for="category" class="container__label"
           >Category</label
         >
-      </div>
-      <div class="container">
+      </div> -->
+      <!-- <div class="container">
         <input
           class="container__input"
           type="text"
@@ -218,7 +250,7 @@
         <label id="subCategory" for="subCategory" class="container__label"
           >Sub Category</label
         >
-      </div>
+      </div> -->
       <div class="container">
         <input
           class="container__input"
@@ -273,6 +305,20 @@
         />
         <label id="itemWeight" for="itemWeight" class="container__label"
           >Item Weight</label
+        >
+      </div>
+      <div class="container">
+
+         <select formControlName="refRefListUomid" class="container__input">
+          <option [ngValue]="null" disabled selected="selected">
+            Select UoM
+          </option>
+          <option *ngFor="let ref of uom" [ngValue]="ref.referenceListId">
+            {{ref.referenceListIdName}}
+          </option>
+        </select>
+        <label id="refRefListUomid" for="refRefListUomid" class="container__label"
+          >UoM</label
         >
       </div>
       <div class="container">
@@ -415,8 +461,59 @@
           >Closing Qty</label
         >
       </div>
+      <div class="container">
+
+         <select formControlName="segmentName" class="container__input" (change)="getSegmentRef()">
+          <option [ngValue]="null" disabled selected="selected">
+            Select Segment
+          </option>
+          <option *ngFor="let ref of segments" [ngValue]="ref.segmentName">
+            {{ref.segmentName}}
+          </option>
+        </select>
+        <label id="segment" for="segment" class="container__label"
+          >Segment</label
+        >
+      </div>
+      <div class="container" *ngFor="let segment of segmentList; let i = index">
+        <select  [formControlName]="i" [(ngModel)]="dynamicValues[i]"  name="segList"  class="container__input" (change)="addSegmentList($event,segment.element)">
+          <option [ngValue]="null" disabled selected="selected">
+            Select {{segment.element}}
+          </option>
+          <option *ngFor="let ref of segment.list" [value]="ref.referenceListId" >
+            {{ref.referenceListName}}
+          </option>
+        </select>
+        <label id="segment" for="segment" class="container__label"
+          >{{segment.element}}</label
+        >
+      </div>
          <button class="form__submit" id="submit" type="button" value="submit" (click)="addProduct()">
         Submit
+      </button>
+    </form>
+  </div>
+</ion-content>
+<ion-content [fullscreen]="true" *ngIf="excelUpload">
+  <div class="pagewrap">
+    <form class="form" id="form">
+      <div class="container">
+        <input
+          class="container__input"
+          type="file"
+          id=""
+          name="tagId"
+          value=""
+          required
+          (change)="onFileSelected($event)"
+        />
+        <label id="userLabel" for="tagId" class="container__label"
+          >Excel</label
+        >
+      </div>
+
+      <button class="form__submit" id="submit" type="button" value="submit" (click)="upload()">
+        Upload
       </button>
     </form>
   </div>

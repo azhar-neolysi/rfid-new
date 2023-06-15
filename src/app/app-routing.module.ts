@@ -148,6 +148,23 @@ const routes: Routes = [
     path: 'item-list',
     loadChildren: () => import('./itemmaster/item-list/item-list.module').then( m => m.ItemListPageModule)
   },
+  {
+    path: 'find-tag',
+    loadChildren: () => import('./find-tag/find-tag.module').then( m => m.FindTagPageModule)
+  },
+  {
+    path: 'taging',
+    loadChildren: () => import('./taging/taging.module').then( m => m.TagingPageModule)
+  },
+
+  {
+    path: 'segment',
+    loadChildren: () => import('./segment/segment/segment.module').then( m => m.SegmentPageModule)
+  },
+  {
+    path: 'add-segment',
+    loadChildren: () => import('./segment/add-segment/add-segment.module').then( m => m.AddSegmentPageModule)
+  },
 
 
 ];

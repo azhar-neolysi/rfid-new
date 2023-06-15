@@ -1,4 +1,3 @@
-
 <ion-header>
   <ion-toolbar color="primary">
     <ion-buttons slot="start">
@@ -20,7 +19,9 @@
           formControlName="refName"
         /> -->
         <select formControlName="refReferenceId" class="container__input">
-          <option [ngValue]="null" disabled selected="selected">Select Reference</option>
+          <option [ngValue]="null" disabled selected="selected">
+            Select Reference
+          </option>
           <option *ngFor="let ref of references" [ngValue]="ref.referenceId">
             {{ref.name}}
           </option>
@@ -56,7 +57,27 @@
           >Description</label
         >
       </div>
-
+      <div class="container">
+        <!-- <input
+          class="container__input"
+          type="text"
+          id="segment"
+          name="segment"
+          required
+          formControlName="segment"
+        /> -->
+         <select formControlName="segment" class="container__input">
+          <option [ngValue]="null" disabled selected="selected">
+            Select Reference
+          </option>
+          <option *ngFor="let ref of segments" [ngValue]="ref.segmentId">
+            {{ref.segmentName}}
+          </option>
+        </select>
+        <label id="segment" for="segment" class="container__label"
+          >Segment</label
+        >
+      </div>
       <button
         class="form__submit"
         id="submit"

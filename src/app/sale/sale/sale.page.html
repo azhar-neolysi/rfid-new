@@ -11,43 +11,33 @@
   </ion-toolbar>
 </ion-header>
 <ion-content [fullscreen]="true">
-
-  <ion-card *ngFor="let sale of saleList">
-    <ion-card-header>
-      <ion-row>
-        <ion-col
-          ><ion-card-title
-            >Product Id:
-            <ion-label>{{sale.productMasterId}}</ion-label></ion-card-title
-          >
-          <ion-card-title
-            >Current Stock:
-            <ion-label>{{sale.currentStock}}</ion-label></ion-card-title
-          ></ion-col
-        >
-        <ion-col
-          ><ion-button
-            color="danger"
-            (click)="deleteSale(sale.salesId)"
-            ><ion-icon name="trash-sharp"></ion-icon></ion-button
-        ></ion-col>
-      </ion-row>
-
-      <!-- <ion-card-subtitle></ion-card-subtitle> -->
-    </ion-card-header>
-
-    <ion-card-content>
-      <ion-grid>
-        <ion-row>
-          <ion-col
-            >Sales Date: <ion-label>{{sale.salesDate | date:'dd:MM:yyyy'}}</ion-label></ion-col
-          >
-          <ion-col
-            ><ion-button (click)="editSale(sale.salesId)">
-              <ion-icon name="create-sharp"></ion-icon></ion-button
-          ></ion-col>
-        </ion-row>
-      </ion-grid>
-    </ion-card-content>
+  <ion-card>
+    <ion-input
+      class="container__input"
+      type="text"
+      id="tagId"
+      name="tagId"
+      expand="full"
+      placeholder="RFID code"
+      [(ngModel)]="tagId"
+      (input)="calculateByteLength($event)"
+      autofocus="true"
+      inputmode="none"
+    ></ion-input>
   </ion-card>
+  <ion-grid>
+    <ion-row>
+      <ion-col></ion-col>
+      <ion-col>
+        <ion-button color="danger" (click)="clear()"
+          ><ion-icon name="close"></ion-icon
+        ></ion-button>
+      </ion-col>
+      <ion-col>
+        <ion-button (click)="editSale()"
+          ><ion-icon name="arrow-redo"></ion-icon>
+        </ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 </ion-content>
