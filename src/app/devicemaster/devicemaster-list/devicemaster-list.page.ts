@@ -10,7 +10,7 @@ import { Router } from '@angular/router';
 export class DevicemasterListPage implements OnInit {
   deviceList: any = [];
   deviceListTemp: any = [];
-  constructor(private device: DevicemasterService, private router: Router) {}
+  constructor(private device: DevicemasterService, private router: Router) { }
 
   ngOnInit() {
     this.getDevices();
@@ -37,7 +37,7 @@ export class DevicemasterListPage implements OnInit {
     } else {
       this.deviceList = this.deviceList.filter(
         (item: any) =>
-          item.deviceCode.toLowerCase() === event.detail.value.toLowerCase()
+          item.deviceCode.toLowerCase().includes(event.detail.value.toLowerCase())
       );
       console.log(this.deviceList);
     }

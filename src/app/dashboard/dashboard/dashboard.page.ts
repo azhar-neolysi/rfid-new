@@ -1,3 +1,4 @@
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import Chart from 'chart.js/auto';
 @Component({
@@ -7,7 +8,7 @@ import Chart from 'chart.js/auto';
 })
 export class DashboardPage implements OnInit {
   public chart: any;
-  constructor() {}
+  constructor(private http: HttpClient) {}
 
   ngOnInit() {
     this.lineChart();
@@ -78,4 +79,5 @@ export class DashboardPage implements OnInit {
       // },
     });
   }
+
 }

@@ -11,6 +11,9 @@
     <ion-buttons slot="start">
       <ion-menu-button> </ion-menu-button>
     </ion-buttons>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
     <ion-title>Product Entry</ion-title>
     <ion-buttons slot="end" (click)="excelUploadEnable()">
       <ion-icon name="cloud-upload-sharp" id="upload"></ion-icon>
@@ -21,50 +24,20 @@
   <div class="pagewrap">
     <form class="form" id="form" [formGroup]="productForm">
       <div class="container">
-        <input
-          class="container__input"
-          type="text"
-          id="productName"
-          name="productName"
-          value=""
-          required
-          formControlName="productName"
-        />
-        <label id="productName" for="productName" class="container__label"
-          >Name</label
-        >
+        <input class="container__input" type="text" id="productName" name="productName" value=""
+          formControlName="productName" />
+        <label id="productName" for="productName" class="container__label">Name <span>*</span></label>
       </div>
       <div class="container">
-        <input
-          class="container__input"
-          type="text"
-          id="printName"
-          name="printName"
-          value=""
-          required
-          formControlName="printName"
-        />
-        <label id="printName" for="printName" class="container__label"
-          >Print Name</label
-        >
+        <input class="container__input" type="text" id="printName" name="printName" value=""
+          formControlName="printName" />
+        <label id="printName" for="printName" class="container__label">Print Name <span>*</span></label>
       </div>
       <div class="container">
-        <input
-        inputmode="none"
-          class="container__input"
-          type="text"
-          id="rfidcode"
-          name="rfidcode"
-          value=""
-          required
-          formControlName="rfidcode"
-          autofocus="true"
-          (input)="calculateByteLength($event)"
-        />
+        <input inputmode="none" class="container__input" type="text" id="rfidcode" name="rfidcode" value=""
+          formControlName="rfidcode" autofocus="true" (input)="calculateByteLength($event)" />
         <!-- <button (click)="clearRfid()" ></button> -->
-        <label id="rfidcode" for="rfidcode" class="container__label"
-          >RFID Code</label
-        >
+        <label id="rfidcode" for="rfidcode" class="container__label">RFID Code </label>
         <ion-grid>
           <ion-row>
             <ion-col></ion-col>
@@ -74,43 +47,30 @@
               </ion-button> -->
             </ion-col>
             <ion-col>
-              <ion-button color="danger"
-                (click)="clear()"><ion-icon name="close"></ion-icon
-              ></ion-button>
+              <ion-button color="danger" (click)="clear()"><ion-icon name="close"></ion-icon></ion-button>
               <!-- <ion-button (click)="editSale()"><ion-icon name="arrow-redo"></ion-icon> </ion-button> -->
             </ion-col>
           </ion-row>
         </ion-grid>
       </div>
       <div class="container">
-        <input
-          class="container__input"
-          type="text"
-          id="itemCode"
-          name="itemCode"
-          value=""
-          required
-          formControlName="itemCode"
-        />
-        <label id="itemCode" for="itemCode" class="container__label"
-          >Item Code</label
-        >
+        <input class="container__input" type="text" id="itemCode" name="itemCode" value="" formControlName="itemCode" />
+        <label id="itemCode" for="itemCode" class="container__label">Item Code</label>
       </div>
       <div class="container">
-        <input
-          class="container__input"
-          type="text"
-          id="barCode"
-          name="barCode"
-          value=""
-          required
-          formControlName="barCode"
-          inputmode="none"
-        />
-        <label id="userLabel" for="barCode" class="container__label"
-          >Barcode</label
-        >
+        <input class="container__input" type="text" id="barCode" name="barCode" value="" formControlName="barCode"
+          inputmode="none" />
+        <label id="userLabel" for="barCode" class="container__label">Barcode <span>*</span></label>
       </div>
+      <!-- <div class="container">
+        <input class="container__input" type="text" id="itemCode" name="itemCode" value="" formControlName="itemCode" />
+        <label id="itemCode" for="itemCode" class="container__label">Style  Code</label>
+      </div> -->
+      <!-- <div class="container">
+        <input class="container__input" type="text" id="barCode" name="barCode" value="" formControlName="barCode"
+          inputmode="none" />
+        <label id="userLabel" for="barCode" class="container__label">Barcode <span>*</span></label>
+      </div> -->
       <!-- <div class="container">
         <input
           class="container__input"
@@ -119,7 +79,7 @@
           name="brand"
           value=""
           formControlName="brand"
-          required
+          
         />
         <label id="brand" for="brand" class="container__label"
           >Brand</label
@@ -132,7 +92,7 @@
           id="type"
           name="type"
           value=""
-          required
+          
           formControlName="type"
         />
         <label id="type" for="type" class="container__label"
@@ -146,7 +106,7 @@
           id="style"
           name="style"
           value=""
-          required
+          
           formControlName="style"
         />
         <label id="style" for="style" class="container__label"
@@ -160,7 +120,7 @@
           id="pattern"
           name="pattern"
           value=""
-          required
+          
           formControlName="pattern"
         />
         <label id="pattern" for="pattern" class="container__label"
@@ -174,7 +134,7 @@
           id="size"
           name="size"
           value=""
-          required
+          
           formControlName="size"
         />
         <label id="size" for="size" class="container__label"
@@ -182,46 +142,22 @@
         >
       </div> -->
       <div class="container">
-        <input
-          class="container__input"
-          type="text"
-          id="rack"
-          name="rack"
-          value=""
-          required
-          formControlName="rack"
-        />
-        <label id="rack" for="rack" class="container__label"
-          >Rack</label
-        >
+        <input class="container__input" type="text" id="styleCode" name="styleCode" value=""
+          formControlName="styleCode" />
+        <label id="styleCode" for="styleCode" class="container__label">Style Code</label>
       </div>
       <div class="container">
-        <input
-          class="container__input"
-          type="text"
-          id="eancode"
-          name="eancode"
-          value=""
-          required
-          formControlName="eancode"
-        />
-        <label id="eancode" for="eancode" class="container__label"
-          >EAN</label
-        >
+        <input class="container__input" type="text" id="rack" name="rack" value="" formControlName="rack" />
+        <label id="rack" for="rack" class="container__label">Rack <span>*</span></label>
       </div>
       <div class="container">
-        <input
-          class="container__input"
-          type="date"
-          id="date"
-          name="date"
-          value=""
-          formControlName="date"
-          required
-        />
-        <label id="date" for="date" class="container__label"
-          >Date</label
-        >
+        <input class="container__input" type="text" id="eancode" name="eancode" value="" formControlName="eancode" />
+        <label id="eancode" for="eancode" class="container__label">EAN <span>*</span></label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="date" id="date" name="date" value="" formControlName="date"
+          [max]="maxDate" />
+        <label id="date" for="date" class="container__label">Date</label>
       </div>
       <!-- <div class="container">
         <input
@@ -231,7 +167,7 @@
           name="category"
           value=""
           formControlName="category"
-          required
+          
         />
         <label id="category" for="category" class="container__label"
           >Category</label
@@ -245,71 +181,35 @@
           name="subCategory"
           value=""
           formControlName="subCategory"
-          required
+          
         />
         <label id="subCategory" for="subCategory" class="container__label"
           >Sub Category</label
         >
       </div> -->
       <div class="container">
-        <input
-          class="container__input"
-          type="text"
-          id="hsnsaccode"
-          name="hsnsaccode"
-          value=""
-          formControlName="hsnsaccode"
-          required
-        />
-        <label id="hsnsaccode" for="hsnsaccode" class="container__label"
-          >Hsnsac Code</label
-        >
+        <input class="container__input" type="text" id="hsnsaccode" name="hsnsaccode" value=""
+          formControlName="hsnsaccode" />
+        <label id="hsnsaccode" for="hsnsaccode" class="container__label">Hsnsac Code <span>*</span></label>
       </div>
       <div class="container">
-        <input
-          class="container__input"
-          type="date"
-          id="manufactureDate"
-          name="manufactureDate"
-          value=""
-          formControlName="manufactureDate"
-          required
-        />
-        <label id="manufactureDate" for="manufactureDate" class="container__label"
-          >Manufacture Date</label
-        >
+        <input class="container__input" type="date" id="manufactureDate" name="manufactureDate" value=""
+          formControlName="manufactureDate" [max]="maxDate" />
+        <label id="manufactureDate" for="manufactureDate" class="container__label">Manufacture Date</label>
       </div>
       <div class="container">
-        <input
-          class="container__input"
-          type="date"
-          id="expiryDate"
-          name="expiryDate"
-          value=""
-          formControlName="expiryDate"
-          required
-        />
-        <label id="expiryDate" for="expiryDate" class="container__label"
-          >Expiry Date</label
-        >
+        <input class="container__input" type="date" id="expiryDate" name="expiryDate" value=""
+          formControlName="expiryDate" [max]="maxDate" />
+        <label id="expiryDate" for="expiryDate" class="container__label">Expiry Date</label>
       </div>
       <div class="container">
-        <input
-          class="container__input"
-          type="number"
-          id="itemWeight"
-          name="itemWeight"
-          value=""
-          formControlName="itemWeight"
-          required
-        />
-        <label id="itemWeight" for="itemWeight" class="container__label"
-          >Item Weight</label
-        >
+        <input class="container__input" type="number" id="itemWeight" name="itemWeight" value=""
+          formControlName="itemWeight" />
+        <label id="itemWeight" for="itemWeight" class="container__label">Item Weight</label>
       </div>
       <div class="container">
 
-         <select formControlName="refRefListUomid" class="container__input">
+        <select formControlName="refRefListUomid" class="container__input">
           <option [ngValue]="null" disabled selected="selected">
             Select UoM
           </option>
@@ -317,153 +217,62 @@
             {{ref.referenceListIdName}}
           </option>
         </select>
-        <label id="refRefListUomid" for="refRefListUomid" class="container__label"
-          >UoM</label
-        >
+        <label id="refRefListUomid" for="refRefListUomid" class="container__label">UoM</label>
       </div>
       <div class="container">
-        <input
-          class="container__input"
-          type="text"
-          id="gst"
-          name="gst"
-          value=""
-          formControlName="gst"
-          required
-        />
-        <label id="gst" for="gst" class="container__label"
-          >GST</label
-        >
+        <input class="container__input" type="text" id="gst" name="gst" value="" formControlName="gst" />
+        <label id="gst" for="gst" class="container__label">GST</label>
       </div>
       <div class="container">
-        <input
-          class="container__input"
-          type="number"
-          id="discount"
-          name="discount"
-          value=""
-          formControlName="discount"
-          required
-        />
-        <label id="discount" for="discount" class="container__label"
-          >Discount</label
-        >
+        <input class="container__input" type="number" id="discount" name="discount" value=""
+          formControlName="discount" />
+        <label id="discount" for="discount" class="container__label">Discount</label>
       </div>
       <div class="container">
-        <input
-          class="container__input"
-          type="number"
-          id="quantity"
-          name="quantity"
-          value=""
-          formControlName="quantity"
-          required
-        />
-        <label id="quantity" for="quantity" class="container__label"
-          >Quantity</label
-        >
+        <input class="container__input" type="number" id="quantity" name="quantity" value=""
+          formControlName="quantity" />
+        <label id="quantity" for="quantity" class="container__label">Quantity <span>*</span></label>
       </div>
       <div class="container">
-        <input
-          class="container__input"
-          type="number"
-          id="costRate"
-          name="costRate"
-          value=""
-          formControlName="costRate"
-          required
-        />
-        <label id="costRate" for="costRate" class="container__label"
-          >Cost Rate</label
-        >
+        <input class="container__input" type="number" id="costRate" name="costRate" value=""
+          formControlName="costRate" />
+        <label id="costRate" for="costRate" class="container__label">Cost Rate <span>*</span></label>
       </div>
       <div class="container">
-        <input
-          class="container__input"
-          type="number"
-          id="salesRate"
-          name="salesRate"
-          value=""
-          formControlName="salesRate"
-          required
-        />
-        <label id="salesRate" for="salesRate" class="container__label"
-          >Sales Rate</label
-        >
+        <input class="container__input" type="number" id="salesRate" name="salesRate" value=""
+          formControlName="salesRate" />
+        <label id="salesRate" for="salesRate" class="container__label">Sales Rate <span>*</span></label>
       </div>
       <div class="container">
-        <input
-          class="container__input"
-          type="number"
-          id="mrp"
-          name="mrp"
-          value=""
-          formControlName="mrp"
-          required
-        />
-        <label id="mrp" for="mrp" class="container__label"
-          >MRP</label
-        >
+        <input class="container__input" type="number" id="mrp" name="mrp" value="" formControlName="mrp" />
+        <label id="mrp" for="mrp" class="container__label">MRP <span>*</span></label>
       </div>
       <div class="container">
-        <input
-          class="container__input"
-          type="number"
-          id="amount"
-          name="amount"
-          value=""
-          formControlName="amount"
-          required
-        />
-        <label id="amount" for="amount" class="container__label"
-          >Amount</label
-        >
+        <input class="container__input" type="number" id="amount" name="amount" value="" formControlName="amount" />
+        <label id="amount" for="amount" class="container__label">Amount <span>*</span></label>
       </div>
       <div class="container">
-        <input
-          class="container__input"
-          type="text"
-          id="description"
-          name="description"
-          value=""
-          formControlName="description"
-          required
-        />
-        <label id="description" for="description" class="container__label"
-          >Description</label
-        >
+        <input class="container__input" type="text" id="mcDesc" name="mcDesc" value="" formControlName="mcDesc" />
+        <label id="mcDesc" for="mcDesc" class="container__label">MC Description</label>
       </div>
       <div class="container">
-        <input
-          class="container__input"
-          type="number"
-          id="openingQty"
-          name="openingQty"
-          value=""
-          formControlName="openingQty"
-          required
-        />
-        <label id="openingQty" for="openingQty" class="container__label"
-          >Opening Qty</label
-        >
+        <input class="container__input" type="text" id="description" name="description" value=""
+          formControlName="description" />
+        <label id="description" for="description" class="container__label">Description</label>
       </div>
       <div class="container">
-        <input
-          class="container__input"
-          type="number"
-          id="closingQty"
-          name="closingQty"
-          value=""
-          formControlName="closingQty"
-          required
-        />
-        <label id="closingQty" for="closingQty" class="container__label"
-          >Closing Qty</label
-        >
+        <input class="container__input" type="number" id="openingQty" name="openingQty" value=""
+          formControlName="openingQty" />
+        <label id="openingQty" for="openingQty" class="container__label">Opening Qty</label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="number" id="closingQty" name="closingQty" value=""
+          formControlName="closingQty" />
+        <label id="closingQty" for="closingQty" class="container__label">Closing Qty</label>
       </div>
       <div class="container">
 
-         <select formControlName="segmentName" class="container__input" (change)="getSegmentRef()">
+        <select formControlName="segmentName" class="container__input" (change)="getSegmentRef()">
           <option [ngValue]="null" disabled selected="selected">
             Select Segment
           </option>
@@ -471,24 +280,21 @@
             {{ref.segmentName}}
           </option>
         </select>
-        <label id="segment" for="segment" class="container__label"
-          >Segment</label
-        >
+        <label id="segment" for="segment" class="container__label">Segment</label>
       </div>
       <div class="container" *ngFor="let segment of segmentList; let i = index">
-        <select  [formControlName]="i" [(ngModel)]="dynamicValues[i]"  name="segList"  class="container__input" (change)="addSegmentList($event,segment.element)">
+        <select [formControlName]="i" [(ngModel)]="dynamicValues[i]" name="segList" class="container__input"
+          (change)="addSegmentList($event,segment.element)">
           <option [ngValue]="null" disabled selected="selected">
             Select {{segment.element}}
           </option>
-          <option *ngFor="let ref of segment.list" [value]="ref.referenceListId" >
+          <option *ngFor="let ref of segment.list" [value]="ref.referenceListId">
             {{ref.referenceListName}}
           </option>
         </select>
-        <label id="segment" for="segment" class="container__label"
-          >{{segment.element}}</label
-        >
+        <label id="segment" for="segment" class="container__label">{{segment.element}}</label>
       </div>
-         <button class="form__submit" id="submit" type="button" value="submit" (click)="addProduct()">
+      <button class="form__submit" id="submit" type="button" value="submit" (click)="addProduct()">
         Submit
       </button>
     </form>
@@ -496,20 +302,32 @@
 </ion-content>
 <ion-content [fullscreen]="true" *ngIf="excelUpload">
   <div class="pagewrap">
-    <form class="form" id="form">
+    <form class="form" id="form" [formGroup]="productForm">
       <div class="container">
-        <input
-          class="container__input"
-          type="file"
-          id=""
-          name="tagId"
-          value=""
-          required
-          (change)="onFileSelected($event)"
-        />
-        <label id="userLabel" for="tagId" class="container__label"
-          >Excel</label
-        >
+        <input class="container__input" type="date" id="printName" name="printName" value=""
+          formControlName="date" />
+        <label id="printName" for="printName" class="container__label">Date <span>*</span></label>
+      </div>
+      <div class="container">
+        <select class="container__input" formControlName="uploadType" name="uploadType" id="uploadType">
+          <option value="" disabled selected="selected">
+            Select Type
+          </option>
+          <option value="bar">
+            Barcode
+          </option>
+          <option value="uan">
+            UAN Code
+          </option>
+
+        </select>
+        <!-- <button (click)="clearRfid()" ></button> -->
+        <label id="rfidcode" for="rfidcode" class="container__label">Excel Type</label>
+
+      </div>
+      <div class="container">
+        <input class="container__input" type="file" id="" name="tagId" value="" (change)="onFileSelected($event)" />
+        <label id="userLabel" for="tagId" class="container__label">Excel</label>
       </div>
 
       <button class="form__submit" id="submit" type="button" value="submit" (click)="upload()">

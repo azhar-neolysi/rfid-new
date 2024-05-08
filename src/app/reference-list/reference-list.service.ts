@@ -21,6 +21,9 @@ export class ReferenceListService {
   getReferenceListId(id: any) {
     return this.http.get(environment.baseUrl + `ReferenceList/${id}`);
   }
+  getReferenceListbyName(id: any) {
+    return this.http.get(environment.baseUrl + `ReferenceList/GetRLByRLName?name=${id}`);
+  }
   getReferenceListbyRefName(name: any) {
     return this.http.get(
       environment.baseUrl + `ReferenceList/GetRLByRName?name=${name}`

@@ -19,6 +19,8 @@ import * as XLSX from 'xlsx';
 import { SegmentService } from 'src/app/segment/segment.service';
 import { ReferenceListService } from 'src/app/reference-list/reference-list.service';
 import { AlertController } from '@ionic/angular';
+import { ToastrService } from 'src/app/services/toastr/toastr.service';
+// import * as XlsxPopulate from 'xlsx-populate';
 @Component({
   selector: 'app-itemmaster',
   templateUrl: './itemmaster.page.html',
@@ -55,20 +57,23 @@ export class ItemmasterPage implements OnInit {
     rack: ['', [Validators.required]], ///
     manufactureDate: [''], ///
     expiryDate: [''], ///
-    itemWeight: [], ///
-    gst: [], ///
-    discount: [], ///
-    quantity: [[Validators.required]], ///
-    costRate: [[Validators.required]], ///
-    salesRate: [[Validators.required]], ///
-    mrp: [[Validators.required]], ///
-    amount: [[Validators.required]], ///
+    itemWeight: [''], ///
+    gst: [''], ///
+    discount: [''], ///
+    quantity: ['', [Validators.required]], ///
+    costRate: ['', [Validators.required]], ///
+    salesRate: ['', [Validators.required]], ///
+    mrp: ['', [Validators.required]], ///
+    amount: ['', [Validators.required]], ///
     description: [''], ///
     refLocationId: [null], ///
     refRefListUomid: [null], ///
-    openingQty: [], ///
-    closingQty: [], ///
+    openingQty: [''], ///
+    closingQty: [''], ///
     segmentName: [''],
+    mcDesc: [''],
+    styleCode: [''],
+    uploadType: [''],
     0: [''],
     1: [''],
     2: [''],
@@ -104,6 +109,10 @@ export class ItemmasterPage implements OnInit {
 
   dynamicValues: any[] = [];
   byteLength: number;
+  maxDate: string;
+  groupedData: any;
+  groupedData2: any = [];
+  excelDataRaw: never[];
   constructor(
     private formBuilder: FormBuilder,
     private product: ProductService,
@@ -112,8 +121,14 @@ export class ItemmasterPage implements OnInit {
     private router: Router,
     private segment: SegmentService,
     private refList: ReferenceListService,
-    private alertController: AlertController
-  ) {}
+    private alertController: AlertController,
+    private toast: ToastrService
+  ) {
+    this.maxDate = new Date().toISOString().split('T')[0];
+    this.productForm.controls.date.setValue(this.maxDate);
+    this.productForm.controls.expiryDate.setValue(this.maxDate);
+    this.productForm.controls.manufactureDate.setValue(this.maxDate);
+  }
 
   ngOnInit() {
     const id = this.route.params.subscribe((param) => {
@@ -212,7 +227,7 @@ export class ItemmasterPage implements OnInit {
         });
         console.log(this.segmentList);
         this.addSegmentListupload(data);
-        setTimeout(()=> console.log('waiting'), 20000);
+        setTimeout(() => console.log('waiting'), 20000);
       });
   }
   addSegmentList(refList: any, ref: any) {
@@ -294,7 +309,7 @@ export class ItemmasterPage implements OnInit {
                 this.selectedSegment.splice(index, 1);
                 this.selectedSegment.push({
                   ref: items.referenceName,
-                  refList:items.referenceListId,
+                  refList: items.referenceListId,
                 });
               }
             });
@@ -315,71 +330,75 @@ export class ItemmasterPage implements OnInit {
     console.log(this.selectedSegment);
     // return;
     this.productForm.controls.productId.setValue(refList.productId);
-      this.productForm.controls.amount.setValue(refList.Amount);
-      this.productForm.controls.barCode.setValue(refList.Barcode);
-      // this.productForm.controls.brand.setValue(refList.brand);
-      // this.productForm.controls.category.setValue(refList.category);
-      this.productForm.controls.closingQty.setValue(refList.Closing_Qty);
-      this.productForm.controls.costRate.setValue(refList.Cost_Rate);
-      // this.productForm.controls.createdDate.setValue(refList.createdDate);
-      this.productForm.controls.date.setValue(
-        this.datePipe.transform(refList.Date, 'yyyy-MM-dd')
-      );
-      this.productForm.controls.description.setValue(refList.Description);
-      this.productForm.controls.discount.setValue(refList.Discount);
-      this.productForm.controls.eancode.setValue(refList.EAN);
-      this.productForm.controls.expiryDate.setValue(
-        this.datePipe.transform(refList.Expiry_Date, 'yyyy-MM-dd')
-      );
-      this.productForm.controls.gst.setValue(refList.GST);
-      this.productForm.controls.hsnsaccode.setValue(refList.HSNSAC_Code);
-      // this.productForm.controls.isActive.setValue(refList.Item_Code);
-      // this.productForm.controls.isDeleted.setValue(refList.isDeleted);
-      this.productForm.controls.itemCode.setValue(String(refList.Item_Code));
-      this.productForm.controls.mrp.setValue(refList.MRP);
-      this.productForm.controls.itemWeight.setValue(refList.item_Weight);
-      this.productForm.controls.manufactureDate.setValue(
-        this.datePipe.transform(refList.Manufacture_Date, 'yyyy-MM-dd')
-      );
-      // this.productForm.controls.modifiedDate.setValue(refList.modifiedDate);
-      // this.productForm.controls.mrp.setValue(refList.mrp);
-      this.productForm.controls.openingQty.setValue(refList.Opening_Qty);
-      // this.productForm.controls.pattern.setValue(String(refList.pattern));
-      this.productForm.controls.printName.setValue(refList.Print_Name);
-      this.productForm.controls.productName.setValue(refList.Name);
-      this.productForm.controls.quantity.setValue(refList.Quantity);
-      this.productForm.controls.rack.setValue(String(refList.Rack));
-      this.productForm.controls.refCreatedBy.setValue(refList.refCreatedBy);
-      this.productForm.controls.refLocationId.setValue(refList.refLocationId);
-      this.productForm.controls.refModifiedBy.setValue(refList.refModifiedBy);
-      this.productForm.controls.refOrgId.setValue(refList.refOrgId);
-      this.productForm.controls.refRefListUomid.setValue(
-        refList.UOM
-      );
-      this.productForm.controls.rfidcode.setValue(refList.RFID_Code);
-      this.productForm.controls.salesRate.setValue(refList.Sales_Rate);
-      // this.productForm.controls.size.setValue(refList.size);
-      // this.productForm.controls.style.setValue(refList.style);
-      // // this.productForm.controls.subCategory.setValue(refList.subCategory);
-      // this.productForm.controls.type.setValue(refList.type);
-      // this.productForm.controls.createdDate.setValue(new Date());
-      // this.productForm.controls.isActive.setValue(true);
-      // this.productForm.controls.isDeleted.setValue(false);
-      // this.productForm.controls.modifiedDate.setValue(new Date());
-      this.productForm.controls.refOrgId.setValue(null);
-      this.productForm.controls.refModifiedBy.setValue(null);
-      this.productForm.controls.refModifiedBy.setValue(null);
-      this.productForm.controls.refLocationId.setValue(null);
-      this.productForm.controls.refCreatedBy.setValue(null);
-      console.log(this.productForm);
+    this.productForm.controls.amount.setValue(refList.Amount);
+    this.productForm.controls.barCode.setValue(refList.Barcode);
+    // this.productForm.controls.brand.setValue(refList.brand);
+    // this.productForm.controls.category.setValue(refList.category);
+    this.productForm.controls.closingQty.setValue(refList.Closing_Qty);
+    this.productForm.controls.costRate.setValue(refList.Cost_Rate);
+    // this.productForm.controls.createdDate.setValue(refList.createdDate);
+    this.productForm.controls.date.setValue(
+      this.datePipe.transform(refList.Date, 'yyyy-MM-dd')
+    );
+    this.productForm.controls.description.setValue(refList.Description);
+    this.productForm.controls.discount.setValue(refList.Discount);
+    this.productForm.controls.eancode.setValue(refList.EAN);
+    this.productForm.controls.expiryDate.setValue(
+      this.datePipe.transform(refList.Expiry_Date, 'yyyy-MM-dd')
+    );
+    this.productForm.controls.gst.setValue(refList.GST);
+    this.productForm.controls.hsnsaccode.setValue(refList.HSNSAC_Code);
+    // this.productForm.controls.isActive.setValue(refList.Item_Code);
+    // this.productForm.controls.isDeleted.setValue(refList.isDeleted);
+    this.productForm.controls.itemCode.setValue(String(refList.Item_Code));
+    this.productForm.controls.mrp.setValue(refList.MRP);
+    this.productForm.controls.itemWeight.setValue(refList.item_Weight);
+    this.productForm.controls.manufactureDate.setValue(
+      this.datePipe.transform(refList.Manufacture_Date, 'yyyy-MM-dd')
+    );
+    // this.productForm.controls.modifiedDate.setValue(refList.modifiedDate);
+    // this.productForm.controls.mrp.setValue(refList.mrp);
+    this.productForm.controls.openingQty.setValue(refList.Opening_Qty);
+    // this.productForm.controls.pattern.setValue(String(refList.pattern));
+    this.productForm.controls.printName.setValue(refList.Print_Name);
+    this.productForm.controls.productName.setValue(refList.Name);
+    this.productForm.controls.quantity.setValue(refList.Quantity);
+    this.productForm.controls.rack.setValue(String(refList.Rack));
+    this.productForm.controls.refCreatedBy.setValue(refList.refCreatedBy);
+    this.productForm.controls.refLocationId.setValue(refList.refLocationId);
+    this.productForm.controls.refModifiedBy.setValue(refList.refModifiedBy);
+    this.productForm.controls.refOrgId.setValue(refList.refOrgId);
+    this.productForm.controls.refRefListUomid.setValue(
+      refList.UOM
+    );
+    this.productForm.controls.rfidcode.setValue(refList.RFID_Code);
+    this.productForm.controls.salesRate.setValue(refList.Sales_Rate);
+    // this.productForm.controls.size.setValue(refList.size);
+    // this.productForm.controls.style.setValue(refList.style);
+    // // this.productForm.controls.subCategory.setValue(refList.subCategory);
+    // this.productForm.controls.type.setValue(refList.type);
+    // this.productForm.controls.createdDate.setValue(new Date());
+    // this.productForm.controls.isActive.setValue(true);
+    // this.productForm.controls.isDeleted.setValue(false);
+    // this.productForm.controls.modifiedDate.setValue(new Date());
+    this.productForm.controls.refOrgId.setValue(null);
+    this.productForm.controls.refModifiedBy.setValue(null);
+    this.productForm.controls.refModifiedBy.setValue(null);
+    this.productForm.controls.refLocationId.setValue(null);
+    this.productForm.controls.refCreatedBy.setValue(null);
+    console.log(this.productForm);
     this.addProduct();
   }
   addProduct() {
-    console.log('Form:',this.productForm.value);
-    console.log('Selected Segment:',this.selectedSegment);
+    console.log('Form:', this.productForm.value);
+    console.log('Selected Segment:', this.selectedSegment);
     // return;
     if (this.productForm.valid) {
       if (this.productId) {
+        if (!this.productForm.value.rfidcode) {
+          this.toast.danger('Enter RFID Code');
+          return;
+        }
         const data = {
           productEntryId: this.productForm.value.productId,
           refOrgId: this.productForm.value.refOrgId,
@@ -429,7 +448,12 @@ export class ItemmasterPage implements OnInit {
           if (this.selectedSegment.length !== 0) {
             this.updateproductSegmentMapping();
           } else {
-            this.router.navigate(['item-list']);
+            // this.router.navigate(['item-list']);
+            this.toast.success('Record Saved Successfully')
+            setTimeout(() => {
+              this.router.navigate(['item-list']);
+              // window.location.reload();
+            }, 3000);
           }
         });
       } else {
@@ -459,21 +483,21 @@ export class ItemmasterPage implements OnInit {
           rack: this.productForm.value.rack, //
           manufactureDate: this.productForm.value.manufactureDate,
           expiryDate: this.productForm.value.expiryDate,
-          itemWeight: this.productForm.value.itemWeight,
+          itemWeight: Number(this.productForm.value.itemWeight),
           gst: Number(this.productForm.value.gst),
-          discount: this.productForm.value.discount,
-          quantity: this.productForm.value.quantity,
-          costRate: this.productForm.value.costRate,
-          salesRate: this.productForm.value.salesRate,
-          mrp: this.productForm.value.mrp,
-          amount: this.productForm.value.amount,
+          discount: Number(this.productForm.value.discount),
+          quantity: Number(this.productForm.value.quantity),
+          costRate: Number(this.productForm.value.costRate),
+          salesRate: Number(this.productForm.value.salesRate),
+          mrp: Number(this.productForm.value.mrp),
+          amount: Number(this.productForm.value.amount),
           description: this.productForm.value.description,
           refLocationId: this.productForm.value.refLocationId,
           refRefListUomid: this.productForm.value.refRefListUomid,
           openingQty: this.productForm.value.openingQty,
           closingQty: this.productForm.value.closingQty,
         };
-        console.log(this.productForm.value);
+        console.log(data);
         this.product.addProduct(data).subscribe((res: any) => {
           console.log(res);
           this.productForm.controls.productId.setValue(res.productEntryId);
@@ -482,8 +506,58 @@ export class ItemmasterPage implements OnInit {
         });
       }
     } else {
-      this.productForm.markAllAsTouched();
+
       console.log('Form not Valid', this.productForm);
+
+      if (!this.productForm.value.productName) {
+        this.toast.danger('Enter Product Name');
+        return;
+      }
+      if (!this.productForm.value.printName) {
+        this.toast.danger('Enter Product Print Name');
+        return;
+      }
+      if (!this.productForm.value.itemCode) {
+        this.toast.danger('Enter Item Code');
+        return;
+      }
+      if (!this.productForm.value.barCode) {
+        this.toast.danger('Enter Barcode');
+        return;
+      }
+      if (!this.productForm.value.hsnsaccode) {
+        this.toast.danger('Enter Hsnsac Code');
+        return;
+      }
+      if (!this.productForm.value.eancode) {
+        this.toast.danger('Enter EAN Code');
+        return;
+      }
+      if (!this.productForm.value.rack) {
+        this.toast.danger('Enter Rack');
+        return;
+      }
+      if (!this.productForm.value.quantity) {
+        this.toast.danger('Enter Quantity');
+        return;
+      }
+      if (!this.productForm.value.costRate) {
+        this.toast.danger('Enter Cost Rate');
+        return;
+      }
+      if (!this.productForm.value.salesRate) {
+        this.toast.danger('Enter Sales Rate');
+        return;
+      }
+      if (!this.productForm.value.mrp) {
+        this.toast.danger('Enter MRP');
+        return;
+      }
+      if (!this.productForm.value.amount) {
+        this.toast.danger('Enter Product Amount');
+        return;
+      }
+
     }
   }
   productSegmentMapping() {
@@ -499,15 +573,19 @@ export class ItemmasterPage implements OnInit {
         console.log(res);
         if (index === this.selectedSegment.length - 1) {
           // Last iteration, reload the window
-          // window.location.reload();
-          this.router.navigate(['item-list']);
+          this.toast.success('Record Saved Successfully')
+          // setTimeout(() => {
+          //   this.router.navigate(['item-list']);
+          //   // window.location.reload();
+          // }, 3000);
+          // this.router.navigate(['item-list']);
         }
       });
     });
   }
   updateproductSegmentMapping() {
     this.selectedSegment.forEach((element: any, index: any) => {
-      if(element.id){
+      if (element.id) {
 
         const data = {
           refOrgid: this.productForm.value.refOrgId,
@@ -526,10 +604,14 @@ export class ItemmasterPage implements OnInit {
           if (index === this.selectedSegment.length - 1) {
             // Last iteration, reload the window
             // window.location.reload();
-            this.router.navigate(['item-list']);
+            this.toast.success('Record Saved Successfully')
+            setTimeout(() => {
+              this.router.navigate(['item-list']);
+              // window.location.reload();
+            }, 3000);
           }
         });
-      }else{
+      } else {
         const data = {
           refOrgid: this.productForm.value.refOrgId,
           refCreatedBy: this.productForm.value.refCreatedBy,
@@ -541,10 +623,14 @@ export class ItemmasterPage implements OnInit {
           console.log(res);
           if (index === this.selectedSegment.length - 1) {
             // Last iteration, reload the window
-            this.router.navigate(['item-list']);
-          // window.location.reload();
-        }
-      });
+            // this.router.navigate(['item-list']);
+            setTimeout(() => {
+              this.router.navigate(['item-list']);
+              // window.location.reload();
+            }, 3000);
+            // window.location.reload();
+          }
+        });
       }
     });
   }
@@ -556,7 +642,7 @@ export class ItemmasterPage implements OnInit {
       console.log(res);
     });
   }
-  getProduct1(){
+  getProduct1() {
     const data = {
       barcode: this.productId,
       rfidcode: null,
@@ -681,91 +767,233 @@ export class ItemmasterPage implements OnInit {
       }
     });
   }
+
+  // ---------------------------Excel Upload------------------------------------//
   excelUploadEnable() {
     this.excelUpload = !this.excelUpload ? true : false;
   }
+  // -----------------------------Excel Select----------------------------------------------//
+  // onFileSelected(event: any) {
+  //   var file=event.target.file[0];
+  //   const fileReader=
+  // }
+
+
+
+
   onFileSelected(event: any) {
-    this.excelData = [];
+    this.excelDataRaw = [];
     const file: any = event.target.files[0];
     console.log(file);
     let fileReader = new FileReader();
     fileReader.readAsBinaryString(file);
     fileReader.onload = (e) => {
+      console.log(e);
+      const data = new Uint8Array(fileReader.result as ArrayBuffer);
+      console.log(data);
       var workbook = XLSX.read(fileReader.result, { type: 'binary' });
+      // var workbook = XLSX.read(data, { type: 'array' });
       var sheetNames = workbook.SheetNames;
-      this.excelData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetNames[0]]);
-      console.log(this.excelData);
+      // var sheetNames = workbook.SheetNames[0];
+      // const worksheet = workbook.Sheets[sheetNames];
+      this.excelDataRaw = XLSX.utils.sheet_to_json(workbook.Sheets[sheetNames[0]]);
+      // const headers = ['productName', 'printName', 'rfidcode', 'itemcode', 'barCode', 'stylecode', 'rack', 'eancode', 'date', 'hsnsaccode', 'manufactureDate', 'expiryDate', 'itemWeight', 'uom', 'gst', 'discount', 'quantity', 'costRate', 'salesRate', 'mrp', 'amount', 'mcdescription', 'description', 'openingQty', 'closingQty', 'segment', 'color', 'size', 'pattern']
+      // this.excelDataRaw = XLSX.utils.sheet_to_json(worksheet, { header: headers });
+      console.log(this.excelDataRaw);
+
+      if (this.productForm.value.uploadType === 'uan') {
+        this.groupedData = {}
+        this.excelDataRaw.forEach((item: any) => {
+          // console.log(item);
+          const key = item.eancode.toString();
+          console.log(key);
+          if (!this.groupedData[key]) {
+            this.groupedData[key] = [];
+          }
+          this.groupedData[key].push(item);
+          console.log(this.groupedData);
+        })
+        this.groupedData2 = [];
+        for (const key in this.groupedData) {
+          if (Object.prototype.hasOwnProperty.call(this.groupedData, key)) {
+            const element = this.groupedData[key];
+            console.log(element);
+            element[0].quantity = element.length;
+            // element[0].date = this.productForm.value.date;
+            this.groupedData2.push(element[0]);
+          }
+          console.log(this.groupedData2);
+        }
+        this.excelData = this.groupedData2;
+        console.log(this.excelData);
+
+      } else {
+        this.excelData = this.excelDataRaw;
+        console.log(this.excelData);
+      }
     };
   }
   upload() {
     console.log(this.excelData);
-    this.excelData.forEach((element: any) => {
-      // console.log(element);
-      this.productForm.controls.segmentName.setValue(element.Segment);
-
-      // this.productForm.controls.productId.setValue(element.productId);
-      // this.productForm.controls.amount.setValue(element.Amount);
-      // this.productForm.controls.barCode.setValue(element.Barcode);
-      // // this.productForm.controls.brand.setValue(element.brand);
-      // // this.productForm.controls.category.setValue(element.category);
-      // this.productForm.controls.closingQty.setValue(element.Closing_Qty);
-      // this.productForm.controls.costRate.setValue(element.Cost_Rate);
-      // // this.productForm.controls.createdDate.setValue(element.createdDate);
-      // this.productForm.controls.date.setValue(
-      //   this.datePipe.transform(element.Date, 'yyyy-MM-dd')
-      // );
-      // this.productForm.controls.description.setValue(element.Description);
-      // this.productForm.controls.discount.setValue(element.Discount);
-      // this.productForm.controls.eancode.setValue(element.EAN);
-      // this.productForm.controls.expiryDate.setValue(
-      //   this.datePipe.transform(element.Expiry_Date, 'yyyy-MM-dd')
-      // );
-      // this.productForm.controls.gst.setValue(element.GST);
-      // this.productForm.controls.hsnsaccode.setValue(element.HSNSAC_Code);
-      // // this.productForm.controls.isActive.setValue(element.Item_Code);
-      // // this.productForm.controls.isDeleted.setValue(element.isDeleted);
-      // this.productForm.controls.itemCode.setValue(String(element.Item_Code));
-      // this.productForm.controls.mrp.setValue(element.MRP);
-      // this.productForm.controls.itemWeight.setValue(element.item_Weight);
-      // this.productForm.controls.manufactureDate.setValue(
-      //   this.datePipe.transform(element.Manufacture_Date, 'yyyy-MM-dd')
-      // );
-      // // this.productForm.controls.modifiedDate.setValue(element.modifiedDate);
-      // // this.productForm.controls.mrp.setValue(element.mrp);
-      // this.productForm.controls.openingQty.setValue(element.Opening_Qty);
-      // // this.productForm.controls.pattern.setValue(String(element.pattern));
-      // this.productForm.controls.printName.setValue(element.Print_Name);
-      // this.productForm.controls.productName.setValue(element.Name);
-      // this.productForm.controls.quantity.setValue(element.Quantity);
-      // this.productForm.controls.rack.setValue(String(element.Rack));
-      // this.productForm.controls.refCreatedBy.setValue(element.refCreatedBy);
-      // this.productForm.controls.refLocationId.setValue(element.refLocationId);
-      // this.productForm.controls.refModifiedBy.setValue(element.refModifiedBy);
-      // this.productForm.controls.refOrgId.setValue(element.refOrgId);
-      // this.productForm.controls.refRefListUomid.setValue(
-      //   element.refRefListUomid
-      // );
-      // this.productForm.controls.rfidcode.setValue(element.RFID_Code);
-      // this.productForm.controls.salesRate.setValue(element.Sales_Rate);
-      // // this.productForm.controls.size.setValue(element.size);
-      // // this.productForm.controls.style.setValue(element.style);
-      // // // this.productForm.controls.subCategory.setValue(element.subCategory);
-      // // this.productForm.controls.type.setValue(element.type);
-      // // this.productForm.controls.createdDate.setValue(new Date());
-      // // this.productForm.controls.isActive.setValue(true);
-      // // this.productForm.controls.isDeleted.setValue(false);
-      // // this.productForm.controls.modifiedDate.setValue(new Date());
-      // this.productForm.controls.refOrgId.setValue(null);
-      // this.productForm.controls.refModifiedBy.setValue(null);
-      // this.productForm.controls.refModifiedBy.setValue(null);
-      // this.productForm.controls.refLocationId.setValue(null);
-      // this.productForm.controls.refCreatedBy.setValue(null);
-      // console.log(this.productForm);
-      this.getSegmentRefupload(element);
-
-      // this.addProduct();
-      // this.addSegmentListupload(element);
+    this.excelData.forEach((productData: any) => {
+      console.log(productData);
+      this.refList.getReferenceListbyName(productData.uom).subscribe((res0: any) => {
+        this.productForm.controls.refRefListUomid.setValue(res0[0].referenceListId);
+        this.refList.getReferenceListbyName(productData.color).subscribe((res1: any) => {
+          console.log(res1);
+          this.selectedSegment.push({
+            ref: res1[0].referencename,
+            refList: res1[0].referenceListId,
+          });
+          this.refList.getReferenceListbyName(productData.size).subscribe((res2: any) => {
+            console.log(res2);
+            this.selectedSegment.push({
+              ref: res2[0].referencename,
+              refList: res2[0].referenceListId,
+            });
+            this.refList.getReferenceListbyName(productData.pattern).subscribe((res3: any) => {
+              console.log(res3);
+              this.selectedSegment.push({
+                ref: res3[0].referencename,
+                refList: res3[0].referenceListId,
+              });
+              this.productForm.controls.amount.setValue(productData.amount);
+              this.productForm.controls.barCode.setValue(String(productData.barCode));
+              this.productForm.controls.closingQty.setValue(productData.closingQty);
+              this.productForm.controls.costRate.setValue(productData.costRate);
+              // this.productForm.controls.date.setValue(productData.date);
+              this.productForm.controls.description.setValue(productData.description);
+              this.productForm.controls.discount.setValue(productData.discount);
+              this.productForm.controls.eancode.setValue(String(productData.eancode));
+              this.productForm.controls.expiryDate.setValue(this.datePipe.transform(productData.expiryDate, 'yyyy-MM-dd'));
+              this.productForm.controls.gst.setValue(productData.gst);
+              this.productForm.controls.hsnsaccode.setValue(String(productData.hsnsaccode));
+              this.productForm.controls.itemWeight.setValue(productData.itemWeight);
+              this.productForm.controls.itemCode.setValue(productData.itemcode);
+              this.productForm.controls.manufactureDate.setValue(this.datePipe.transform(productData.manufactureDate, 'yyyy-MM-dd'));
+              this.productForm.controls.mcDesc.setValue(productData.mcdescription);
+              this.productForm.controls.mrp.setValue(productData.mrp);
+              this.productForm.controls.mrp.setValue(productData.mrp);
+              this.productForm.controls.openingQty.setValue(productData.openingQty);
+              this.productForm.controls.printName.setValue(productData.printName);
+              this.productForm.controls.productName.setValue(productData.productName);
+              this.productForm.controls.quantity.setValue(productData.quantity);
+              this.productForm.controls.rack.setValue(productData.rack);
+              this.productForm.controls.salesRate.setValue(productData.salesRate);
+              this.productForm.controls.styleCode.setValue(productData.stylecode);
+              // this.productForm.controls..setValue(productData.stylecode);
+              this.addProduct();
+            });
+          });
+        });
+      })
     });
+    // this.excelData.forEach((productData: any) => {
+    //   // console.log(element);
+    //   this.productForm.controls.segmentName.setValue(productData.segment);
+
+    //   console.log(this.productForm.value.segmentName);
+    //   this.segmentTemp = [];
+    //   this.segmentList = [];
+    //   this.segment
+    //     .segmentRefList(this.productForm.value.segmentName)
+    //     .subscribe((res: any) => {
+    //       console.log(res);
+    //       this.segmentTemp = res;
+    //       let referenceName = [
+    //         ...new Set(this.segmentTemp.map((p: any) => p.referenceName)),
+    //       ];
+    //       console.log(referenceName);
+    //       this.segmentList = [];
+    //       referenceName.forEach((element: any) => {
+    //         let referenceNameList = this.segmentTemp.filter(
+    //           (p: any) => p.referenceName === element
+    //         );
+    //         this.segmentList.push({ element, list: referenceNameList });
+    //         console.log(this.segmentList);
+    //         console.log(productData);
+
+    //         // if (this.productId) {
+    //         //   this.segmentList.forEach((item: any, index: any) => {
+    //         //     this.productSegmentList.forEach((element: any, index: any) => {
+    //         //       // console.log(item);
+    //         //       // console.log(element);
+    //         //       if (item.element === element.referenceame) {
+    //         //         // console.log(element.referenceListId);
+    //         //         // this.item+`${index}`=
+    //         //         this.dynamicValues[index] = element.referenceListId;
+    //         //         console.log(this.dynamicValues);
+    //         //       }
+    //         //     });
+    //         //   });
+    //         // }
+    //       });
+    //     });
+
+    //   // this.getSegmentRef();
+    //   // this.productForm.controls.productId.setValue(element.productId);
+    //   // this.productForm.controls.amount.setValue(element.Amount);
+    //   // this.productForm.controls.barCode.setValue(element.Barcode);
+    //   // // this.productForm.controls.brand.setValue(element.brand);
+    //   // // this.productForm.controls.category.setValue(element.category);
+    //   // this.productForm.controls.closingQty.setValue(element.Closing_Qty);
+    //   // this.productForm.controls.costRate.setValue(element.Cost_Rate);
+    //   // // this.productForm.controls.createdDate.setValue(element.createdDate);
+    //   // this.productForm.controls.date.setValue(
+    //   //   this.datePipe.transform(element.Date, 'yyyy-MM-dd')
+    //   // );
+    //   // this.productForm.controls.description.setValue(element.Description);
+    //   // this.productForm.controls.discount.setValue(element.Discount);
+    //   // this.productForm.controls.eancode.setValue(element.EAN);
+    //   // this.productForm.controls.expiryDate.setValue(
+    //   //   this.datePipe.transform(element.Expiry_Date, 'yyyy-MM-dd')
+    //   // );
+    //   // this.productForm.controls.gst.setValue(element.GST);
+    //   // this.productForm.controls.hsnsaccode.setValue(element.HSNSAC_Code);
+    //   // // this.productForm.controls.isActive.setValue(element.Item_Code);
+    //   // // this.productForm.controls.isDeleted.setValue(element.isDeleted);
+    //   // this.productForm.controls.itemCode.setValue(String(element.Item_Code));
+    //   // this.productForm.controls.mrp.setValue(element.MRP);
+    //   // this.productForm.controls.itemWeight.setValue(element.item_Weight);
+    //   // this.productForm.controls.manufactureDate.setValue(
+    //   //   this.datePipe.transform(element.Manufacture_Date, 'yyyy-MM-dd')
+    //   // );
+    //   // // this.productForm.controls.modifiedDate.setValue(element.modifiedDate);
+    //   // // this.productForm.controls.mrp.setValue(element.mrp);
+    //   // this.productForm.controls.openingQty.setValue(element.Opening_Qty);
+    //   // // this.productForm.controls.pattern.setValue(String(element.pattern));
+    //   // this.productForm.controls.printName.setValue(element.Print_Name);
+    //   // this.productForm.controls.productName.setValue(element.Name);
+    //   // this.productForm.controls.quantity.setValue(element.Quantity);
+    //   // this.productForm.controls.rack.setValue(String(element.Rack));
+    //   // this.productForm.controls.refCreatedBy.setValue(element.refCreatedBy);
+    //   // this.productForm.controls.refLocationId.setValue(element.refLocationId);
+    //   // this.productForm.controls.refModifiedBy.setValue(element.refModifiedBy);
+    //   // this.productForm.controls.refOrgId.setValue(element.refOrgId);
+    //   // this.productForm.controls.refRefListUomid.setValue(
+    //   //   element.refRefListUomid
+    //   // );
+    //   // this.productForm.controls.rfidcode.setValue(element.RFID_Code);
+    //   // this.productForm.controls.salesRate.setValue(element.Sales_Rate);
+    //   // // this.productForm.controls.size.setValue(element.size);
+    //   // // this.productForm.controls.style.setValue(element.style);
+    //   // // // this.productForm.controls.subCategory.setValue(element.subCategory);
+    //   // // this.productForm.controls.type.setValue(element.type);
+    //   // // this.productForm.controls.createdDate.setValue(new Date());
+    //   // // this.productForm.controls.isActive.setValue(true);
+    //   // // this.productForm.controls.isDeleted.setValue(false);
+    //   // // this.productForm.controls.modifiedDate.setValue(new Date());
+    //   // this.productForm.controls.refOrgId.setValue(null);
+    //   // this.productForm.controls.refModifiedBy.setValue(null);
+    //   // this.productForm.controls.refModifiedBy.setValue(null);
+    //   // this.productForm.controls.refLocationId.setValue(null);
+    //   // this.productForm.controls.refCreatedBy.setValue(null);
+    //   // console.log(this.productForm);
+    //   // this.getSegmentRefupload(element);
+
+    //   // this.addProduct();
+    //   // this.addSegmentListupload(element);
+    // });
   }
   clearRfid() {
     this.productForm.controls.rfidcode.setValue(null);

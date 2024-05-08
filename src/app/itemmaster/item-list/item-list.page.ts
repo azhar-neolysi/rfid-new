@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ProductService } from '../product.service';
 import { Router } from '@angular/router';
+import { ToastController } from '@ionic/angular';
 
 @Component({
   selector: 'app-item-list',
@@ -12,10 +13,10 @@ export class ItemListPage implements OnInit {
   products: any = [];
   productsTemp: any = [];
   barcodeScan:any;
-  constructor(private product: ProductService, private router: Router) {}
+  constructor(private product: ProductService, private router: Router,private toast: ToastController,) {}
 
-  ngOnInit() {
-    this.getProducts();
+  async ngOnInit() {
+   await this.getProducts();
   }
   ionViewDidEnter() {
     this.barcodeScan=null;
@@ -59,9 +60,19 @@ export class ItemListPage implements OnInit {
   //   }
   // }
   deleteProduct(id: any) {
-    this.product.deleteProduct(id).subscribe((res: any) => {
+    this.product.deleteProduct(id).subscribe(async (res: any) => {
       console.log(res);
-      window.location.reload();
+      // window.location.reload();
+      const toast = await this.toast.create({
+        color: 'success',
+        message: 'Sucessfully Deleted',
+        position: 'top',
+        duration: 2000,
+      });
+      toast.present();
+      toast.onDidDismiss().then(() => {
+        window.location.reload(); // Reloading the page
+      });
     });
   }
   editProduct(id: any) {

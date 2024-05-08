@@ -13,72 +13,38 @@
 </ion-header>
 <ion-content [fullscreen]="true">
   <ion-card>
-    <ion-input
-      (ionChange)="search($event)"
-      class="container__input"
-      type="text"
-      id="tagId"
-      name="tagId"
-      expand="full"
-      placeholder="Tag ID"
-    />
+    <ion-input (ionChange)="search($event)" class="container__input" type="text" id="tagId" name="tagId" expand="full"
+      placeholder="Tag ID" />
   </ion-card>
 
   <ion-card *ngFor="let rfid of rfidItems">
     <ion-card-header>
       <ion-row>
-        <ion-col
-          ><ion-card-title
-            ><b>Tag ID:</b>
-            <ion-label>{{rfid.tagId}}</ion-label></ion-card-title
-          >
-          <ion-card-title
-            ><b>Tag Model:</b
-            ><ion-label>{{rfid.tagModel}}</ion-label></ion-card-title
-          >
-          <ion-card-title
-            ><b>Tag Size:</b>
-            <ion-label>{{rfid.tagSize}}</ion-label></ion-card-title
-          >
-          <ion-card-title
-            ><b>Status:</b>
-            <ion-label>{{rfid.tagStatus}}</ion-label></ion-card-title
-          >
+        <ion-col><ion-card-title><b>Tag ID:</b>
+            <ion-label>{{rfid.tagId}}</ion-label></ion-card-title>
+          <ion-card-title><b>Tag Model:</b><ion-label>{{rfid.tagModel}}</ion-label></ion-card-title>
+          <ion-card-title><b>Tag Size:</b>
+            <ion-label>{{rfid.tagSize}}</ion-label></ion-card-title>
+          <ion-card-title><b>Status:</b>
+            <ion-label>{{rfid.tagStatus}}</ion-label></ion-card-title>
         </ion-col>
-        <ion-col size="auto"
-          ><ion-button color="danger" (click)="deleteRFID(rfid.rfidmasterId)"
-            ><ion-icon name="trash-sharp"></ion-icon></ion-button
-        ></ion-col>
+        <ion-col size="auto"><ion-button color="danger" (click)="deleteRFID(rfid.rfidmasterId)"><ion-icon
+              name="trash-sharp"></ion-icon></ion-button></ion-col>
       </ion-row>
       <ion-grid>
         <ion-row>
           <ion-col>
-            <ion-card-title
-              ><b>Frequency:</b>
-              <ion-label>{{rfid.frequency}}</ion-label></ion-card-title
-            >
-            <ion-card-title
-              ><b>Size: </b><ion-label>{{rfid.size}}</ion-label></ion-card-title
-            >
-            <ion-card-title
-              ><b>Style:</b
-              ><ion-label>{{rfid.style}}</ion-label></ion-card-title
-            >
-            <ion-card-title
-              ><b>isAssigned:</b>
-              <ion-label *ngIf="rfid.isAssigned" else #isAssigned
-                >Yes</ion-label
-              >
-
-              <ng-template #isAssigned>
-                <ion-label>No</ion-label>
-              </ng-template>
+            <ion-card-title><b>Frequency:</b>
+              <ion-label>{{rfid.frequency}}</ion-label></ion-card-title>
+            <ion-card-title><b>Size: </b><ion-label>{{rfid.size}}</ion-label></ion-card-title>
+            <ion-card-title><b>Style:</b><ion-label>{{rfid.style}}</ion-label></ion-card-title>
+            <ion-card-title><b>isAssigned:</b>
+              <ion-label *ngIf="rfid.isAssigned === true; else isAssigned">Yes</ion-label>
+              <ng-template #isAssigned><ion-label>No</ion-label></ng-template>
             </ion-card-title>
           </ion-col>
-          <ion-col size="auto"
-            ><ion-button (click)="editRFID(rfid.rfidmasterId)">
-              <ion-icon name="create-sharp"></ion-icon></ion-button
-          ></ion-col>
+          <ion-col size="auto"><ion-button (click)="editRFID(rfid.rfidmasterId)">
+              <ion-icon name="create-sharp"></ion-icon></ion-button></ion-col>
         </ion-row>
       </ion-grid>
       <!-- <ion-card-subtitle></ion-card-subtitle> -->

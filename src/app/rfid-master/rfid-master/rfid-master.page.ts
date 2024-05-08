@@ -50,6 +50,7 @@ export class RfidMasterPage implements OnInit {
   excelData: any = [];
   rfid_Id: any;
   rfidData: any = [];
+  maxDate: string;
   constructor(
     private formBuilder: FormBuilder,
     private file: File,
@@ -57,7 +58,10 @@ export class RfidMasterPage implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private datePipe: DatePipe
-  ) {}
+  ) {
+    this.maxDate = new Date().toISOString().split('T')[0];
+    this.rfidForm.controls.date.setValue(this.maxDate)
+  }
 
   ngOnInit() {
     // const single_digit = 1;
@@ -138,7 +142,7 @@ export class RfidMasterPage implements OnInit {
       console.log(element);
       // this.referenceForm.controls.refName.setValue(res.name);
       this.rfidForm.controls.createdDate.setValue(new Date());
-      this.rfidForm.controls.date.setValue('');
+      this.rfidForm.controls.date.setValue(element.Date);
       this.rfidForm.controls.descritpion1.setValue(element.Descritpion1);
       this.rfidForm.controls.descritpion2.setValue(element.Descritpion2);
       this.rfidForm.controls.descritpion3.setValue(element.Descritpion3);
@@ -146,9 +150,9 @@ export class RfidMasterPage implements OnInit {
       this.rfidForm.controls.frequency.setValue(element.Frequency);
       this.rfidForm.controls.isActive.setValue(true);
       this.rfidForm.controls.isDeleted.setValue(false);
-      this.rfidForm.controls.isAssigned.setValue(element.isAssigned);
-      this.rfidForm.controls.isRewritable.setValue(element.isRewritable);
-      this.rfidForm.controls.memorySize.setValue(String(element.MemorySize));
+      this.rfidForm.controls.isAssigned.setValue(element.isAssigned === 1 ? true : false);
+      this.rfidForm.controls.isRewritable.setValue(element.isRewritable === 1 ? true : false);
+      this.rfidForm.controls.memorySize.setValue(element.MemorySize);
       this.rfidForm.controls.modifiedDate.setValue(null);
       this.rfidForm.controls.refCreatedBy.setValue(null);
       this.rfidForm.controls.refModifiedBy.setValue(null);
@@ -230,8 +234,10 @@ export class RfidMasterPage implements OnInit {
           systemId: this.rfidForm.value.systemId,
           userMemoryId: this.rfidForm.value.userMemoryId,
           memorySize: this.rfidForm.value.memorySize,
-          isRewritable: this.rfidForm.value.isRewritable,
-          isAssigned: this.rfidForm.value.isAssigned,
+          isRewritable: this.rfidForm.value.isRewritable ,
+          isAssigned: this.rfidForm.value.isAssigned ,
+          // isRewritable: this.rfidForm.value.isRewritable === 1 ? true : false,
+          // isAssigned: this.rfidForm.value.isAssigned === 1 ? true : false,
           descritpion1: this.rfidForm.value.descritpion1,
           descritpion2: this.rfidForm.value.descritpion2,
           descritpion3: this.rfidForm.value.descritpion3,

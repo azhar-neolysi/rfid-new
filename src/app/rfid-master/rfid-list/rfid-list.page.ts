@@ -15,7 +15,7 @@ export class RfidListPage implements OnInit {
     private rfid: RfidService,
     private toast: ToastController,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.getRfid();
@@ -52,6 +52,10 @@ export class RfidListPage implements OnInit {
         duration: 2000,
       });
       toast.present();
+      toast.onDidDismiss().then(() => {
+        // Reload the page or perform the desired action here
+        window.location.reload(); // Reloading the page
+      });
     });
   }
   editRFID(id: any) {

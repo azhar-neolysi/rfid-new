@@ -15,25 +15,6 @@ import * as XLSX from 'xlsx';
   styleUrls: ['./devicemaster.page.scss'],
 })
 export class DevicemasterPage implements OnInit {
-  // data = {
-  //   deviceMasterId: 0,
-  //   refOrgId: 0,
-  //   createdDate: '2023-04-18T04:38:30.785Z',
-  //   refCreatedBy: 0,
-  //   modifiedDate: '2023-04-18T04:38:30.785Z',
-  //   refModifiedBy: 0,
-  //   isActive: true,
-  //   isDeleted: true,
-  //   deviceCode: 'string',
-  //   deviceName: 'string',
-  //   deviceType: 'string',
-  //   deviceManufacturer: 'string',
-  //   deviceIpaddress: 'string',
-  //   deviceMacaddress: 'string',
-  //   devicePassword: 'string',
-  //   description: 'string',
-  //   refLocationId: 0,
-  // };
   deviceForm = this.formBuilder.group({
     deviceMasterId: [0],
     refOrgId: [null],
@@ -52,13 +33,17 @@ export class DevicemasterPage implements OnInit {
     devicePassword: ['', [Validators.required]],
     description: [''],
     refLocationId: [null],
+    imei: ['', [Validators.required]],
+    deviceModel: ['', [Validators.required]],
+    status: ['', [Validators.required]]
   });
   deviceId: any;
-  excelUpload=false;
+  excelUpload = false;
   excelData: any;
-  constructor(private formBuilder: FormBuilder,private device:DevicemasterService,private route: ActivatedRoute,private router:Router) {}
+  constructor(private formBuilder: FormBuilder, private device: DevicemasterService, private route: ActivatedRoute, private router: Router) { }
 
   ngOnInit() {
+    console.log(this.deviceForm.value);
     const id = this.route.params.subscribe((param) => {
       // this.editRateId = Number(param.id);
       this.deviceId = param['id'];
@@ -69,13 +54,15 @@ export class DevicemasterPage implements OnInit {
     });
   }
   excelUploadEnable() {
+    console.log(this.deviceForm.value);
     this.excelUpload = !this.excelUpload ? true : false;
   }
   addDevice() {
+    console.log(this.deviceForm.value);
     if (this.deviceForm.valid) {
-      if(this.deviceId){
+      if (this.deviceId) {
         const data = {
-          deviceMasterId:this.deviceForm.value.deviceMasterId,
+          deviceMasterId: this.deviceForm.value.deviceMasterId,
           refOrgId: this.deviceForm.value.refOrgId,
           createdDate: this.deviceForm.value.createdDate,
           refCreatedBy: this.deviceForm.value.refCreatedBy,
@@ -92,13 +79,18 @@ export class DevicemasterPage implements OnInit {
           devicePassword: this.deviceForm.value.devicePassword,
           description: this.deviceForm.value.description,
           refLocationId: null,
+          imei: this.deviceForm.value.imei,
+          deviceModel: this.deviceForm.value.deviceModel,
+          status: this.deviceForm.value.status
         };
-        this.device.editDevice(data).subscribe((res:any)=>{
+        console.log(data);
+        this.device.editDevice(data).subscribe((res: any) => {
           console.log(res);
           this.router.navigate(['devicemaster-list']);
           // window.location.reload();
         })
-      }else{
+      } else {
+        console.log(this.deviceForm.value);
         const data = {
           refOrgId: this.deviceForm.value.refOrgId,
           createdDate: this.deviceForm.value.createdDate,
@@ -113,22 +105,26 @@ export class DevicemasterPage implements OnInit {
           deviceManufacturer: this.deviceForm.value.deviceManufacturer,
           deviceIpaddress: this.deviceForm.value.deviceIpaddress,
           deviceMacaddress: this.deviceForm.value.deviceMacaddress,
-          devicePassword: this.deviceForm.value.devicePassword,
+          devicePassword: String(this.deviceForm.value.devicePassword),
           description: this.deviceForm.value.description,
           refLocationId: null,
+          imei:String(this.deviceForm.value.imei),
+          deviceModel: this.deviceForm.value.deviceModel,
+          status: this.deviceForm.value.status
         };
-        this.device.addDevice(data).subscribe((res:any)=>{
+        console.log(data);
+        this.device.addDevice(data).subscribe((res: any) => {
           console.log(res);
           window.location.reload();
         })
       }
 
-    }else{
-      console.log('Form not Valid',this.deviceForm);
+    } else {
+      console.log('Form not Valid', this.deviceForm);
     }
   }
-  getDevice(){
-    this.device.getDevice(this.deviceId).subscribe((res:any)=>{
+  getDevice() {
+    this.device.getDevice(this.deviceId).subscribe((res: any) => {
       console.log(res);
       this.deviceForm.controls.createdDate.setValue(res.createdDate);
       this.deviceForm.controls.description.setValue(res.description);
@@ -164,25 +160,29 @@ export class DevicemasterPage implements OnInit {
   }
   upload() {
     console.log(this.excelData);
+    console.log(this.deviceForm.value);
     this.excelData.forEach((element: any) => {
       console.log(element);
-      this.deviceForm.controls.createdDate.setValue(element.createdDate);
+      // this.deviceForm.controls.createdDate.setValue(element.createdDate);
       this.deviceForm.controls.description.setValue(element.description);
       this.deviceForm.controls.deviceCode.setValue(element.deviceCode);
       this.deviceForm.controls.deviceIpaddress.setValue(element.deviceIpaddress);
       this.deviceForm.controls.deviceMacaddress.setValue(element.deviceMacaddress);
+      this.deviceForm.controls.deviceModel.setValue(element.deviceModel);
+      this.deviceForm.controls.imei.setValue(element.imei);
       this.deviceForm.controls.deviceManufacturer.setValue(element.deviceManufacturer);
       this.deviceForm.controls.deviceMasterId.setValue(element.deviceMasterId);
       this.deviceForm.controls.deviceName.setValue(element.deviceName);
       this.deviceForm.controls.devicePassword.setValue(element.devicePassword);
       this.deviceForm.controls.deviceType.setValue(element.deviceType);
-      this.deviceForm.controls.isActive.setValue(element.isActive);
-      this.deviceForm.controls.isDeleted.setValue(element.isDeleted);
-      this.deviceForm.controls.modifiedDate.setValue(element.modifiedDate);
-      this.deviceForm.controls.refCreatedBy.setValue(element.refCreatedBy);
-      this.deviceForm.controls.refLocationId.setValue(element.refLocationId);
-      this.deviceForm.controls.refModifiedBy.setValue(element.refModifiedBy);
-      this.deviceForm.controls.refOrgId.setValue(element.refOrgId);
+      this.deviceForm.controls.status.setValue(element.status);
+      // this.deviceForm.controls.isActive.setValue(element.isActive);
+      // this.deviceForm.controls.isDeleted.setValue(element.isDeleted);
+      // this.deviceForm.controls.modifiedDate.setValue(element.modifiedDate);
+      // this.deviceForm.controls.refCreatedBy.setValue(element.refCreatedBy);
+      this.deviceForm.controls.refLocationId.setValue(element.locationId);
+      // this.deviceForm.controls.refModifiedBy.setValue(element.refModifiedBy);
+      // this.deviceForm.controls.refOrgId.setValue(element.refOrgId);
       this.addDevice();
     });
   }

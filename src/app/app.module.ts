@@ -16,7 +16,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 // import { NgApexchartsModule } from "ng-apexcharts";
 import { File } from '@awesome-cordova-plugins/file/ngx';
-// import { FileTransfer } from '@awesome-cordova-plugins/file-transfer/ngx';
+import { FileTransfer } from '@awesome-cordova-plugins/file-transfer/ngx';
 import { DatePipe } from '@angular/common';
 // import { AutoFocusDirective } from './auto-focus.directive';
 @NgModule({
@@ -30,9 +30,9 @@ import { DatePipe } from '@angular/common';
     ReactiveFormsModule,
     FormsModule
   ],
-  providers: [{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy },HttpClientModule,File,DatePipe],
+  providers: [{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy }, HttpClientModule, File, DatePipe, FileTransfer],
   bootstrap: [AppComponent],
-  schemas:[CUSTOM_ELEMENTS_SCHEMA]
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class AppModule {
   constructor(library: FaIconLibrary) {
