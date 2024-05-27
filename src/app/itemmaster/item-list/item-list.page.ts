@@ -33,9 +33,9 @@ export class ItemListPage implements OnInit {
     this.router.navigate(['itemmaster']);
   }
   search(event: any) {
-    if(event.detail.value){
+    if(event.target.value){
 
-      this.router.navigate(['itemmaster', event.detail.value]);
+      this.router.navigate(['itemmaster', event.target.value]);
     }
   }
   // search(event: any) {

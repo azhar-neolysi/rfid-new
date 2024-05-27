@@ -28,7 +28,7 @@
 </ion-header>
 <ion-content [fullscreen]="true">
   <ion-card>
-    <ion-input inputmode="none" [(ngModel)]="barcodeScan" (ionChange)="search($event)" class="container__input"
+    <ion-input inputmode="none" [(ngModel)]="barcodeScan" (ionInput)="search($event)" class="container__input"
       type="text" id="tagId" name="tagId" expand="full" placeholder="Barcode" autofocus="true" />
     <!-- <button type="reset" id="clear" class="close-icon"></button> -->
     <!-- <button class="close-icon" type="reset"></button> -->

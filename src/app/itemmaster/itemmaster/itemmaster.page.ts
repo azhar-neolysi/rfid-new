@@ -439,6 +439,18 @@ export class ItemmasterPage implements OnInit {
           refRefListUomid: this.productForm.value.refRefListUomid,
           openingQty: this.productForm.value.openingQty,
           closingQty: this.productForm.value.closingQty,
+          mcDesc: this.productForm.value.mcDesc,
+          styleCode: this.productForm.value.styleCode,
+          description1: 0,
+          description2: 0,
+          description3: '',
+          description4: '',
+          description5: '',
+          description6: '',
+          description7: '',
+          description8: '',
+          description9: '',
+          description10: '',
         };
         console.log(data);
         // return;
@@ -496,6 +508,18 @@ export class ItemmasterPage implements OnInit {
           refRefListUomid: this.productForm.value.refRefListUomid,
           openingQty: this.productForm.value.openingQty,
           closingQty: this.productForm.value.closingQty,
+          mcDesc: this.productForm.value.mcDesc,
+          styleCode: this.productForm.value.styleCode,
+          description1: 0,
+          description2: 0,
+          description3: '',
+          description4: '',
+          description5: '',
+          description6: '',
+          description7: '',
+          description8: '',
+          description9: '',
+          description10: '',
         };
         console.log(data);
         this.product.addProduct(data).subscribe((res: any) => {
