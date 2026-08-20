@@ -63,6 +63,18 @@ yarn-error.log
 testem.log
 /typings
 
+# Security - never commit secrets
+key/
+*.jks
+*.keystore
+local.properties
+
+# Manual backups
+backup/
+sdk/
+src-backup-pre-ui-2026-08-19-1719/
+
 # System files
 .DS_Store
 Thumbs.db
+NUL

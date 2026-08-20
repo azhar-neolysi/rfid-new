@@ -3,13 +3,22 @@
 
 /** Ionic CSS Variables **/
 :root {
-  /** primary **/
-  --ion-color-primary: #3880ff;
-  --ion-color-primary-rgb: 56, 128, 255;
+  /** Brand colors (Neo RFID) **/
+  --brand-navy: #011644;
+  --brand-navy-dark: #000d33;
+  --brand-navy-tint: #01266b;
+  --brand-red: #ff2800;
+  --brand-red-tint: #ff5c3d;
+  --brand-bg: #f5f7fb;
+  --brand-muted: #6b7a99;
+
+  /** primary (brand navy) **/
+  --ion-color-primary: #011644;
+  --ion-color-primary-rgb: 1, 22, 68;
   --ion-color-primary-contrast: #ffffff;
   --ion-color-primary-contrast-rgb: 255, 255, 255;
-  --ion-color-primary-shade: #3171e0;
-  --ion-color-primary-tint: #4c8dff;
+  --ion-color-primary-shade: #010d33;
+  --ion-color-primary-tint: #01266b;
 
   /** secondary **/
   --ion-color-secondary: #3dc2ff;
@@ -43,13 +52,13 @@
   --ion-color-warning-shade: #e0ac08;
   --ion-color-warning-tint: #ffca22;
 
-  /** danger **/
-  --ion-color-danger: #eb445a;
-  --ion-color-danger-rgb: 235, 68, 90;
+  /** danger (brand red) **/
+  --ion-color-danger: #ff2800;
+  --ion-color-danger-rgb: 255, 40, 0;
   --ion-color-danger-contrast: #ffffff;
   --ion-color-danger-contrast-rgb: 255, 255, 255;
-  --ion-color-danger-shade: #cf3c4f;
-  --ion-color-danger-tint: #ed576b;
+  --ion-color-danger-shade: #e02400;
+  --ion-color-danger-tint: #ff5333;
 
   /** dark **/
   --ion-color-dark: #222428;

@@ -1,47 +1,45 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { environment } from 'src/environments/environment';
-@Injectable({
-  providedIn: 'root',
-})
-export class ProductService {
-  constructor(private http: HttpClient) {}
-  addProduct(data: any) {
-    return this.http.post(environment.baseUrl + `ProductEntry`, data);
+import { Observable } from 'rxjs';
+import { BaseService } from '../services/base.service';
+import { ProductEntry } from '../models/product-entry.model';
+
+@Injectable({ providedIn: 'root' })
+export class ProductService extends BaseService {
+  addProduct(data: any): Observable<ProductEntry> {
+    return this.post<ProductEntry>('api/ProductEntry', data);
   }
-  updateProduct(data: any) {
-    return this.http.put(
-      environment.baseUrl + `ProductEntry/${data.productEntryId}`,
-      data
+
+  updateProduct(data: any): Observable<void> {
+    return this.put<void>(`api/ProductEntry/${data.productEntryId}`, data);
+  }
+
+  GetLastProducts(): Observable<ProductEntry[]> {
+    return this.get<ProductEntry[]>('api/ProductEntry/GetLastNProducts?pCount=10');
+  }
+
+  getProducts(): Observable<ProductEntry[]> {
+    return this.get<ProductEntry[]>('api/ProductEntry');
+  }
+
+  getProduct(id: number): Observable<ProductEntry> {
+    return this.get<ProductEntry>(`api/ProductEntry/${id}`);
+  }
+
+  getProductbyBarcode(barcode: string): Observable<ProductEntry> {
+    return this.get<ProductEntry>(`api/ProductEntry/GetProductEntryTbyBarcode?barcode=${barcode}`);
+  }
+
+  getProductwithSegment(id: number): Observable<ProductEntry> {
+    return this.get<ProductEntry>(`api/ProductEntry/GetProductEntryT/?productEntryId=${id}`);
+  }
+
+  deleteProduct(id: number): Observable<void> {
+    return this.delete<void>(`api/ProductEntry/${id}`);
+  }
+
+  searchProduct(params: { barcode: any; rfidcode: any }): Observable<ProductEntry> {
+    return this.get<ProductEntry>(
+      `api/ProductEntry/GetProductByRFIDorBarcode?barcode=${params.barcode}&rfidcode=${params.rfidcode}`
     );
-  }
-  GetLastProducts() {
-    // https://cloud.neolysi.com/rfidapi/api/ProductEntry/GetLastNProducts?pCount=5
-   const page=10;
-    return this.http.get(environment.baseUrl + `ProductEntry/GetLastNProducts?pCount=10`);
-    // return this.http.get(environment.baseUrl + `ProductEntry`);
-  }
-  getProducts() {
-    // https://cloud.neolysi.com/rfidapi/api/ProductEntry/GetLastNProducts?pCount=5
-   const page=10;
-    // return this.http.get(environment.baseUrl + `ProductEntry/GetLastNProducts?pCount=10`);
-    return this.http.get(environment.baseUrl + `ProductEntry`);
-  }
-  getProduct(id: any) {
-    return this.http.get(environment.baseUrl + `ProductEntry/${id}`);
-  }
-  getProductbyBarcode(id: any) {
-    return this.http.get(environment.baseUrl + `ProductEntry/GetProductEntryTbyBarcode?barcode=${id}`);
-  }
-  getProductwithSegment(id: any) {
-    // https://cloud.neolysi.com/rfidapi/api/ProductEntry/GetProductEntryT/?productEntryId=10
-    return this.http.get(environment.baseUrl + `ProductEntry/GetProductEntryT/?productEntryId=${id}`);
-  }
-  deleteProduct(id: any) {
-    return this.http.delete(environment.baseUrl + `ProductEntry/${id}`);
-  }
-  searchProduct(data: any) {
-    console.log(environment.baseUrl + `ProductEntry/GetProductByRFIDorBarcode?barcode=${data.barcode}&rfidcode=${data.rfidcode}`);
-    return this.http.get(environment.baseUrl + `ProductEntry/GetProductByRFIDorBarcode?barcode=${data.barcode}&rfidcode=${data.rfidcode}`);
   }
 }

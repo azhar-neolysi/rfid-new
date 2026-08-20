@@ -1,13 +1,44 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>role</ion-title>
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Roles</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="addRole()">
+        <ion-icon name="add-circle-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">role</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content>
+  <ion-searchbar
+    [(ngModel)]="searchTerm"
+    placeholder="Search roles..."
+    debounce="300"
+  ></ion-searchbar>
+
+  <ion-list>
+    <ion-item-sliding *ngFor="let role of filteredRoles">
+      <ion-item (click)="editRole(role)" button detail>
+        <ion-label>
+          <h2>{{ role.roleName }}</h2>
+          <p>{{ role.description }}</p>
+        </ion-label>
+        <ion-note slot="end" color="medium">
+          ID: {{ role.roleId }}
+        </ion-note>
+      </ion-item>
+      <ion-item-options side="end">
+        <ion-item-option color="danger" (click)="deleteRole(role)">
+          <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+        </ion-item-option>
+      </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
+
+  <ion-text *ngIf="filteredRoles.length === 0" class="ion-text-center ion-padding">
+    <p>No roles found</p>
+  </ion-text>
 </ion-content>

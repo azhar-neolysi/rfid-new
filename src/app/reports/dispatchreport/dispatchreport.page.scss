@@ -35,12 +35,12 @@ body {
     margin-bottom: 1.2em;
     border: none;
     padding: .90em;
-    background-color: skyblue;
+    background-color: var(--brand-navy-tint);
     color: #fff;
     letter-spacing: 1.2px;
     font-size: .98rem;
     text-transform: uppercase;
-    box-shadow: -3px 5px darken(skyblue, 10%);
+    box-shadow: -3px 5px var(--brand-navy-dark);
     cursor: pointer;
         transition: all 0s ease;
 
@@ -63,7 +63,7 @@ body {
   width: 100%;
   height: 100%;
   padding: 1em;
-  border: 3px solid skyblue;
+  border: 3px solid var(--brand-navy-tint);
   background-color: transparent;
   color: #000000;
   font-weight: bold;
@@ -89,7 +89,7 @@ body {
   // width: 60%;
   height: 10%;
   padding: .80em 3.5em;
-  background-color: skyblue;
+  background-color: var(--brand-navy-tint);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -111,12 +111,12 @@ ion-button {
   margin-bottom: 1.2em;
   border: none;
   // padding: 1.1em;
-  --background: skyblue;
+  --background: var(--brand-navy-tint);
   color: #fff;
   letter-spacing: 1.2px;
   font-size: .98rem;
   text-transform: uppercase;
-  box-shadow: -3px 5px darken(skyblue, 10%);
+  box-shadow: -3px 5px var(--brand-navy-dark);
   cursor: pointer;
       transition: all 0s ease;
 

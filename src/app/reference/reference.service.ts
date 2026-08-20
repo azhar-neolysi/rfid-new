@@ -1,28 +1,27 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { environment } from 'src/environments/environment';
-@Injectable({
-  providedIn: 'root',
-})
-export class ReferenceService {
-  constructor(private http: HttpClient) {}
-  addReference(data: any) {
-    console.log(data);
-    return this.http.post(environment.baseUrl + `Reference`, data);
+import { Observable } from 'rxjs';
+import { BaseService } from '../services/base.service';
+import { Reference } from '../models/reference.model';
+
+@Injectable({ providedIn: 'root' })
+export class ReferenceService extends BaseService {
+  addReference(data: any): Observable<Reference> {
+    return this.post<Reference>('api/Reference', data);
   }
-  getReference() {
-    return this.http.get(environment.baseUrl + `Reference`);
+
+  getReference(): Observable<Reference[]> {
+    return this.get<Reference[]>('api/Reference');
   }
-  getReferenceById(id: any) {
-    return this.http.get(environment.baseUrl + `Reference/${id}`);
+
+  getReferenceById(id: number): Observable<Reference> {
+    return this.get<Reference>(`api/Reference/${id}`);
   }
-  updateReference(data: any) {
-    return this.http.put(
-      environment.baseUrl + `Reference/${data.referenceId}`,
-      data
-    );
+
+  updateReference(data: any): Observable<void> {
+    return this.put<void>(`api/Reference/${data.referenceId}`, data);
   }
-  deleteReference(id: any) {
-    return this.http.delete(environment.baseUrl + `Reference/${id}`);
+
+  deleteReference(id: number): Observable<void> {
+    return this.delete<void>(`api/Reference/${id}`);
   }
 }

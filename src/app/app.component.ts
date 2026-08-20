@@ -1,14 +1,12 @@
-import { Component, OnInit, Optional, ViewChild } from '@angular/core';
+import { Component, OnInit, Optional } from '@angular/core';
 import {
   Platform,
   AlertController,
-  MenuController,
   NavController,
   IonRouterOutlet,
 } from '@ionic/angular';
-import { Location } from '@angular/common';
-import { Router } from '@angular/router';
 import { App } from '@capacitor/app';
+import { HardwareRfidService } from './services/hardware-rfid.service';
 
 @Component({
   selector: 'app-root',
@@ -16,6 +14,8 @@ import { App } from '@capacitor/app';
   styleUrls: ['app.component.scss'],
 })
 export class AppComponent implements OnInit {
+  readerConnected = false;
+  readerName = '';
   pages = [
     {
       title: 'Dashboard',
@@ -85,7 +85,7 @@ export class AppComponent implements OnInit {
       icon: 'settings-sharp',
       children: [
         {
-          title: 'Employess',
+          title: 'Employees',
           url: '/employee',
           icon: 'people',
         },
@@ -105,8 +105,7 @@ export class AppComponent implements OnInit {
       title: 'Mapping',
       open: false,
       icon: 'radio',
-      url: '/taging',
-      // <ion-icon name="radio"></ion-icon>
+      url: '/tagging',
       children: [],
     },
     {
@@ -114,15 +113,13 @@ export class AppComponent implements OnInit {
       open: false,
       icon: 'snow-sharp',
       url: '/sale',
-      // <ion-icon name="snow-sharp"></ion-icon>
       children: [],
     },
     {
-      title: 'Stock Ttransfer',
+      title: 'Stock Transfer',
       open: false,
       icon: 'arrow-redo-sharp',
       url: '/stock-transfer',
-      // <ion-icon name="arrow-redo-sharp"></ion-icon>
       children: [],
     },
     {
@@ -130,7 +127,6 @@ export class AppComponent implements OnInit {
       open: false,
       icon: 'grid-sharp',
       url: '/add-segment',
-      // <ion-icon name="grid-sharp"></ion-icon>
       children: [],
     },
 
@@ -139,27 +135,16 @@ export class AppComponent implements OnInit {
       open: false,
       icon: 'search-sharp',
       url: '/find-tag',
-      // <ion-icon name="search-sharp"></ion-icon>
       children: [],
     },
   ];
-  backNo = 0;
-  backButtonPressed: number = 0;
+  private backButtonPressed = 0;
   constructor(
-    // private platform: Platform,
-    // private splashScreen: SplashScreen,
-
-    private menuCtrl: MenuController,
-    private router: Router,
-    // public alertController: AlertController,
-    private location: Location,
     private platform: Platform,
-    private navCtrl: NavController,
     private alertController: AlertController,
+    private hardwareRfid: HardwareRfidService,
     @Optional() private routerOutlet?: IonRouterOutlet
   ) {
-    console.log('initializeApp');
-    // this.initializeApp();
     this.platform.backButton.subscribeWithPriority(-1, () => {
       if (!this.routerOutlet?.canGoBack()) {
         App.exitApp();
@@ -167,6 +152,17 @@ export class AppComponent implements OnInit {
     });
   }
   ngOnInit(): void {
+    this.hardwareRfid.connected$.subscribe((name) => {
+      this.readerConnected = true;
+      this.readerName = name || '';
+    });
+    this.hardwareRfid.disconnected$.subscribe(() => {
+      this.readerConnected = false;
+      this.readerName = '';
+    });
+    this.platform.ready().then(() => {
+      this.hardwareRfid.connect().catch(() => {});
+    });
     this.platform.backButton.subscribeWithPriority(9999, () => {
       if (this.backButtonPressed === 0) {
         this.backButtonPressed++;
@@ -199,77 +195,4 @@ export class AppComponent implements OnInit {
 
     await alert.present();
   }
-  // initializeApp() {
-
-  //   this.platform.ready().then(() => {
-  //     // this.statusBar.styleDefault();
-  //     // this.splashScreen.hide();
-  //   });
-
-  //   this.platform.backButton.subscribeWithPriority(0, (processNextHandler) => {
-  //     console.log('Back press handler!');
-  //     console.log(this.backNo);
-  //     if (
-  //       this.location.isCurrentPathEqualTo('/dashboard') ||
-  //       this.backNo === 2
-  //     ) {
-  //       // Show Exit Alert!
-  //       console.log('Show Exit Alert!');
-  //       this.showExitConfirm();
-  //       processNextHandler();
-  //     } else {
-  //       // Navigate to back page
-  //       console.log('Navigate to back page');
-  //       this.backNo++;
-  //       this.location.back();
-  //       // this.showExitConfirm();
-  //       // processNextHandler();
-  //     }
-  //   });
-
-  //   this.platform.backButton.subscribeWithPriority(5, () => {
-  //     console.log('Handler called to force close!');
-  //     this.alertController
-  //       .getTop()
-  //       .then((r) => {
-  //         if (r) {
-  //           (navigator as any).app.exitApp();
-  //         }
-  //       })
-  //       .catch((e) => {
-  //         console.log(e);
-  //       });
-  //   });
-  // }
-  // showExitConfirm() {
-  //   this.alertController
-  //     .create({
-  //       header: 'App termination',
-  //       message: 'Do you want to close the app?',
-  //       backdropDismiss: false,
-  //       // mode:'ios',
-  //       cssClass: 'custom-alert',
-  //       buttons: [
-  //         {
-  //           text: 'Ok',
-  //           role: 'cancel',
-  //           cssClass: 'alert-button-cancel',
-  //           handler: () => {
-  //             this.backNo = 0;
-  //             console.log('Application exit prevented!');
-  //           },
-  //         },
-  //         {
-  //           text: 'Exit',
-  //           cssClass: 'alert-button-confirm',
-  //           handler: () => {
-  //             (navigator as any).app.exitApp();
-  //           },
-  //         },
-  //       ],
-  //     })
-  //     .then((alert) => {
-  //       alert.present();
-  //     });
-  // }
 }

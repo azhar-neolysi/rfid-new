@@ -115,11 +115,11 @@ export class AddReferenceListPage implements OnInit {
   }
   segmentMapping() {
     const data = {
-      RefOrgid: this.referenceListFrom.value.refOrgId,
-      RefCreatedBy: this.referenceListFrom.value.refCreatedBy,
-      RefModifiedBy: this.referenceListFrom.value.refModifiedBy,
-      RefSegmentId: this.referenceListFrom.value.segment,
-      RefReferenceListId: this.referenceListFrom.value.refReferenceListId,
+      refOrgId: this.referenceListFrom.value.refOrgId,
+      refCreatedBy: this.referenceListFrom.value.refCreatedBy,
+      refModifiedBy: this.referenceListFrom.value.refModifiedBy,
+      refSegmentId: this.referenceListFrom.value.segment,
+      refReferenceListId: this.referenceListFrom.value.refReferenceListId,
     };
     this.segment.addSegmentMapping(data).subscribe((res:any)=>{
       console.log(res);

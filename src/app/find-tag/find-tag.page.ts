@@ -19,6 +19,7 @@ export class FindTagPage implements OnInit, AfterViewInit {
   // @ViewChild('inputTag', { static: false }) myInput: ElementRef;
   @ViewChild('myInput', { static: false, read: ElementRef })
   myInput: ElementRef<HTMLInputElement>;
+  readerConnected = false;
   tagsArr: any = [];
   totalScannes: any = 0;
   totalTags: any = 0;

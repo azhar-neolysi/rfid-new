@@ -1,24 +1,27 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { environment } from 'src/environments/environment';
-@Injectable({
-  providedIn: 'root',
-})
-export class DevicemasterService {
-  constructor(private http: HttpClient) {}
-  addDevice(data: any) {
-    return this.http.post(environment.baseUrl + `DeviceMaster`, data);
+import { Observable } from 'rxjs';
+import { BaseService } from '../services/base.service';
+import { DeviceMaster } from '../models/device-master.model';
+
+@Injectable({ providedIn: 'root' })
+export class DevicemasterService extends BaseService {
+  addDevice(data: any): Observable<DeviceMaster> {
+    return this.post<DeviceMaster>('api/DeviceMaster', data);
   }
-  editDevice(data: any) {
-    return this.http.put(environment.baseUrl + `DeviceMaster/${data.deviceMasterId}`, data);
+
+  editDevice(data: any): Observable<void> {
+    return this.put<void>(`api/DeviceMaster/${data.deviceMasterId}`, data);
   }
-  getDevices() {
-    return this.http.get(environment.baseUrl + `DeviceMaster`);
+
+  getDevices(): Observable<DeviceMaster[]> {
+    return this.get<DeviceMaster[]>('api/DeviceMaster');
   }
-  getDevice(id: any) {
-    return this.http.get(environment.baseUrl + `DeviceMaster/${id}`);
+
+  getDevice(id: number): Observable<DeviceMaster> {
+    return this.get<DeviceMaster>(`api/DeviceMaster/${id}`);
   }
-  deleteDevice(id: any) {
-    return this.http.delete(environment.baseUrl + `DeviceMaster/${id}`);
+
+  deleteDevice(id: number): Observable<void> {
+    return this.delete<void>(`api/DeviceMaster/${id}`);
   }
 }

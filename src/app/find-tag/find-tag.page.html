@@ -19,6 +19,13 @@
       <ion-icon name="cloud-upload-sharp" id="upload"></ion-icon>
     </ion-buttons>
   </ion-toolbar>
+  <ion-toolbar color="dark">
+    <div style="display:flex;align-items:center;gap:6px;padding:0 12px;font-size:13px;">
+      <span [style.background]="readerConnected ? '#2dd36f' : '#eb445b'" style="width:10px;height:10px;border-radius:50%;display:inline-block;"></span>
+      <span *ngIf="readerConnected">Reader connected</span>
+      <span *ngIf="!readerConnected">Reader disconnected</span>
+    </div>
+  </ion-toolbar>
 </ion-header>
 
 

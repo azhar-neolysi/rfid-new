@@ -10,6 +10,7 @@ import { ToastController } from '@ionic/angular';
 })
 export class ItemListPage implements OnInit {
 
+  readerConnected = false;
   products: any = [];
   productsTemp: any = [];
   barcodeScan:any;

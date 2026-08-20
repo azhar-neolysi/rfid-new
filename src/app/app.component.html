@@ -1,10 +1,18 @@
 <ion-menu contentId="content">
   <ion-header>
-    <ion-toolbar color="primary">
-      <ion-title> RFID </ion-title>
+    <ion-toolbar color="primary" class="sidebar-header">
+      <div class="sidebar-logo">
+        <img src="assets/logos/rfid-icon-light.png" alt="RFID Logo" />
+        <ion-title>RFID</ion-title>
+      </div>
     </ion-toolbar>
   </ion-header>
   <ion-content>
+    <div class="reader-status">
+      <span class="reader-dot" [class.connected]="readerConnected"></span>
+      <span *ngIf="readerConnected">Reader{{ readerName ? ': ' + readerName : '' }}</span>
+      <span *ngIf="!readerConnected">Reader disconnected</span>
+    </div>
     <div *ngFor="let p of pages">
       <ion-menu-toggle *ngIf="p.children.length === 0">
         <ion-item  class="active" [routerLink]="p.url" >

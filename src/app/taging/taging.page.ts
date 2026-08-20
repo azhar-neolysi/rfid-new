@@ -11,6 +11,7 @@ import { IonInput } from '@ionic/angular';
 export class TagingPage implements OnInit {
   // @ViewChild('myInput', { static: true }) myInput: ElementRef;
   @ViewChild('myInput', { static: false, read: IonInput }) myInput: IonInput;
+  readerConnected = false;
   products: any = [];
   productsTemp: any = [];
   tagId: null;

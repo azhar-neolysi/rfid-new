@@ -3,6 +3,10 @@ import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 
 const routes: Routes = [
   {
+    path: 'login',
+    loadChildren: () => import('./login/login.module').then( m => m.LoginPageModule)
+  },
+  {
     path: 'home',
     loadChildren: () => import('./home/home.module').then( m => m.HomePageModule)
   },
@@ -68,6 +72,10 @@ const routes: Routes = [
     loadChildren: () => import('./location/add-location/add-location.module').then( m => m.AddLocationPageModule)
   },
   {
+    path: 'add-location/:id',
+    loadChildren: () => import('./location/add-location/add-location.module').then( m => m.AddLocationPageModule)
+  },
+  {
     path: 'reference',
     loadChildren: () => import('./reference/reference/reference.module').then( m => m.ReferencePageModule)
   },
@@ -102,6 +110,14 @@ const routes: Routes = [
   {
     path: 'role',
     loadChildren: () => import('./role/role.module').then( m => m.RolePageModule)
+  },
+  {
+    path: 'add-role',
+    loadChildren: () => import('./role/add-role/add-role.module').then( m => m.AddRolePageModule)
+  },
+  {
+    path: 'add-role/:id',
+    loadChildren: () => import('./role/add-role/add-role.module').then( m => m.AddRolePageModule)
   },
   {
     path: 'sale',
@@ -153,7 +169,7 @@ const routes: Routes = [
     loadChildren: () => import('./find-tag/find-tag.module').then( m => m.FindTagPageModule)
   },
   {
-    path: 'taging',
+    path: 'tagging',
     loadChildren: () => import('./taging/taging.module').then( m => m.TagingPageModule)
   },
 

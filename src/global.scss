@@ -42,3 +42,90 @@ button.alert-button.alert-button-confirm {
   border-radius: 4px;
 }
 
+/* ================= Brand modern restyle (navy #011644 / red #ff2800) ================= */
+
+ion-content {
+  --background: var(--brand-bg);
+}
+
+ion-toolbar[color="primary"] {
+  --background: linear-gradient(135deg, var(--brand-navy) 0%, var(--brand-navy-tint) 100%);
+  --color: #ffffff;
+  border-bottom: 3px solid var(--brand-red);
+}
+
+ion-toolbar[color="primary"] ion-menu-button,
+ion-toolbar[color="primary"] ion-back-button,
+ion-toolbar[color="primary"] ion-icon,
+ion-toolbar[color="primary"] ion-buttons {
+  --color: #ffffff;
+  color: #ffffff;
+}
+
+ion-card {
+  border-radius: 16px !important;
+  border: 1px solid #eef1f8 !important;
+  box-shadow: 0 10px 30px rgba(1, 22, 68, 0.08) !important;
+  margin: 14px 16px !important;
+}
+
+ion-card[color="light"] {
+  --background: #ffffff !important;
+}
+
+ion-button {
+  --border-radius: 12px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+ion-input,
+ion-textarea {
+  --border-radius: 12px;
+}
+
+/* Form container (floating-label) inputs used by most forms */
+.container__input {
+  border-radius: 12px !important;
+  border: 1.5px solid #dbe2f0 !important;
+  background-color: #ffffff !important;
+  color: #0b1a33 !important;
+  font-weight: 600;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:focus,
+  &:focus-visible {
+    border-color: var(--brand-red) !important;
+    box-shadow: 0 0 0 3px rgba(255, 40, 0, 0.15) !important;
+    outline: none;
+  }
+}
+
+.container__label {
+  background-color: var(--brand-navy) !important;
+  color: #ffffff !important;
+  border-radius: 6px;
+}
+
+input:not([type="file"]),
+select {
+  border-radius: 10px !important;
+  border: 1.5px solid #dbe2f0 !important;
+}
+
+.form__submit {
+  background: linear-gradient(135deg, var(--brand-red) 0%, #ff4d2e 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 12px !important;
+  font-weight: 700;
+  box-shadow: 0 10px 24px rgba(255, 40, 0, 0.35);
+}
+
+ion-item {
+  --border-color: #eef1f8;
+}
+
+ion-label {
+  color: #0b1a33;
+}

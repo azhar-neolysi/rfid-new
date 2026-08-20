@@ -49,7 +49,7 @@ body {
 // 	width: 20px;
 // 	height: 20px;
 // 	position: absolute;
-// 	background-color: #3880ff;
+// 	background-color: var(--brand-navy);
 // 	z-index:1;
 // 	top: 0;
 //   bottom: 33px;
@@ -61,7 +61,7 @@ body {
 // 	color: white;
 // 	font-weight: normal;
 // 	font-size: 16px;
-// 	box-shadow: 0 0 2px #3880ff;
+// 	box-shadow: 0 0 2px var(--brand-navy);
 // 	cursor: pointer;
 // }
 .pagewrap {
@@ -94,12 +94,12 @@ body {
     margin-bottom: 1.2em;
     border: none;
     padding: 0.9em;
-    background-color: #3880ff;
+    background-color: var(--brand-navy);
     color: #fff;
     letter-spacing: 1.2px;
     font-size: 0.98rem;
     text-transform: uppercase;
-    box-shadow: -3px 5px darken(#3880ff, 10%);
+    box-shadow: -3px 5px var(--brand-navy-dark);
     cursor: pointer;
     transition: all 0s ease;
 
@@ -122,7 +122,7 @@ body {
     width: 100%;
     height: 100%;
     padding: 1em;
-    border: 3px solid #3880ff;
+    border: 3px solid var(--brand-navy);
     background-color: transparent;
     color: #000000;
     font-weight: bold;
@@ -148,7 +148,7 @@ body {
     width: 255px;
     height: 10%;
     padding: 0.8em 3.5em;
-    background-color: #3880ff;
+    background-color: var(--brand-navy);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -180,7 +180,7 @@ body {
   width: 20px;
   height: 20px;
   position: absolute;
-  background-color: #3880ff;
+  background-color: var(--brand-navy);
   z-index: 1;
   top: 0;
   bottom: 33px;
@@ -192,7 +192,7 @@ body {
   color: white;
   font-weight: normal;
   font-size: 16px;
-  box-shadow: 0 0 2px #3880ff;
+  box-shadow: 0 0 2px var(--brand-navy);
   cursor: pointer;
 }
 

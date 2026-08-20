@@ -1,30 +1,27 @@
 import { Injectable } from '@angular/core';
-import { environment } from 'src/environments/environment';
-import { HttpClient } from '@angular/common/http'
-@Injectable({
-  providedIn: 'root'
-})
-export class EmployeeService {
-// baseUrl=environment.baseUrl;
-  constructor(private http:HttpClient) { }
-  getEmployees(){
-    console.log(environment.baseUrl+`Employee`);
-    return this.http.get(environment.baseUrl+`Employee`)
+import { Observable } from 'rxjs';
+import { BaseService } from '../services/base.service';
+import { Employee } from '../models/employee.model';
+
+@Injectable({ providedIn: 'root' })
+export class EmployeeService extends BaseService {
+  getEmployees(): Observable<Employee[]> {
+    return this.get<Employee[]>('api/Employee');
   }
-  getEmployee(id:any){
-    console.log(environment.baseUrl+`Employee/${id}`);
-    return this.http.get(environment.baseUrl+`Employee/${id}`)
+
+  getEmployee(id: number): Observable<Employee> {
+    return this.get<Employee>(`api/Employee/${id}`);
   }
-  addEmployee(data:any){
-    console.log(environment.baseUrl+`Employee`,data);
-    return this.http.post(environment.baseUrl+`Employee`,data)
+
+  addEmployee(data: any): Observable<Employee> {
+    return this.post<Employee>('api/Employee', data);
   }
-  updateEmployee(data:any){
-    console.log(environment.baseUrl+`Employee/${data.employeeId}`,data);
-    return this.http.put(environment.baseUrl+`Employee/${data.employeeId}`,data)
+
+  updateEmployee(data: any): Observable<void> {
+    return this.put<void>(`api/Employee/${data.employeeId}`, data);
   }
-  deleteEmployee(id:any){
-    console.log(environment.baseUrl+`Employee/${id}`);
-    return this.http.get(environment.baseUrl+`Employee/${id}`)
+
+  deleteEmployee(id: number): Observable<void> {
+    return this.delete<void>(`api/Employee/${id}`);
   }
 }

@@ -37,11 +37,11 @@ export class AddSegmentPage implements OnInit {
       if (this.segmentId) {
       } else {
         const data = {
-          RefOrgId: this.segmentForm.value.refOrgId,
-          RefCreatedBy: this.segmentForm.value.refCreatedBy,
-          RefModifiedBy: this.segmentForm.value.refModifiedBy,
-          SegmentName: this.segmentForm.value.segmentName,
-          Description: this.segmentForm.value.description,
+          refOrgId: this.segmentForm.value.refOrgId,
+          refCreatedBy: this.segmentForm.value.refCreatedBy,
+          refModifiedBy: this.segmentForm.value.refModifiedBy,
+          segmentName: this.segmentForm.value.segmentName,
+          description: this.segmentForm.value.description,
         };
         console.log(data);
         // return;

@@ -1,83 +1,76 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import Chart from 'chart.js/auto';
+import { ProductService } from 'src/app/itemmaster/product.service';
+import { SaleService } from 'src/app/sale/sale.service';
+import { StockService } from 'src/app/stock-transfer/stock.service';
+import { ProductEntry } from 'src/app/models/product-entry.model';
+import { Sale } from 'src/app/models/sale.model';
+import { StockTransfer } from 'src/app/models/stock-transfer.model';
+
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.page.html',
   styleUrls: ['./dashboard.page.scss'],
 })
 export class DashboardPage implements OnInit {
-  public chart: any;
-  constructor(private http: HttpClient) {}
+  totalProducts = 0;
+  totalSales = 0;
+  totalTransfers = 0;
+  recentProducts: ProductEntry[] = [];
+  chart: Chart;
+
+  constructor(
+    private productService: ProductService,
+    private saleService: SaleService,
+    private stockService: StockService
+  ) {}
 
   ngOnInit() {
-    this.lineChart();
-    this.doughnutChart();
+    this.loadStats();
+    this.loadCharts();
   }
-  lineChart() {
-    this.chart = new Chart('MyChart', {
-      type: 'line', //this denotes tha type of chart
 
+  loadStats() {
+    this.productService.getProducts().subscribe((res: ProductEntry[]) => {
+      this.totalProducts = res.length;
+      this.recentProducts = res.slice(0, 5);
+    });
+    this.saleService.getSaleList().subscribe((res: Sale[]) => {
+      this.totalSales = res.length;
+    });
+    this.stockService.getstockTransfers().subscribe((res: StockTransfer[]) => {
+      this.totalTransfers = res.length;
+    });
+  }
+
+  loadCharts() {
+    this.productService.GetLastProducts().subscribe((products: ProductEntry[]) => {
+      this.createProductChart(products);
+    });
+  }
+
+  private createProductChart(products: ProductEntry[]) {
+    const labels = products.map((p) => p.productName?.substring(0, 15) || 'Unknown');
+    const quantities = products.map((p) => Number(p.quantity) || 0);
+
+    this.chart = new Chart('MyChart', {
+      type: 'bar',
       data: {
-        // values on X-Axis
-        labels: [
-          'Jan',
-          'Feb',
-          'Mar',
-          'Apr',
-          'May',
-          'Jun',
-          'Jul',
-          'Aug',
-          'Sep',
-          'Oct',
-          'Nov',
-          'Dec',
-        ],
+        labels,
         datasets: [
           {
-            label: 'Sales',
-            data: ['467', '576', '572', '79', '92', '574', '573', '576'],
-            backgroundColor: 'blue',
+            label: 'Quantity',
+            data: quantities,
+            backgroundColor: '#011644',
           },
-          // {
-          //   label: 'Profit',
-          //   data: ['542', '542', '536', '327', '17', '0.00', '538', '541'],
-          //   backgroundColor: 'limegreen',
-          // },
         ],
       },
       options: {
         aspectRatio: 1.5,
+        plugins: {
+          legend: { display: false },
+        },
       },
     });
   }
-  doughnutChart() {
-    this.chart = new Chart('doughnut-chart', {
-      type: 'doughnut',
-      data: {
-        labels: ['Africa', 'Asia', 'Europe', 'Latin America', 'North America'],
-        datasets: [
-          {
-            label: 'Population (millions)',
-            backgroundColor: [
-              '#3e95cd',
-              '#8e5ea2',
-              '#3cba9f',
-              '#e8c3b9',
-              '#c45850',
-            ],
-            data: [2478, 5267, 734, 784, 433],
-          },
-        ],
-      },
-      // options: {
-      //   title: {
-      //     display: true,
-      //     text: 'Category of Asset Statistics',
-      //   },
-      // },
-    });
-  }
-
 }

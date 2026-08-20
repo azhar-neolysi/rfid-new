@@ -1,4 +1,9 @@
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ToastrService } from 'src/app/services/toastr/toastr.service';
+import { LocationService } from '../location.service';
+import { Location } from 'src/app/models/location.model';
 
 @Component({
   selector: 'app-add-location',
@@ -6,157 +11,62 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./add-location.page.scss'],
 })
 export class AddLocationPage implements OnInit {
-  data = {
-    locationId: 0,
-    refReferenceListCityId: 0,
-    refReferenceListStateId: 0,
-    refReferenceListCountryId: 0,
-    isActive: true,
-    isDeleted: true,
-    refCreatedBy: 0,
-    createdDate: '2023-04-03T12:10:15.660Z',
-    refModifiedBy: 0,
-    modifiedDate: '2023-04-03T12:10:15.660Z',
-    address1: 'string',
-    address2: 'string',
-    address3: 'string',
-    address4: 'string',
-    pin: 'string',
-    refCreatedByNavigation: {
-      userId: 0,
-      refOrgid: 0,
-      isActive: true,
-      refCreatedBy: 0,
-      createdDate: '2023-04-03T12:10:15.660Z',
-      refModifiedBy: 0,
-      modifiedDate: '2023-04-03T12:10:15.660Z',
-      userName: 'string',
-      email: 'string',
-      mobileNo: 'string',
-      password: 'string',
-      processing: 'string',
-      comments: 'string',
-      passwordHash: 'string',
-      passwordSalt: 'string',
-      emailVerified: true,
-      isDeleted: true,
-      refOrg: 'string',
-    },
-    refModifiedByNavigation: {
-      userId: 0,
-      refOrgid: 0,
-      isActive: true,
-      refCreatedBy: 0,
-      createdDate: '2023-04-03T12:10:15.660Z',
-      refModifiedBy: 0,
-      modifiedDate: '2023-04-03T12:10:15.660Z',
-      userName: 'string',
-      email: 'string',
-      mobileNo: 'string',
-      password: 'string',
-      processing: 'string',
-      comments: 'string',
-      passwordHash: 'string',
-      passwordSalt: 'string',
-      emailVerified: true,
-      isDeleted: true,
-      refOrg: 'string',
-    },
-    refReferenceListCity: {
-      referenceListId: 0,
-      refOrgId: 0,
-      refReferenceId: 0,
-      isActive: true,
-      isDeleted: true,
-      refCreatedBy: 0,
-      createdDate: '2023-04-03T12:10:15.660Z',
-      refModifiedBy: 0,
-      modifiedDate: '2023-04-03T12:10:15.660Z',
-      name: 'string',
-      description: 'string',
-      refCreatedByNavigation: 'string',
-      refModifiedByNavigation: 'string',
-      refOrg: 'string',
-      refReference: {
-        referenceId: 0,
-        isActive: true,
-        isDeleted: true,
-        refCreatedBy: 0,
-        createdDate: '2023-04-03T12:10:15.660Z',
-        refModifiedBy: 0,
-        modifiedDate: '2023-04-03T12:10:15.660Z',
-        name: 'string',
-        description: 'string',
-        refOrgId: 0,
-        refCreatedByNavigation: 'string',
-        refModifiedByNavigation: 'string',
-        refOrg: 'string',
-      },
-    },
-    refReferenceListCountry: {
-      referenceListId: 0,
-      refOrgId: 0,
-      refReferenceId: 0,
-      isActive: true,
-      isDeleted: true,
-      refCreatedBy: 0,
-      createdDate: '2023-04-03T12:10:15.660Z',
-      refModifiedBy: 0,
-      modifiedDate: '2023-04-03T12:10:15.660Z',
-      name: 'string',
-      description: 'string',
-      refCreatedByNavigation: 'string',
-      refModifiedByNavigation: 'string',
-      refOrg: 'string',
-      refReference: {
-        referenceId: 0,
-        isActive: true,
-        isDeleted: true,
-        refCreatedBy: 0,
-        createdDate: '2023-04-03T12:10:15.660Z',
-        refModifiedBy: 0,
-        modifiedDate: '2023-04-03T12:10:15.660Z',
-        name: 'string',
-        description: 'string',
-        refOrgId: 0,
-        refCreatedByNavigation: 'string',
-        refModifiedByNavigation: 'string',
-        refOrg: 'string',
-      },
-    },
-    refReferenceListState: {
-      referenceListId: 0,
-      refOrgId: 0,
-      refReferenceId: 0,
-      isActive: true,
-      isDeleted: true,
-      refCreatedBy: 0,
-      createdDate: '2023-04-03T12:10:15.660Z',
-      refModifiedBy: 0,
-      modifiedDate: '2023-04-03T12:10:15.660Z',
-      name: 'string',
-      description: 'string',
-      refCreatedByNavigation: 'string',
-      refModifiedByNavigation: 'string',
-      refOrg: 'string',
-      refReference: {
-        referenceId: 0,
-        isActive: true,
-        isDeleted: true,
-        refCreatedBy: 0,
-        createdDate: '2023-04-03T12:10:15.660Z',
-        refModifiedBy: 0,
-        modifiedDate: '2023-04-03T12:10:15.660Z',
-        name: 'string',
-        description: 'string',
-        refOrgId: 0,
-        refCreatedByNavigation: 'string',
-        refModifiedByNavigation: 'string',
-        refOrg: 'string',
-      },
-    },
-  };
-  constructor() {}
+  locationForm = this.fb.group({
+    locationId: [null],
+    address1: ['', [Validators.required]],
+    address2: [''],
+    address3: [''],
+    address4: [''],
+    pin: [''],
+    refReferenceListCityId: [null],
+    refReferenceListStateId: [null],
+    refReferenceListCountryId: [null],
+    refOrgId: [null],
+    refCreatedBy: [null],
+    refModifiedBy: [null],
+  });
 
-  ngOnInit() {}
+  locationId: number | null = null;
+
+  constructor(
+    private fb: FormBuilder,
+    private locationService: LocationService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private toast: ToastrService
+  ) {}
+
+  ngOnInit() {
+    this.route.params.subscribe((params) => {
+      this.locationId = params['id'] ? Number(params['id']) : null;
+      if (this.locationId) {
+        this.loadLocation();
+      }
+    });
+  }
+
+  loadLocation() {
+    this.locationService.getLocation(this.locationId!).subscribe((res: Location) => {
+      this.locationForm.patchValue(res as any);
+    });
+  }
+
+  save() {
+    if (!this.locationForm.valid) {
+      this.toast.danger('Please enter address');
+      return;
+    }
+    const data = this.locationForm.value;
+    if (this.locationId) {
+      this.locationService.updateLocation(data as any).subscribe(() => {
+        this.toast.success('Location updated');
+        this.router.navigate(['location']);
+      });
+    } else {
+      this.locationService.addLocation(data).subscribe(() => {
+        this.toast.success('Location created');
+        this.router.navigate(['location']);
+      });
+    }
+  }
 }

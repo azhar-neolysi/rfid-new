@@ -3,14 +3,14 @@ ion-row{
   align-items: center;
 }
 ion-card{
-  border: 2px solid #3880ff;
+  border: 2px solid var(--brand-navy);
 }
 .addbtn{
   font-size: 25px;
   color: white;
 }
 ion-label{
-  color: blue;
+  color: var(--brand-navy);
 }
 
 
@@ -20,17 +20,17 @@ input {
     width: 100%;
     // height: 100%;
     padding: 1em;
-    border: 1px solid #3880ff;
+    border: 1px solid var(--brand-navy);
     background-color: transparent;
     color: #000000;
     font-weight: bold;
 
   }
 // ion-card:focus{
-//   border: 3px solid #3880ff;
+//   border: 3px solid var(--brand-navy);
 // }
 // input:focus{
-//   border: 1px solid #3880ff;
+//   border: 1px solid var(--brand-navy);
 // }
 // ion-card{
 //   ion-card-header{

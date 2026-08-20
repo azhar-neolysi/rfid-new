@@ -1,24 +1,27 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { environment } from 'src/environments/environment';
-@Injectable({
-  providedIn: 'root',
-})
-export class RfidService {
-  constructor(private http: HttpClient) {}
-  addRFID(data: any) {
-    return this.http.post(environment.baseUrl + `Rfidmaster`, data);
+import { Observable } from 'rxjs';
+import { BaseService } from '../services/base.service';
+import { Rfidmaster } from '../models/rfid-master.model';
+
+@Injectable({ providedIn: 'root' })
+export class RfidService extends BaseService {
+  addRFID(data: any): Observable<Rfidmaster> {
+    return this.post<Rfidmaster>('api/Rfidmaster', data);
   }
-  updateRFID(data: any) {
-    return this.http.put(environment.baseUrl + `Rfidmaster/${data.rfidmasterId}`, data);
+
+  updateRFID(data: any): Observable<void> {
+    return this.put<void>(`api/Rfidmaster/${data.rfidmasterId}`, data);
   }
-  deleteRFID(id: any) {
-    return this.http.delete(environment.baseUrl + `Rfidmaster/${id}`);
+
+  deleteRFID(id: number): Observable<void> {
+    return this.delete<void>(`api/Rfidmaster/${id}`);
   }
-  getRFIDs() {
-    return this.http.get(environment.baseUrl + `Rfidmaster`);
+
+  getRFIDs(): Observable<Rfidmaster[]> {
+    return this.get<Rfidmaster[]>('api/Rfidmaster');
   }
-  getRFID(id: any) {
-    return this.http.get(environment.baseUrl + `Rfidmaster/${id}`);
+
+  getRFID(id: number): Observable<Rfidmaster> {
+    return this.get<Rfidmaster>(`api/Rfidmaster/${id}`);
   }
 }

@@ -1,34 +1,30 @@
 import { Injectable } from '@angular/core';
 import { ToastController } from '@ionic/angular';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class ToastrService {
+  constructor(private toastController: ToastController) {}
 
-  constructor(private toastServictoastCtrl: ToastController) { }
-  success(msg: any) {
+  success(msg: string): void {
     this.presentToast(msg, 'success');
   }
 
-  warning(msg: any) {
+  warning(msg: string): void {
     this.presentToast(msg, 'warning');
   }
 
-  danger(msg: any) {
+  danger(msg: string): void {
     this.presentToast(msg, 'danger');
   }
 
-  private async presentToast(msg: any, color1: string) {
-    const toast = await this.toastServictoastCtrl.create({
+  private async presentToast(msg: string, color: string): Promise<void> {
+    const toast = await this.toastController.create({
       message: msg,
       duration: 2000,
       position: 'top',
-      color: color1,
-      mode: 'ios'
+      color,
+      mode: 'ios',
     });
-
     toast.present();
-  }
-
+  }
 }

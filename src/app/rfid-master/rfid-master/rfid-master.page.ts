@@ -6,7 +6,6 @@ import {
   Validators,
 } from '@angular/forms';
 import * as XLSX from 'xlsx';
-import { File } from '@awesome-cordova-plugins/file/ngx';
 import { RfidService } from '../rfid.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
@@ -18,6 +17,7 @@ import { DatePipe } from '@angular/common';
 export class RfidMasterPage implements OnInit {
   data: any[] = [];
   excelUpload = false;
+  readerConnected = false;
   rfidForm = this.formBuilder.group({
     rfidmasterId: [],
     refOrgId: [null],
@@ -53,7 +53,6 @@ export class RfidMasterPage implements OnInit {
   maxDate: string;
   constructor(
     private formBuilder: FormBuilder,
-    private file: File,
     private rfid: RfidService,
     private route: ActivatedRoute,
     private router: Router,

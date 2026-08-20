@@ -1,24 +1,27 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { environment } from 'src/environments/environment';
-@Injectable({
-  providedIn: 'root',
-})
-export class SaleService {
-  constructor(private http: HttpClient) {}
-  saleEntry(data: any) {
-    return this.http.post(environment.baseUrl + `Sale`, data);
+import { Observable } from 'rxjs';
+import { BaseService } from '../services/base.service';
+import { Sale } from '../models/sale.model';
+
+@Injectable({ providedIn: 'root' })
+export class SaleService extends BaseService {
+  saleEntry(data: any): Observable<Sale> {
+    return this.post<Sale>('api/Sale', data);
   }
-  editSale(data: any) {
-    return this.http.put(environment.baseUrl + `Sale/${data.salesId}`, data);
+
+  editSale(data: any): Observable<void> {
+    return this.put<void>(`api/Sale/${data.salesId}`, data);
   }
-  getSaleList() {
-    return this.http.get(environment.baseUrl + `Sale`);
+
+  getSaleList(): Observable<Sale[]> {
+    return this.get<Sale[]>('api/Sale');
   }
-  getSale(id: any) {
-    return this.http.get(environment.baseUrl + `Sale/${id}`);
+
+  getSale(id: number): Observable<Sale> {
+    return this.get<Sale>(`api/Sale/${id}`);
   }
-  deleteSale(id: any) {
-    return this.http.delete(environment.baseUrl + `Sale/${id}`);
+
+  deleteSale(id: number): Observable<void> {
+    return this.delete<void>(`api/Sale/${id}`);
   }
 }

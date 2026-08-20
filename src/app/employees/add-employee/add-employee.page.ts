@@ -34,7 +34,7 @@ export class AddEmployeePage implements OnInit {
     nationality: ['Indian', [Validators.required]],
     isActive: [true],
     password: [''],
-    cmfpassword: [''],
+    confirmpassword: [''],
     refOrgId: [1],
     refRoleId: [''],
     refLocationId: [''],
@@ -106,7 +106,7 @@ export class AddEmployeePage implements OnInit {
     // this.empForm.controls.isActive = 'false';
     if (this.empForm.valid) {
       if (this.editEmpID) {
-        if (this.empForm.value.password === this.empForm.value.cmfpassword) {
+        if (this.empForm.value.password === this.empForm.value.confirmpassword) {
           const data = {
             employeeId: this.empForm.value.employeeId,
             refOrgId: null,
@@ -145,7 +145,7 @@ export class AddEmployeePage implements OnInit {
           console.log('Password Mismatch');
         }
       } else {
-        if (this.empForm.value.password === this.empForm.value.cmfpassword) {
+        if (this.empForm.value.password === this.empForm.value.confirmpassword) {
           const data = {
             refOrgId: null,
             refLocationId: null,

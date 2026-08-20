@@ -144,6 +144,16 @@ export class HardwareRfidService {
     });
   }
 
+  async ensureConnected(): Promise<void> {
+    if (this.isConnected) return;
+    try {
+      await this.connect();
+    } catch {
+      await this.pairReader();
+      await this.connect();
+    }
+  }
+
   startInventory(options?: { power?: number; beep?: boolean }): Promise<void> {
     if (!this.isNativeSupported()) {
       return Promise.resolve();
