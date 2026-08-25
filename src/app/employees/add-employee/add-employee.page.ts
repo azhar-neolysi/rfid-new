@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { EmployeeService } from '../employee.service';
 import {
   FormBuilder,
@@ -11,6 +11,7 @@ import { UserService } from '../user.service';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import * as XLSX from 'xlsx';
+import { ToastrService } from 'src/app/services/toastr/toastr.service';
 @Component({
   selector: 'app-add-employee',
   templateUrl: './add-employee.page.html',
@@ -81,7 +82,8 @@ export class AddEmployeePage implements OnInit {
     private user: UserService,
     private datePipe: DatePipe,
     private route: ActivatedRoute,
-    private router:Router
+    private router:Router,
+    private toast: ToastrService
   ) {}
 
   ngOnInit() {
@@ -93,7 +95,6 @@ export class AddEmployeePage implements OnInit {
     const id = this.route.params.subscribe((param) => {
       // this.editRateId = Number(param.id);
       this.editEmpID = param['id'];
-      console.log(this.editEmpID);
       if (this.editEmpID) {
         // this.getRFIDById();
         this.getEmp();
@@ -101,8 +102,6 @@ export class AddEmployeePage implements OnInit {
     });
   }
   addEmployee() {
-    console.log(this.empForm);
-    console.log(this.empForm.value);
     // this.empForm.controls.isActive = 'false';
     if (this.empForm.valid) {
       if (this.editEmpID) {
@@ -132,17 +131,15 @@ export class AddEmployeePage implements OnInit {
             nationality: this.empForm.value.nationality,
           };
 
-          console.log(data);
-          this.emp.updateEmployee(data).subscribe((res: any) => {
-            console.log(res);
-            // this.empID = res.employeeId;
-            // console.log(this.empID);
-            // window.location.reload();
-            // this.createUser();
-            this.router.navigate(['employee'])
+          this.emp.updateEmployee(data).subscribe({
+            next: () => {
+              this.toast.success('Record Saved Successfully');
+              this.router.navigate(['employee']);
+            },
+            error: () => this.toast.danger('Failed to save employee'),
           });
         } else {
-          console.log('Password Mismatch');
+          this.toast.danger('Password Mismatch');
         }
       } else {
         if (this.empForm.value.password === this.empForm.value.confirmpassword) {
@@ -170,28 +167,28 @@ export class AddEmployeePage implements OnInit {
             nationality: this.empForm.value.nationality,
           };
 
-          console.log(data);
-          this.emp.addEmployee(data).subscribe((res: any) => {
-            console.log(res);
-            this.empID = res.employeeId;
-            console.log(this.empID);
-            // window.location.reload();
-            this.createUser();
+          this.emp.addEmployee(data).subscribe({
+            next: (res: any) => {
+              this.empID = res.employeeId;
+              this.createUser();
+            },
+            error: () => this.toast.danger('Failed to save employee'),
           });
         } else {
-          console.log('Password Mismatch');
+          this.toast.danger('Password Mismatch');
         }
       }
     } else {
-      console.log(this.empForm);
-      console.log('Form not Valid');
+      this.toast.danger('Please fill all required fields');
     }
   }
 
   getRole() {
-    this.refList.getReferenceListbyRefName('Role').subscribe((res: any) => {
-      console.log(res);
-      this.role = res;
+    this.refList.getReferenceListbyRefName('Role').subscribe({
+      next: (res: any) => {
+        this.role = res;
+      },
+      error: () => this.toast.danger('Failed to load roles'),
     });
   }
   createUser() {
@@ -213,11 +210,14 @@ export class AddEmployeePage implements OnInit {
       emailVerified: false,
       isDeleted: false,
     };
-    console.log(data);
-    this.user.createUser(data).subscribe((res: any) => {
-      console.log(res);
-      this.userID = res.userId;
-      this.userMapping();
+    this.user.createUser(data).subscribe({
+      next: (res: any) => {
+        this.userID = res.userId;
+        this.userMapping();
+      },
+      error: () => {
+        this.toast.danger('Employee saved but user account creation failed');
+      },
     });
   }
   userMapping() {
@@ -232,14 +232,19 @@ export class AddEmployeePage implements OnInit {
       modifiedDate: new Date(),
       isDeleted: false,
     };
-    this.user.createMapp(data).subscribe((res: any) => {
-      console.log(res);
-      window.location.reload();
+    this.user.createMapp(data).subscribe({
+      next: () => {
+        this.toast.success('Record Saved Successfully');
+        this.router.navigate(['employee']);
+      },
+      error: () => {
+        this.toast.danger('Employee saved but user mapping failed');
+        this.router.navigate(['employee']);
+      },
     });
   }
   getEmp() {
     this.emp.getEmployee(this.editEmpID).subscribe((res: any) => {
-      console.log(res);
       this.empForm.controls.employeeId.setValue(res.employeeId);
       this.empForm.controls.description.setValue(res.description);
       this.empForm.controls.dob.setValue(
@@ -271,20 +276,16 @@ export class AddEmployeePage implements OnInit {
   onFileSelected(event: any) {
     this.excelData = [];
     const file: any = event.target.files[0];
-    console.log(file);
     let fileReader = new FileReader();
     fileReader.readAsBinaryString(file);
     fileReader.onload = (e) => {
       var workbook = XLSX.read(fileReader.result, { type: 'binary' });
       var sheetNames = workbook.SheetNames;
       this.excelData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetNames[0]]);
-      console.log(this.excelData);
     };
   }
   upload() {
-    console.log(this.excelData);
     this.excelData.forEach((element: any) => {
-      console.log(element);
       this.empForm.controls.employeeId.setValue(element.employeeId);
       this.empForm.controls.description.setValue(element.description);
       this.empForm.controls.dob.setValue(

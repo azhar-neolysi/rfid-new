@@ -10,11 +10,23 @@
       <ion-icon name="add-sharp" slot="end"></ion-icon>
     </ion-buttons>
   </ion-toolbar>
+  <ion-toolbar color="dark">
+    <div style="display:flex;align-items:center;gap:6px;padding:0 12px;font-size:13px;">
+      <span [style.background]="readerConnected ? '#2dd36f' : '#eb445b'"
+        style="width:10px;height:10px;border-radius:50%;display:inline-block;"></span>
+      <span *ngIf="readerConnected">Reader connected</span>
+      <span *ngIf="!readerConnected">Reader disconnected</span>
+    </div>
+  </ion-toolbar>
 </ion-header>
 <ion-content [fullscreen]="true">
-  <ion-card>
+  <!-- <ion-card>
     <ion-input (ionChange)="search($event)" class="container__input" type="text" id="tagId" name="tagId" expand="full"
       placeholder="Tag ID" />
+  </ion-card> -->
+  <ion-card>
+    <ion-input (ionInput)="search($event)" class="container__input" type="text" placeholder="Tag ID">
+    </ion-input>
   </ion-card>
 
   <ion-card *ngFor="let rfid of rfidItems">

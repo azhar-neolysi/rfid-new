@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { SaleService } from '../sale.service';
 import {
   FormBuilder,
@@ -55,7 +55,6 @@ export class SaleEntryPage implements OnInit {
     const id = this.route.params.subscribe((param) => {
       // this.editRateId = Number(param.id);
       this.salesID = param['id'];
-      console.log(this.salesID);
       if (this.salesID) {
         this.getProduct();
       }
@@ -100,27 +99,46 @@ export class SaleEntryPage implements OnInit {
           description: this.salesForm.value.description,
         };
 
-        console.log(data);
-        this.sale.saleEntry(data).subscribe((res: any) => {
-          console.log(res);
-          console.log(this.products);
-          this.products.quantity=this.products.quantity-Number(this.salesForm.value.currentStock);
-          this.products.modifiedDate=new Date();
-          // this.products.date=new Date();
-          console.log(this.products);
-          this.product.updateProduct(this.products).subscribe((res:any)=>{
-
-            this.router.navigate(['sale']);
-          })
+        this.sale.saleEntry(data).subscribe({
+          next: (res: any) => {
+            this.products.quantity =
+              this.products.quantity -
+              Number(this.salesForm.value.currentStock);
+            this.products.modifiedDate = new Date();
+            this.product.updateProduct(this.products).subscribe({
+              next: () => {
+                this.presentToast('success', 'Record Saved Successfully');
+                this.router.navigate(['sale']);
+              },
+              error: () => {
+                this.presentToast(
+                  'warning',
+                  'Sale recorded but stock update failed'
+                );
+                this.router.navigate(['sale']);
+              },
+            });
+          },
+          error: () => {
+            this.presentToast('danger', 'Failed to save sale');
+          },
         });
-      // }
-    } else {
-      console.log('Invalid Form', this.salesForm);
-    }
+      } else {
+        this.presentToast('danger', 'Please fill all required fields');
+      }
+  }
+  async presentToast(color: string, message: string) {
+    const toast = await this.toast.create({
+      message,
+      duration: 2000,
+      position: 'top',
+      color,
+    });
+    toast.present();
   }
   getSale() {
-    this.sale.getSale(this.salesID).subscribe((res: any) => {
-      console.log(res);
+    this.sale.getSale(this.salesID).subscribe({
+      next: (res: any) => {
       this.salesForm.controls.createdDate.setValue(res.createdDate);
       this.salesForm.controls.currentStock.setValue(res.currentStock);
       this.salesForm.controls.description.setValue(res.description);
@@ -136,44 +154,44 @@ export class SaleEntryPage implements OnInit {
       //   this.datePipe.transform(res.salesDate, 'yyyy-MM-dd')
       // );
       this.salesForm.controls.salesId.setValue(res.salesId);
+      },
+      error: () => {
+        this.presentToast('danger', 'Failed to load sale');
+        this.router.navigate(['sale']);
+      },
     });
   }
   getProduct() {
-    // console.log(event);
-    // console.log(event.target.value);
     const data = {
       barcode: null,
       rfidcode: this.salesID,
     };
-    this.product.searchProduct(data).subscribe(async (res: any) => {
-      console.log(res);
-      this.products=res[0];
-      this.salesForm.controls.productName.setValue(res[0].productName);
-      this.salesForm.controls.productEntryId.setValue(res[0].productEntryId);
-      this.salesForm.controls.printName.setValue(res[0].printName);
-      this.salesForm.controls.brand.setValue(res[0].brand);
-      this.salesForm.controls.category.setValue(res[0].category);
-      this.salesForm.controls.mrp.setValue(res[0].mrp);
-      this.salesForm.controls.saleRate.setValue(res[0].salesRate);
-      if(this.products.length !==0){
+    this.product.searchProduct(data).subscribe({
+      next: async (res: any) => {
+        if (!res || res.length === 0) {
+          await this.presentToast('warning', 'Invalid RFID Tag ID');
+          this.router.navigate(['sale']);
+          return;
+        }
+        this.products = res[0];
+        this.salesForm.controls.productName.setValue(res[0].productName);
+        this.salesForm.controls.productEntryId.setValue(res[0].productEntryId);
+        this.salesForm.controls.printName.setValue(res[0].printName);
+        this.salesForm.controls.brand.setValue(res[0].brand);
+        this.salesForm.controls.category.setValue(res[0].category);
+        this.salesForm.controls.mrp.setValue(res[0].mrp);
+        this.salesForm.controls.saleRate.setValue(res[0].salesRate);
         this.saleEntry();
-      }else{
-        const toast = await this.toast.create({
-          message: 'Invalid RFID Tag ID',
-          duration: 2000,
-          position: 'top',
-          color: 'warning',
-        });
-        toast.present();
+      },
+      error: () => {
+        this.presentToast('danger', 'Failed to find product');
         this.router.navigate(['sale']);
-        // window.location.reload();
-      }
+      },
     });
   }
   calculateByteLength(event:any){
     const encoder = new TextEncoder();
     const encodedData = encoder.encode(event.target.value);
     this.byteLength = encodedData.length;
-    console.log('byteLength',this.byteLength);
   }
 }

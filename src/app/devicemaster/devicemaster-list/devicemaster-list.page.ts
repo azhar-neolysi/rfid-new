@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { DevicemasterService } from '../devicemaster.service';
 import { Router } from '@angular/router';
+import { AlertController } from '@ionic/angular';
+import { ToastrService } from 'src/app/services/toastr/toastr.service';
 
 @Component({
   selector: 'app-devicemaster-list',
@@ -10,16 +12,23 @@ import { Router } from '@angular/router';
 export class DevicemasterListPage implements OnInit {
   deviceList: any = [];
   deviceListTemp: any = [];
-  constructor(private device: DevicemasterService, private router: Router) { }
+  constructor(
+    private device: DevicemasterService,
+    private router: Router,
+    private alertCtrl: AlertController,
+    private toast: ToastrService
+  ) { }
 
   ngOnInit() {
     this.getDevices();
   }
   getDevices() {
-    this.device.getDevices().subscribe((res: any) => {
-      console.log(res);
-      this.deviceList = res;
-      this.deviceListTemp = res;
+    this.device.getDevices().subscribe({
+      next: (res: any) => {
+        this.deviceList = res;
+        this.deviceListTemp = res;
+      },
+      error: () => this.toast.danger('Failed to load devices'),
     });
   }
   addDevice() {
@@ -27,26 +36,42 @@ export class DevicemasterListPage implements OnInit {
   }
   search(event: any) {
     this.deviceList = this.deviceListTemp;
-    console.log(this.deviceList);
-    console.log(event.detail.value);
     if (event.detail.value === '') {
       this.deviceList = this.deviceListTemp;
-
-      // this.vehicleList = this.vehicleListTemp;
-      // this.vehicleList = this.vehicleList;
     } else {
       this.deviceList = this.deviceList.filter(
         (item: any) =>
           item.deviceCode.toLowerCase().includes(event.detail.value.toLowerCase())
       );
-      console.log(this.deviceList);
     }
   }
-  deleteDevice(id: any) {
-    this.device.deleteDevice(id).subscribe((res: any) => {
-      console.log(res);
-      window.location.reload();
+  async deleteDevice(id: any) {
+    const alert = await this.alertCtrl.create({
+      header: 'Confirm Delete',
+      message: 'Delete this device?',
+      buttons: [
+        { text: 'Cancel', role: 'cancel' },
+        {
+          text: 'Delete',
+          role: 'destructive',
+          handler: () => {
+            this.device.deleteDevice(id).subscribe({
+              next: () => {
+                this.toast.success('Device deleted');
+                this.deviceList = this.deviceList.filter(
+                  (item: any) => item.deviceMasterId !== id
+                );
+                this.deviceListTemp = this.deviceListTemp.filter(
+                  (item: any) => item.deviceMasterId !== id
+                );
+              },
+              error: () => this.toast.danger('Failed to delete device'),
+            });
+          },
+        },
+      ],
     });
+    await alert.present();
   }
   editDevice(id: any) {
     this.router.navigate(['devicemaster', id]);

@@ -1,0 +1,117 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Tag Locator</ion-title>
+  </ion-toolbar>
+  <ion-toolbar color="dark">
+    <div class="statusline">
+      <span [style.background]="readerConnected ? '#2dd36f' : '#eb445a'" class="dot"></span>
+      <span *ngIf="readerConnected">Reader connected</span>
+      <span *ngIf="!readerConnected">Reader disconnected</span>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="locator-content">
+  <div class="wrap">
+    <div class="card">
+      <div class="card__title">
+        <ion-icon name="radar-outline"></ion-icon>
+        <span>Locate a tag</span>
+      </div>
+
+      <ion-input class="field__input" [(ngModel)]="targetEpc" name="targetEpc"
+        placeholder="Enter or scan target EPC" [disabled]="locating"></ion-input>
+
+      <div class="btnrow">
+        <button class="pill pill--start" type="button" (click)="startLocator()"
+          [disabled]="locating || !targetEpc.trim()">
+          <ion-icon name="play-outline"></ion-icon>
+          Start
+        </button>
+        <button class="pill pill--stop" type="button" (click)="stopLocator()" [disabled]="!locating">
+          <ion-icon name="stop-outline"></ion-icon>
+          Stop
+        </button>
+      </div>
+
+      <div class="gauge" *ngIf="locateMode" [class.gauge--hot]="proximity >= 75">
+        <svg viewBox="0 0 200 200">
+          <defs>
+            <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#22d3ee" />
+              <stop offset="100%" stop-color="#22c55e" />
+            </linearGradient>
+          </defs>
+          <circle class="ring-bg" cx="100" cy="100" r="84"></circle>
+          <circle class="ring-fg" cx="100" cy="100" r="84" stroke="url(#ringGrad)"
+            [style.stroke-dashoffset]="ringOffset"></circle>
+        </svg>
+        <div class="gauge__center">
+          <span class="gauge__pct">{{proximity}}%</span>
+          <span class="gauge__label">{{signalLabel()}}</span>
+          <span class="gauge__dbm">{{targetRssi !== undefined ? targetRssi + ' dBm' : '-- dBm'}}</span>
+        </div>
+      </div>
+
+      <div class="target-chip" *ngIf="locateMode">
+        <ion-icon name="bookmark-outline"></ion-icon>
+        <span>{{targetEpc}}</span>
+      </div>
+
+      <!-- Live stats -->
+      <div class="stats" *ngIf="locateMode">
+        <div class="stat">
+          <span class="stat__v">≈{{distanceText()}} m</span>
+          <span class="stat__l">Distance</span>
+        </div>
+        <div class="stat">
+          <span class="stat__v">{{targetReads}}</span>
+          <span class="stat__l">Reads</span>
+        </div>
+        <div class="stat">
+          <span class="stat__v">{{bestRssi !== undefined ? bestRssi + ' dBm' : '--'}}</span>
+          <span class="stat__l">Best</span>
+        </div>
+        <div class="stat">
+          <span class="stat__v">{{rateText()}}</span>
+          <span class="stat__l">Reads/s</span>
+        </div>
+      </div>
+
+      <!-- Frequency / channel strength -->
+      <div class="freq-row" *ngIf="locateMode && lastChannelIndex !== undefined">
+        <ion-icon name="radio-outline"></ion-icon>
+        <span class="freq-row__t">Ch{{lastChannelIndex}} · {{channelMhz(lastChannelIndex)}} MHz</span>
+        <span class="freq-row__ant" *ngIf="lastAntennaId !== undefined">Ant{{lastAntennaId}}</span>
+        <div class="signal-bars">
+          <span class="bar" [class.filled]="signalLevel(targetRssi) >= 1"></span>
+          <span class="bar" [class.filled]="signalLevel(targetRssi) >= 2"></span>
+          <span class="bar" [class.filled]="signalLevel(targetRssi) >= 3"></span>
+          <span class="bar" [class.filled]="signalLevel(targetRssi) >= 4"></span>
+        </div>
+      </div>
+
+      <!-- Recent signal trend -->
+      <div class="spark-wrap" *ngIf="locateMode && history.length > 1">
+        <span class="spark-title">Signal trend</span>
+        <div class="spark">
+          <span class="spark__bar" *ngFor="let h of history" [style.height.%]="histHeight(h)"
+            [class.spark__bar--hot]="h >= -50"></span>
+        </div>
+      </div>
+
+      <p class="seen" *ngIf="locateMode && lastSeenAgo !== null"
+        [class.seen--stale]="lastSeenAgo > 3">
+        {{lastSeenAgo > 3 ? 'Last seen ' + lastSeenAgo + 's ago' : 'Tag in view'}}
+      </p>
+
+      <p class="hint" *ngIf="!locateMode">
+        Pick a tag from the Find Tag list or type an EPC, then press Start.
+        Walk slowly toward the tag — the ring fills and vibration speeds up as you get closer.
+      </p>
+    </div>
+  </div>
+</ion-content>

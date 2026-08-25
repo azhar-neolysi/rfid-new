@@ -1,0 +1,150 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button> </ion-menu-button>
+    </ion-buttons>
+    <ion-buttons slot="start" (click)="excelUploadEnable()" *ngIf="excelUpload">
+      <ion-icon name="arrow-back-outline" id="arrow-back-outline"></ion-icon>
+    </ion-buttons>
+    <ion-title>Find Tag</ion-title>
+
+    <ion-buttons slot="end" (click)="excelUploadEnable()" *ngIf="!excelUpload">
+      <!-- <ion-icon name="cloud-upload-sharp" ></ion-icon> -->
+      <ion-icon name="search-outline" id="upload"></ion-icon>
+      <!-- <ion-icon name="cloud-upload-sharp" id="upload" *ngIf="excelUpload"></ion-icon> -->
+    </ion-buttons>
+    <ion-buttons slot="end" (click)="excelUploadEnable2()" *ngIf="excelUpload">
+      <!-- <ion-icon name="cloud-upload-sharp" ></ion-icon> -->
+      <!-- <ion-icon name="search-outline" id="upload" *ngIf="!excelUpload"></ion-icon> -->
+      <ion-icon name="cloud-upload-sharp" id="upload"></ion-icon>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar color="dark">
+    <div style="display:flex;align-items:center;gap:6px;padding:0 12px;font-size:13px;">
+      <span [style.background]="readerConnected ? '#2dd36f' : '#eb445b'" style="width:10px;height:10px;border-radius:50%;display:inline-block;"></span>
+      <span *ngIf="readerConnected">Reader connected</span>
+      <span *ngIf="!readerConnected">Reader disconnected</span>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+
+
+
+<ion-content [fullscreen]="true" *ngIf="!excelUpload">
+  <div class="pagewrap">
+    <form class="form" id="form">
+      <div class="container">
+        <ion-textarea class="container__input" type="text" placeholder="Finded Tags" (ionChange)="search($event)"
+          name="tags" required #myInput autofocus />
+        <label id="tags" for="tags" class="container__label">Tags ID</label>
+      </div>
+
+      <div class="container container2">
+        <ion-item>
+          <ion-label position="fixed">Total Scans </ion-label>
+        </ion-item>
+        <ion-item *ngFor="let tag of scannedTags">
+          {{tag}}
+          <!-- <ion-input placeholder="Enter text"></ion-input> -->
+        </ion-item>
+      </div>
+      <div class="container">
+        <ion-item>
+          <ion-label position="fixed">
+            <h2>Total Scans</h2>
+          </ion-label>{{totalScannes}}
+          <!-- <ion-input placeholder="Enter text"></ion-input> -->
+        </ion-item>
+      </div>
+      <div class="container">
+        <ion-item>
+          <ion-label position="fixed">
+            <h2>Total Tags</h2>
+          </ion-label>{{totalTags}}
+          <!-- <ion-input placeholder="Enter text"></ion-input> -->
+        </ion-item>
+      </div>
+
+      <!-- <button class="form__submit" id="submit" type="button" value="submit" (click)="addDevice()">
+        Submit
+      </button> -->
+    </form>
+  </div>
+</ion-content>
+<ion-content [fullscreen]="true" *ngIf="excelUpload">
+  <div class="pagewrap">
+    <form class="form" id="form">
+      <div class="container" *ngIf="!excelUpload2">
+        <ion-textarea class="container__input" type="text" id="" name="tagId" value="" required [(ngModel)]="tags"
+          placeholder="RFID Tags Codes" (ionChange)="gettags($event)" />
+        <label id="userLabel" for="tagId" class="container__label">RFID Code</label>
+      </div>
+      <div class="container" *ngIf="excelUpload2">
+        <input class="container__input" type="file" id="" name="tagId" value="" required placeholder="Barcodes"
+          (change)="onFileSelected($event)" />
+        <label id="userLabel" for="tagId" class="container__label">Barcode</label>
+      </div>
+      <div class="container">
+        <ion-textarea class="container__input" type="text" placeholder="Finded Tags" (ionChange)="search2($event)"
+          name="tags" required />
+        <label id="tags" for="tags" class="container__label">Scanned Tags</label>
+      </div>
+
+      <!-- <button class="form__submit" id="submit" type="button" value="submit" (click)="upload()">
+        Upload
+      </button> -->
+    </form>
+  </div>
+
+  <div class="container3">
+    <ion-button id="auto-trigger" expand="block" color="light">
+      Unfounded Barcodes : {{notFoundBarcode.length}}</ion-button>
+    <ion-popover trigger="auto-trigger" size="auto">
+      <ng-template>
+        <ion-content class="ion-padding">
+          <ion-item *ngFor="let tag of notFoundBarcode"> {{tag}} </ion-item></ion-content>
+      </ng-template>
+    </ion-popover>
+  </div>
+  <div class="container3">
+    <ion-button id="auto-trigger" expand="block" color="light">
+      Tags Founded : {{foundArray.length}}</ion-button>
+    <ion-popover trigger="auto-trigger" size="auto">
+      <ng-template>
+        <ion-content class="ion-padding">
+          <ion-item *ngFor="let tag of foundArray"> {{tag}} </ion-item></ion-content>
+      </ng-template>
+    </ion-popover>
+  </div>
+  <div class="container3">
+    <ion-button id="auto-trigger2" expand="block" color="light">Unfounded Tags : {{notFoundArray.length}}</ion-button>
+    <ion-popover trigger="auto-trigger2" size="auto">
+      <ng-template>
+        <ion-content class="ion-padding">
+          <ion-item *ngFor="let tag of notFoundArray"> {{tag}} </ion-item></ion-content>
+      </ng-template>
+    </ion-popover>
+  </div>
+  <div class="container3">
+    <ion-button expand="block" color="light" id="auto-trigger3">Unknoun Tags : {{extraArray.length}}</ion-button>
+    <ion-popover trigger="auto-trigger3" size="auto">
+      <ng-template>
+        <ion-content class="ion-padding">
+          <ion-item *ngFor="let tag of extraArray"> {{tag}} </ion-item></ion-content>
+      </ng-template>
+    </ion-popover>
+  </div>
+
+  <!-- <ion-grid class="container">
+    <ion-row>
+      <ion-col><ion-button color="light">Light</ion-button></ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col><ion-button color="light">Light</ion-button></ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col><ion-button color="light">Light</ion-button></ion-col>
+    </ion-row>
+  </ion-grid> -->
+</ion-content>

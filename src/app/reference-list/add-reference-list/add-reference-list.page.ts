@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -9,6 +9,7 @@ import { ReferenceService } from 'src/app/reference/reference.service';
 import { ReferenceListService } from '../reference-list.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SegmentService } from 'src/app/segment/segment.service';
+import { ToastrService } from 'src/app/services/toastr/toastr.service';
 
 @Component({
   selector: 'app-add-reference-list',
@@ -40,14 +41,14 @@ export class AddReferenceListPage implements OnInit {
     private referenceList: ReferenceListService,
     private route: ActivatedRoute,
     private router: Router,
-    private segment: SegmentService
+    private segment: SegmentService,
+    private toast: ToastrService
   ) {}
 
   ngOnInit() {
     const id = this.route.params.subscribe((param) => {
       // this.editRateId = Number(param.id);
       this.refListNo = param['id'];
-      console.log(this.refListNo);
       if (this.refListNo) {
         this.getRefList();
       }
@@ -56,20 +57,22 @@ export class AddReferenceListPage implements OnInit {
     this.getSegment();
   }
   getReference() {
-    this.reference.getReference().subscribe((res: any) => {
-      console.log(res);
-      this.references = res;
+    this.reference.getReference().subscribe({
+      next: (res: any) => {
+        this.references = res;
+      },
+      error: () => this.toast.danger('Failed to load references'),
     });
   }
   getSegment() {
-    this.segment.getSegment().subscribe((res: any) => {
-      console.log(res);
-      this.segments = res;
+    this.segment.getSegment().subscribe({
+      next: (res: any) => {
+        this.segments = res;
+      },
+      error: () => this.toast.danger('Failed to load segments'),
     });
   }
   addReferenceList() {
-    console.log(this.referenceListFrom.value);
-    console.log(this.referenceListFrom);
     if (this.referenceListFrom.valid) {
       if (this.refListNo) {
         const data = {
@@ -82,10 +85,12 @@ export class AddReferenceListPage implements OnInit {
 
           refModifiedBy: this.referenceListFrom.value.refModifiedBy,
         };
-        console.log(data);
-        this.referenceList.updateReferenceList(data).subscribe((res: any) => {
-          console.log(res);
-          this.router.navigate(['reference']);
+        this.referenceList.updateReferenceList(data).subscribe({
+          next: () => {
+            this.toast.success('Record Saved Successfully');
+            this.router.navigate(['reference-list']);
+          },
+          error: () => this.toast.danger('Failed to save reference list item'),
         });
       } else {
         const data = {
@@ -100,17 +105,18 @@ export class AddReferenceListPage implements OnInit {
           refModifiedBy: this.referenceListFrom.value.refModifiedBy,
           modifiedDate: this.referenceListFrom.value.modifiedDate,
         };
-        console.log(data);
-        this.referenceList.addReferenceList(data).subscribe((res: any) => {
-          console.log(res);
-          this.referenceListFrom.controls.refReferenceListId.setValue(res.referenceListId);
-          this.segmentMapping();
-          // return;
-          // window.location.reload();
+        this.referenceList.addReferenceList(data).subscribe({
+          next: (res: any) => {
+            this.referenceListFrom.controls.refReferenceListId.setValue(
+              res.referenceListId
+            );
+            this.segmentMapping();
+          },
+          error: () => this.toast.danger('Failed to save reference list item'),
         });
       }
     } else {
-      console.log('Form Not Valid');
+      this.toast.danger('Please fill all required fields');
     }
   }
   segmentMapping() {
@@ -121,36 +127,43 @@ export class AddReferenceListPage implements OnInit {
       refSegmentId: this.referenceListFrom.value.segment,
       refReferenceListId: this.referenceListFrom.value.refReferenceListId,
     };
-    this.segment.addSegmentMapping(data).subscribe((res:any)=>{
-      console.log(res);
-      window.location.reload();
-    })
+    this.segment.addSegmentMapping(data).subscribe({
+      next: () => {
+        this.toast.success('Record Saved Successfully');
+        this.router.navigate(['reference-list']);
+      },
+      error: () => {
+        this.toast.danger('Reference list saved but segment mapping failed');
+        this.router.navigate(['reference-list']);
+      },
+    });
   }
   getRefList() {
     this.referenceList
       .getReferenceListId(this.refListNo)
-      .subscribe((res: any) => {
-        console.log(res);
-        this.referenceListFrom.controls.createdDate.setValue(res.createdDate);
-        this.referenceListFrom.controls.isActive.setValue(res.isActive);
-        this.referenceListFrom.controls.isDeleted.setValue(res.isDeleted);
-        this.referenceListFrom.controls.modifiedDate.setValue(res.modifiedDate);
-        this.referenceListFrom.controls.refCreatedBy.setValue(res.refCreatedBy);
-        this.referenceListFrom.controls.refDescription.setValue(
-          res.description
-        );
-        this.referenceListFrom.controls.refListName.setValue(res.name);
-        this.referenceListFrom.controls.refModifiedBy.setValue(
-          res.refModifiedBy
-        );
-        this.referenceListFrom.controls.refNo.setValue(res.referenceListId);
-        this.referenceListFrom.controls.refOrgId.setValue(res.refOrgId);
-        this.referenceListFrom.controls.refReferenceId.setValue(
-          res.refReferenceId
-        );
+      .subscribe({
+        next: (res: any) => {
+          this.referenceListFrom.controls.createdDate.setValue(res.createdDate);
+          this.referenceListFrom.controls.isActive.setValue(res.isActive);
+          this.referenceListFrom.controls.isDeleted.setValue(res.isDeleted);
+          this.referenceListFrom.controls.modifiedDate.setValue(res.modifiedDate);
+          this.referenceListFrom.controls.refCreatedBy.setValue(res.refCreatedBy);
+          this.referenceListFrom.controls.refDescription.setValue(
+            res.description
+          );
+          this.referenceListFrom.controls.refListName.setValue(res.name);
+          this.referenceListFrom.controls.refModifiedBy.setValue(
+            res.refModifiedBy
+          );
+          this.referenceListFrom.controls.refNo.setValue(res.referenceListId);
+          this.referenceListFrom.controls.refOrgId.setValue(res.refOrgId);
+          this.referenceListFrom.controls.refReferenceId.setValue(
+            res.refReferenceId
+          );
+        },
+        error: () => this.toast.danger('Failed to load reference list item'),
       });
   }
   selectRef(event: any) {
-    console.log(event);
   }
 }

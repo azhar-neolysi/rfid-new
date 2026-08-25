@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ReferenceListService } from '../reference-list.service';
 import { ReferenceService } from 'src/app/reference/reference.service';
-import { ToastController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { ToastrService } from 'src/app/services/toastr/toastr.service';
 
 @Component({
   selector: 'app-reference-list',
@@ -17,7 +18,8 @@ export class ReferenceListPage implements OnInit {
   constructor(
     private refList: ReferenceListService,
     private reference: ReferenceService,
-    private toast: ToastController,
+    private alertCtrl: AlertController,
+    private toast: ToastrService,
     private router: Router
   ) {}
 
@@ -25,19 +27,33 @@ export class ReferenceListPage implements OnInit {
     this.getRefList();
     this.getReference();
   }
-  deleteRefList(id: any) {
-    this.refList.deleteReferenceList(id).subscribe(async (res: any) => {
-      console.log(res);
-      const toast = await this.toast.create({
-        message: 'Deleted',
-        duration: 2000,
-        position: 'top',
-        color: 'warning',
-      });
-      toast.present();
-
-      window.location.reload();
+  async deleteRefList(id: any) {
+    const alert = await this.alertCtrl.create({
+      header: 'Confirm Delete',
+      message: 'Delete this reference list item?',
+      buttons: [
+        { text: 'Cancel', role: 'cancel' },
+        {
+          text: 'Delete',
+          role: 'destructive',
+          handler: () => {
+            this.refList.deleteReferenceList(id).subscribe({
+              next: () => {
+                this.toast.success('Reference list item deleted');
+                this.referenceListItems = this.referenceListItems.filter(
+                  (item: any) => item.referenceListId !== id
+                );
+                this.referenceListItemsTemp = this.referenceListItemsTemp.filter(
+                  (item: any) => item.referenceListId !== id
+                );
+              },
+              error: () => this.toast.danger('Failed to delete reference list item'),
+            });
+          },
+        },
+      ],
     });
+    await alert.present();
   }
 
   editReferenceList(id: any) {
@@ -48,39 +64,32 @@ export class ReferenceListPage implements OnInit {
   }
   search(event: any) {
     this.referenceListItems = this.referenceListItemsTemp;
-    console.log(this.referenceListItems);
-    console.log(event.detail.value);
     if (event.detail.value === '') {
       this.referenceListItems = this.referenceListItemsTemp;
-
-      // this.vehicleList = this.vehicleListTemp;
-      // this.vehicleList = this.vehicleList;
     } else {
       this.referenceListItems = this.referenceListItems.filter((item: any) =>
         item.name.toLowerCase().includes(event.detail.value.toLowerCase())
       );
-      console.log(this.referenceListItems);
     }
   }
   getRefList() {
-    this.refList.getReferenceList().subscribe((res: any) => {
-      console.log(res);
-      this.referenceListItems = res;
-      this.referenceListItemsTemp = res;
+    this.refList.getReferenceList().subscribe({
+      next: (res: any) => {
+        this.referenceListItems = res;
+        this.referenceListItemsTemp = res;
+      },
+      error: () => this.toast.danger('Failed to load reference lists'),
     });
   }
   getReference() {
     this.reference.getReference().subscribe((res: any) => {
-      console.log(res);
       this.references = res;
     });
   }
   selectRef(event: any) {
-    console.log(event);
     this.referenceListItems = this.referenceListItemsTemp;
     this.referenceListItems = this.referenceListItems.filter(
       (item: any) => item.refReferenceId === event
     );
-    console.log(this.referenceListItems);
   }
 }

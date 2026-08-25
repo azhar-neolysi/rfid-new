@@ -1,6 +1,7 @@
 import {
   Component,
   OnInit,
+  OnDestroy,
   ElementRef,
   ViewChild,
 } from '@angular/core';
@@ -8,6 +9,7 @@ import {
   FormBuilder,
   Validators,
 } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { ProductService } from '../product.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
@@ -17,15 +19,20 @@ import { ReferenceListService } from 'src/app/reference-list/reference-list.serv
 import { AlertController } from '@ionic/angular';
 import { ToastrService } from 'src/app/services/toastr/toastr.service';
 import { ProductEntry } from 'src/app/models/product-entry.model';
+import { HardwareRfidService } from 'src/app/services/hardware-rfid.service';
 
 @Component({
   selector: 'app-itemmaster',
   templateUrl: './itemmaster.page.html',
   styleUrls: ['./itemmaster.page.scss'],
 })
-export class ItemmasterPage implements OnInit {
+export class ItemmasterPage implements OnInit, OnDestroy {
   @ViewChild('myInput', { static: false, read: ElementRef })
   myInputField: ElementRef<HTMLInputElement>;
+
+  readerConnected = false;
+  pageActive = false;
+  private subs: Subscription[] = [];
 
   productForm = this.formBuilder.group({
     productId: [],
@@ -39,7 +46,7 @@ export class ItemmasterPage implements OnInit {
     date: [''],
     productName: ['', [Validators.required]],
     printName: ['', [Validators.required]],
-    rfidcode: [null],
+    rfidcode: [null as string | null],
     itemCode: ['', [Validators.required]],
     barCode: ['', [Validators.required]],
     eancode: ['', [Validators.required]],
@@ -95,7 +102,8 @@ export class ItemmasterPage implements OnInit {
     private segment: SegmentService,
     private refList: ReferenceListService,
     private alertController: AlertController,
-    private toast: ToastrService
+    private toast: ToastrService,
+    private hardwareRfid: HardwareRfidService
   ) {
     this.maxDate = new Date().toISOString().split('T')[0];
     this.productForm.controls.date.setValue(this.maxDate);
@@ -104,6 +112,15 @@ export class ItemmasterPage implements OnInit {
   }
 
   ngOnInit() {
+    this.readerConnected = this.hardwareRfid.isConnected;
+    this.subs.push(
+      this.hardwareRfid.connected$.subscribe(() => { this.readerConnected = true; }),
+      this.hardwareRfid.disconnected$.subscribe(() => { this.readerConnected = false; }),
+      this.hardwareRfid.tagRead$.subscribe((event) => {
+        if (!this.pageActive) return;
+        this.productForm.controls.rfidcode.setValue(event.epc);
+      })
+    );
     this.route.params.subscribe((param) => {
       this.productId = Number(param['id']);
       if (this.productId) {
@@ -112,6 +129,15 @@ export class ItemmasterPage implements OnInit {
     });
     this.getSegments();
     this.getUoM();
+  }
+  ngOnDestroy() {
+    this.subs.forEach(s => s.unsubscribe());
+  }
+  ionViewDidEnter() {
+    this.pageActive = true;
+  }
+  ionViewDidLeave() {
+    this.pageActive = false;
   }
 
   clear() {
@@ -123,14 +149,20 @@ export class ItemmasterPage implements OnInit {
   }
 
   getSegments() {
-    this.segment.getSegment().subscribe((res: any[]) => {
-      this.segments = res;
+    this.segment.getSegment().subscribe({
+      next: (res: any[]) => {
+        this.segments = res;
+      },
+      error: () => this.toast.danger('Failed to load segments'),
     });
   }
 
   getUoM() {
-    this.refList.getReferenceListbyRefName('UOM').subscribe((res: any[]) => {
-      this.uom = res;
+    this.refList.getReferenceListbyRefName('UOM').subscribe({
+      next: (res: any[]) => {
+        this.uom = res;
+      },
+      error: () => this.toast.danger('Failed to load UOM'),
     });
   }
 
@@ -206,15 +238,21 @@ export class ItemmasterPage implements OnInit {
         this.createProduct();
       }
     } else {
+      console.log(this.productForm)
       this.showValidationErrors();
     }
   }
 
   private createProduct() {
     const data = this.buildProductData();
-    this.product.addProduct(data as any).subscribe((res: any) => {
-      this.productForm.controls.productId.setValue(res.productEntryId);
-      this.saveSegmentMappings();
+    this.product.addProduct(data as any).subscribe({
+      next: (res: any) => {
+        this.productForm.controls.productId.setValue(res.productEntryId);
+        this.saveSegmentMappings();
+      },
+      error: () => {
+        this.toast.danger('Failed to save product');
+      },
     });
   }
 
@@ -228,13 +266,20 @@ export class ItemmasterPage implements OnInit {
       productEntryId: this.productForm.value.productId,
       modifiedDate: new Date(),
     };
-    this.product.updateProduct(data as any).subscribe(() => {
-      if (this.selectedSegment.length !== 0) {
-        this.updateproductSegmentMapping();
-      } else {
-        this.toast.success('Record Saved Successfully');
-        setTimeout(() => this.router.navigate(['item-list']), 3000);
-      }
+    console.log(data);
+    this.product.updateProduct(data as any).subscribe({
+      next: () => {
+        if (this.selectedSegment.length !== 0) {
+          this.updateproductSegmentMapping();
+        } else {
+          this.toast.success('Record Saved Successfully');
+          setTimeout(() => this.router.navigate(['item-list']), 3000);
+        }
+      },
+      error: (err) => {
+        console.log(err);
+        this.toast.danger('Failed to save product');
+      },
     });
   }
 
@@ -269,8 +314,8 @@ export class ItemmasterPage implements OnInit {
       closingQty: this.productForm.value.closingQty,
       mcDesc: this.productForm.value.mcDesc,
       styleCode: this.productForm.value.styleCode,
-      isActive: 'true',
-      isDeleted: 'false',
+      isActive: true,
+      isDeleted: false,
       description1: '0',
       description2: '0',
       description3: '',
@@ -308,7 +353,25 @@ export class ItemmasterPage implements OnInit {
   }
 
   saveSegmentMappings() {
-    this.selectedSegment.forEach((element: any, index: number) => {
+    if (this.selectedSegment.length === 0) {
+      this.toast.success('Record Saved Successfully');
+      setTimeout(() => this.router.navigate(['item-list']), 3000);
+      return;
+    }
+    const total = this.selectedSegment.length;
+    let completed = 0;
+    let failed = 0;
+    const finish = () => {
+      if (completed + failed < total) return;
+      if (failed > 0) {
+        this.toast.danger(`Saved with ${failed} segment mapping error(s)`);
+        setTimeout(() => this.router.navigate(['item-list']), 3000);
+      } else {
+        this.toast.success('Record Saved Successfully');
+        setTimeout(() => this.router.navigate(['item-list']), 3000);
+      }
+    };
+    this.selectedSegment.forEach((element: any) => {
       const data = {
         refOrgid: this.productForm.value.refOrgId,
         refCreatedBy: this.productForm.value.refCreatedBy,
@@ -316,16 +379,33 @@ export class ItemmasterPage implements OnInit {
         refproductEntryId: this.productForm.value.productId,
         refReferenceListId: element.refList,
       };
-      this.segment.productSegmentMapping(data).subscribe(() => {
-        if (index === this.selectedSegment.length - 1) {
-          this.toast.success('Record Saved Successfully');
-        }
+      this.segment.productSegmentMapping(data).subscribe({
+        next: () => {
+          completed++;
+          finish();
+        },
+        error: () => {
+          failed++;
+          finish();
+        },
       });
     });
   }
 
   updateproductSegmentMapping() {
-    this.selectedSegment.forEach((element: any, index: number) => {
+    const total = this.selectedSegment.length;
+    let completed = 0;
+    let failed = 0;
+    const finish = () => {
+      if (completed + failed < total) return;
+      if (failed > 0) {
+        this.toast.danger(`Saved with ${failed} segment mapping error(s)`);
+      } else {
+        this.toast.success('Record Saved Successfully');
+      }
+      setTimeout(() => this.router.navigate(['item-list']), 3000);
+    };
+    this.selectedSegment.forEach((element: any) => {
       if (element.id) {
         const data = {
           refOrgid: this.productForm.value.refOrgId,
@@ -339,11 +419,15 @@ export class ItemmasterPage implements OnInit {
           modifiedDate: new Date(),
           isDeleted: false,
         };
-        this.segment.updatProductSegmentMapping(data).subscribe(() => {
-          if (index === this.selectedSegment.length - 1) {
-            this.toast.success('Record Saved Successfully');
-            setTimeout(() => this.router.navigate(['item-list']), 3000);
-          }
+        this.segment.updatProductSegmentMapping(data).subscribe({
+          next: () => {
+            completed++;
+            finish();
+          },
+          error: () => {
+            failed++;
+            finish();
+          },
         });
       } else {
         const data = {
@@ -353,24 +437,34 @@ export class ItemmasterPage implements OnInit {
           refproductEntryId: this.productForm.value.productId,
           refReferenceListId: element.refList,
         };
-        this.segment.productSegmentMapping(data).subscribe(() => {
-          if (index === this.selectedSegment.length - 1) {
-            setTimeout(() => this.router.navigate(['item-list']), 3000);
-          }
+        this.segment.productSegmentMapping(data).subscribe({
+          next: () => {
+            completed++;
+            finish();
+          },
+          error: () => {
+            failed++;
+            finish();
+          },
         });
       }
     });
   }
 
   getProduct() {
-    this.product.getProductbyBarcode(String(this.productId)).subscribe((res: any) => {
-      if (res.productEntry.length !== 0) {
-        const p = res.productEntry[0];
-        this.populateFormFromProduct(p);
-        this.productForm.controls.segmentName.setValue(res.productCatSeg[0].segmentName);
-        this.productSegmentList = res.productCatSeg;
-        this.getSegmentRef();
-      }
+    this.product.getProductbyBarcode(String(this.productId)).subscribe({
+      next: (res: any) => {
+        if (res.productEntry.length !== 0) {
+          const p = res.productEntry[0];
+          this.populateFormFromProduct(p);
+          this.productForm.controls.segmentName.setValue(
+            res.productCatSeg[0].segmentName
+          );
+          this.productSegmentList = res.productCatSeg;
+          this.getSegmentRef();
+        }
+      },
+      error: () => this.toast.danger('Failed to load product'),
     });
   }
 
@@ -484,7 +578,9 @@ export class ItemmasterPage implements OnInit {
 
   upload() {
     this.excelData.forEach((productData: any) => {
+      console.log(productData);
       this.refList.getReferenceListbyName(productData.uom).subscribe((res0: any[]) => {
+        console.log(res0);
         this.productForm.controls.refRefListUomid.setValue(res0[0].referenceListId);
         this.refList.getReferenceListbyName(productData.color).subscribe((res1: any[]) => {
           this.selectedSegment.push({ ref: res1[0].referencename, refList: res1[0].referenceListId });
@@ -513,7 +609,7 @@ export class ItemmasterPage implements OnInit {
     this.productForm.controls.gst.setValue(d.gst);
     this.productForm.controls.hsnsaccode.setValue(String(d.hsnsaccode));
     this.productForm.controls.itemWeight.setValue(d.itemWeight);
-    this.productForm.controls.itemCode.setValue(d.itemcode);
+    this.productForm.controls.itemCode.setValue(d.itemCode);
     this.productForm.controls.manufactureDate.setValue(this.datePipe.transform(d.manufactureDate, 'yyyy-MM-dd'));
     this.productForm.controls.mcDesc.setValue(d.mcdescription);
     this.productForm.controls.mrp.setValue(d.mrp);

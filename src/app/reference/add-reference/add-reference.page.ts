@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -6,7 +6,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { ReferenceService } from '../reference.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ToastrService } from 'src/app/services/toastr/toastr.service';
 @Component({
   selector: 'app-add-reference',
   templateUrl: './add-reference.page.html',
@@ -29,77 +30,78 @@ export class AddReferencePage implements OnInit {
   constructor(
     private formBuilder: FormBuilder,
     private reference: ReferenceService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router,
+    private toast: ToastrService
   ) {}
 
   ngOnInit() {
     const id = this.route.params.subscribe((param) => {
       // this.editRateId = Number(param.id);
       this.refId = param['id'];
-      console.log(this.refId);
       if (this.refId) {
         this.getReferenceById();
       }
     });
   }
   addReference() {
-    console.log(this.referenceForm.value);
-    if(this.referenceForm.valid){
-      if(this.refId){
+    if (this.referenceForm.valid) {
+      if (this.refId) {
         const data = {
-          referenceId:this.referenceForm.value.referenceId ,
+          referenceId: this.referenceForm.value.referenceId,
           name: this.referenceForm.value.refName,
           description: this.referenceForm.value.refDescription,
-          refOrgId:this.referenceForm.value.refOrgId,
+          refOrgId: this.referenceForm.value.refOrgId,
           isActive: this.referenceForm.value.isActive,
           isDeleted: this.referenceForm.value.isDeleted,
-          refCreatedBy:this.referenceForm.value.refCreatedBy,
+          refCreatedBy: this.referenceForm.value.refCreatedBy,
           createdDate: this.referenceForm.value.createdDate,
-          refModifiedBy:this.referenceForm.value.refModifiedBy,
+          refModifiedBy: this.referenceForm.value.refModifiedBy,
           modifiedDate: this.referenceForm.value.modifiedDate,
         };
-        this.reference.updateReference(data).subscribe((res: any) => {
-          console.log(res);
-          // this.referenceForm.reset();
-          window.location.reload();
+        this.reference.updateReference(data).subscribe({
+          next: () => {
+            this.toast.success('Record Saved Successfully');
+            this.router.navigate(['reference']);
+          },
+          error: () => this.toast.danger('Failed to save reference'),
         });
-      }else{
+      } else {
         const data = {
-          // referenceId:this.referenceForm.value.referenceId,
           name: this.referenceForm.value.refName,
           description: this.referenceForm.value.refDescription,
-          refOrgId:this.referenceForm.value.refOrgId,
-          // isActive: this.referenceForm.value.isActive,
-          // isDeleted: this.referenceForm.value.isDeleted,
-          refCreatedBy:this.referenceForm.value.refCreatedBy,
-          // createdDate: this.referenceForm.value.createdDate,
-          refModifiedBy:this.referenceForm.value.refModifiedBy,
-          // modifiedDate: this.referenceForm.value.modifiedDate,
+          refOrgId: this.referenceForm.value.refOrgId,
+          refCreatedBy: this.referenceForm.value.refCreatedBy,
+          refModifiedBy: this.referenceForm.value.refModifiedBy,
         };
-        this.reference.addReference(data).subscribe((res: any) => {
-          console.log(res);
-          window.location.reload();
-
-          // this.referenceForm.reset();
+        this.reference.addReference(data).subscribe({
+          next: () => {
+            this.toast.success('Record Saved Successfully');
+            this.router.navigate(['reference']);
+          },
+          error: () => this.toast.danger('Failed to save reference'),
         });
       }
+    } else {
+      this.toast.danger('Please enter reference name');
     }
   }
 
   getReferenceById() {
-    this.reference.getReferenceById(this.refId).subscribe((res: any) => {
-      console.log(res);
-      // this.form.controls['dept'].setValue(selected.id);
-      this.referenceForm.controls.referenceId.setValue(res.referenceId)
-      this.referenceForm.controls.refName.setValue(res.name);
-      this.referenceForm.controls.refDescription.setValue(res.description);
-      this.referenceForm.controls.refOrgId.setValue(res.refOrgId);
-      this.referenceForm.controls.isActive.setValue(res.isActive);
-      this.referenceForm.controls.isDeleted.setValue(res.isDeleted);
-      this.referenceForm.controls.refCreatedBy.setValue(res.refCreatedBy);
-      this.referenceForm.controls.createdDate.setValue(res.createdDate);
-      this.referenceForm.controls.refModifiedBy.setValue(res.refModifiedBy);
-      this.referenceForm.controls.modifiedDate.setValue(res.modifiedDate);
+    this.reference.getReferenceById(this.refId).subscribe({
+      next: (res: any) => {
+        this.referenceForm.controls.referenceId.setValue(res.referenceId);
+        this.referenceForm.controls.refName.setValue(res.name);
+        this.referenceForm.controls.refDescription.setValue(res.description);
+        this.referenceForm.controls.refOrgId.setValue(res.refOrgId);
+        this.referenceForm.controls.isActive.setValue(res.isActive);
+        this.referenceForm.controls.isDeleted.setValue(res.isDeleted);
+        this.referenceForm.controls.refCreatedBy.setValue(res.refCreatedBy);
+        this.referenceForm.controls.createdDate.setValue(res.createdDate);
+        this.referenceForm.controls.refModifiedBy.setValue(res.refModifiedBy);
+        this.referenceForm.controls.modifiedDate.setValue(res.modifiedDate);
+      },
+      error: () => this.toast.danger('Failed to load reference'),
     });
   }
 }

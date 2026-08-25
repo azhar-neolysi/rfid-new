@@ -46,8 +46,11 @@ export class AddLocationPage implements OnInit {
   }
 
   loadLocation() {
-    this.locationService.getLocation(this.locationId!).subscribe((res: Location) => {
-      this.locationForm.patchValue(res as any);
+    this.locationService.getLocation(this.locationId!).subscribe({
+      next: (res: Location) => {
+        this.locationForm.patchValue(res as any);
+      },
+      error: () => this.toast.danger('Failed to load location'),
     });
   }
 
@@ -58,14 +61,20 @@ export class AddLocationPage implements OnInit {
     }
     const data = this.locationForm.value;
     if (this.locationId) {
-      this.locationService.updateLocation(data as any).subscribe(() => {
-        this.toast.success('Location updated');
-        this.router.navigate(['location']);
+      this.locationService.updateLocation(data as any).subscribe({
+        next: () => {
+          this.toast.success('Location updated');
+          this.router.navigate(['location']);
+        },
+        error: () => this.toast.danger('Failed to save location'),
       });
     } else {
-      this.locationService.addLocation(data).subscribe(() => {
-        this.toast.success('Location created');
-        this.router.navigate(['location']);
+      this.locationService.addLocation(data).subscribe({
+        next: () => {
+          this.toast.success('Location created');
+          this.router.navigate(['location']);
+        },
+        error: () => this.toast.danger('Failed to save location'),
       });
     }
   }

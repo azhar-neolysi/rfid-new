@@ -1,0 +1,92 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button> </ion-menu-button>
+      <!-- <ion-icon name="add-sharp" slot="end"></ion-icon> -->
+    </ion-buttons>
+    <ion-title>Stock Transfer List</ion-title>
+    <ion-buttons slot="end" class="addbtn" (click)="stockTransferEntry()">
+      <!-- <ion-menu-button> </ion-menu-button> -->
+      <ion-icon name="add-sharp" slot="end"></ion-icon>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content [fullscreen]="true">
+  <ion-card>
+    <ion-input
+      (ionChange)="search($event)"
+      class="container__input"
+      type="text"
+      id="refName"
+      name="refName"
+      expand="full"
+      placeholder="Reference Name"
+    />
+  </ion-card>
+
+  <ion-card *ngFor="let ref of stockList">
+    <ion-card-header>
+      <ion-row>
+        <ion-col
+          ><ion-card-title
+            >Product ID:
+            <ion-label>{{ref.productEntryId}}</ion-label></ion-card-title
+          >
+          <ion-card-title
+            >Transfer Date:
+            <ion-label
+              >{{ref.date | date:'dd/MM/yyyy'}}</ion-label
+            ></ion-card-title
+          >
+          <ion-card-title
+            >Reason: <ion-label>{{ref.reason}}</ion-label></ion-card-title
+          >
+        </ion-col>
+        <ion-col size="auto"
+          ><ion-button
+            color="danger"
+            (click)="deleteTransferEntry(ref.stockTransferId)"
+            ><ion-icon name="trash-sharp"></ion-icon></ion-button
+        ></ion-col>
+      </ion-row>
+
+      <!-- <ion-card-subtitle></ion-card-subtitle> -->
+    </ion-card-header>
+
+    <ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col>
+            <ion-card-title
+              >Source Point:
+              <ion-label
+                >{{ref.refRefListSourcePoint}}</ion-label
+              ></ion-card-title
+            >
+            <ion-card-title
+              >Destination Point:
+              <ion-label
+                >{{ref.refRefListDestinationPoint}}</ion-label
+              ></ion-card-title
+            >
+          </ion-col>
+          <ion-col size="auto"
+            ><ion-button (click)="editTransferEntry(ref.stockTransferId)">
+              <ion-icon name="create-sharp"></ion-icon></ion-button
+          ></ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+    <!-- <ion-grid>
+      <ion-row>
+        <ion-col
+          ><ion-button> <ion-icon name="create-sharp"></ion-icon></ion-button
+        ></ion-col>
+        <ion-col
+          ><ion-button color="danger" (click)="deleteRef(ref.referenceId)"
+            ><ion-icon name="trash-sharp"></ion-icon></ion-button
+        ></ion-col>
+      </ion-row>
+    </ion-grid> -->
+  </ion-card>
+</ion-content>

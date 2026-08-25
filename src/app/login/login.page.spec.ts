@@ -1,8 +1,7 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ToastController } from '@ionic/angular';
-import { of, throwError } from 'rxjs';
 import { LoginPage } from './login.page';
 import { AuthService } from '../services/auth.service';
 
@@ -14,7 +13,7 @@ describe('LoginPage', () => {
   let toastSpy: jasmine.SpyObj<ToastController>;
 
   beforeEach(async () => {
-    authSpy = jasmine.createSpyObj('AuthService', ['login']);
+    authSpy = jasmine.createSpyObj('AuthService', ['setLoggedIn']);
     routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     toastSpy = jasmine.createSpyObj('ToastController', ['create']);
     const mockToast = { present: jasmine.createSpy('present') };
@@ -22,7 +21,7 @@ describe('LoginPage', () => {
 
     await TestBed.configureTestingModule({
       declarations: [LoginPage],
-      imports: [ReactiveFormsModule],
+      imports: [ReactiveFormsModule, FormsModule],
       providers: [
         { provide: AuthService, useValue: authSpy },
         { provide: Router, useValue: routerSpy },
@@ -44,7 +43,7 @@ describe('LoginPage', () => {
     component.login();
     tick();
 
-    expect(authSpy.login).not.toHaveBeenCalled();
+    expect(authSpy.setLoggedIn).not.toHaveBeenCalled();
     expect(toastSpy.create).toHaveBeenCalledWith(
       jasmine.objectContaining({ message: 'Please enter username and password' })
     );
@@ -56,42 +55,31 @@ describe('LoginPage', () => {
     component.login();
     tick();
 
-    expect(authSpy.login).not.toHaveBeenCalled();
+    expect(authSpy.setLoggedIn).not.toHaveBeenCalled();
     expect(toastSpy.create).toHaveBeenCalled();
   }));
 
-  it('should call auth.login and navigate on success', fakeAsync(() => {
-    authSpy.login.and.returnValue(of({ token: 'tok', expiresAt: 99999 }));
+  it('should log in and navigate on valid credentials', fakeAsync(() => {
     component.userName = 'admin';
-    component.password = 'pass123';
+    component.password = 'admin';
     component.login();
-    tick();
+    tick(500);
 
-    expect(authSpy.login).toHaveBeenCalledWith('admin', 'pass123');
+    expect(authSpy.setLoggedIn).toHaveBeenCalledWith(true);
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/dashboard']);
     expect(component.loading).toBeFalse();
   }));
 
-  it('should show toast and stop loading on login error', fakeAsync(() => {
-    authSpy.login.and.returnValue(throwError(() => new Error('fail')));
+  it('should show toast and stop loading on invalid credentials', fakeAsync(() => {
     component.userName = 'admin';
     component.password = 'wrong';
     component.login();
-    tick();
+    tick(500);
 
+    expect(authSpy.setLoggedIn).not.toHaveBeenCalled();
     expect(component.loading).toBeFalse();
     expect(toastSpy.create).toHaveBeenCalledWith(
       jasmine.objectContaining({ message: 'Invalid credentials' })
     );
   }));
-
-  it('should set loading=true while login is in progress', () => {
-    authSpy.login.and.returnValue(of({ token: 'tok', expiresAt: 99999 }));
-    component.userName = 'admin';
-    component.password = 'pass';
-    component.login();
-
-    // loading was set to true synchronously before subscribe completes
-    expect(component.loading).toBeFalse(); // false again after sync completion
-  });
 });

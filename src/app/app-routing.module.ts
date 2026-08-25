@@ -12,7 +12,7 @@ const routes: Routes = [
   },
   {
     path: '',
-    redirectTo: 'dashboard',
+    redirectTo: 'login',
     pathMatch: 'full'
   },
   {
@@ -167,6 +167,14 @@ const routes: Routes = [
   {
     path: 'find-tag',
     loadChildren: () => import('./find-tag/find-tag.module').then( m => m.FindTagPageModule)
+  },
+  {
+    path: 'tag-count',
+    loadChildren: () => import('./tag-count/tag-count.module').then( m => m.TagCountPageModule)
+  },
+  {
+    path: 'tag-locator',
+    loadChildren: () => import('./tag-locator/tag-locator.module').then( m => m.TagLocatorPageModule)
   },
   {
     path: 'tagging',

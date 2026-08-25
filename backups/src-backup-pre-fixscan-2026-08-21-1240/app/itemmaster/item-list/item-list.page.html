@@ -1,0 +1,94 @@
+<!-- <ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button> </ion-menu-button>
+    </ion-buttons>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Products</ion-title>
+    <ion-buttons slot="end" class="addbtn" (click)="addProduct()">
+      <ion-icon name="add-sharp" slot="end"></ion-icon>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header> -->
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button> </ion-menu-button>
+    </ion-buttons>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Products</ion-title>
+    <ion-buttons slot="end" class="addbtn" (click)="addProduct()">
+      <ion-icon name="add-sharp" slot="end"></ion-icon>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar color="dark">
+    <div style="display:flex;align-items:center;gap:6px;padding:0 12px;font-size:13px;">
+      <span [style.background]="readerConnected ? '#2dd36f' : '#eb445b'" style="width:10px;height:10px;border-radius:50%;display:inline-block;"></span>
+      <span *ngIf="readerConnected">Reader connected</span>
+      <span *ngIf="!readerConnected">Reader disconnected</span>
+    </div>
+  </ion-toolbar>
+</ion-header>
+<ion-content [fullscreen]="true">
+  <ion-card>
+    <ion-input inputmode="none" [(ngModel)]="barcodeScan" (ionInput)="search($event)" class="container__input"
+      type="text" id="tagId" name="tagId" expand="full" placeholder="Barcode" autofocus="true" />
+    <!-- <button type="reset" id="clear" class="close-icon"></button> -->
+    <!-- <button class="close-icon" type="reset"></button> -->
+  </ion-card>
+
+  <ion-card *ngFor="let prod of products;let i = index">
+    <!-- <h2> {{prod.productEntryId}}</h2> -->
+    <ion-card-header>
+      <ion-row>
+        <ion-col>
+          <ion-card-title>
+            <b>S.No:</b>
+            <ion-label>{{i+1}}</ion-label></ion-card-title>
+          <ion-card-title>
+            <b>Product Name:</b>
+            <ion-label>{{prod.productName}}</ion-label></ion-card-title>
+          <!-- <ion-card-title
+            ><b>productEntryId:</b>
+            <ion-label>{{prod.productEntryId}}</ion-label></ion-card-title
+          > -->
+          <ion-card-title><b>Print Name:</b><ion-label>{{prod.printName}}</ion-label></ion-card-title>
+          <!-- <ion-card-title
+            ><b>Brand:</b> <ion-label>{{prod.brand}}</ion-label></ion-card-title
+          >
+          <ion-card-title
+            ><b>Category:</b>
+            <ion-label>{{prod.category}}</ion-label></ion-card-title
+          >
+          <ion-card-title
+            ><b>Sub Category:</b>
+            <ion-label>{{prod.subCategory}}</ion-label></ion-card-title
+          >
+          <ion-card-title
+            ><b>Type:</b> <ion-label>{{prod.type}}</ion-label></ion-card-title
+          > -->
+        </ion-col>
+        <ion-col size="auto"><ion-button color="danger" (click)="deleteProduct(prod.productEntryId)"><ion-icon
+              name="trash-sharp"></ion-icon></ion-button></ion-col>
+      </ion-row>
+      <ion-grid>
+        <ion-row>
+          <ion-col>
+            <ion-card-title><b>MRP:</b> <ion-label>{{prod.mrp}}</ion-label></ion-card-title>
+            <ion-card-title><b>Cost Rate:</b>
+              <ion-label>{{prod.costRate}}</ion-label></ion-card-title>
+            <ion-card-title><b>Sales Rate:</b>
+              <ion-label>{{prod.salesRate}}</ion-label></ion-card-title>
+          </ion-col>
+          <ion-col size="auto"><ion-button (click)="editProduct(prod.barCode)">
+              <ion-icon name="create-sharp"></ion-icon></ion-button></ion-col>
+        </ion-row>
+      </ion-grid>
+      <!-- <ion-card-subtitle></ion-card-subtitle> -->
+    </ion-card-header>
+  </ion-card>
+</ion-content>

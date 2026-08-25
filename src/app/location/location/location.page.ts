@@ -60,9 +60,12 @@ export class LocationPage implements OnInit {
           text: 'Delete',
           role: 'destructive',
           handler: () => {
-            this.locationService.deleteLocation(loc.locationId).subscribe(() => {
-              this.toast.success('Location deleted');
-              this.loadLocations();
+            this.locationService.deleteLocation(loc.locationId).subscribe({
+              next: () => {
+                this.toast.success('Location deleted');
+                this.loadLocations();
+              },
+              error: () => this.toast.danger('Failed to delete location'),
             });
           },
         },

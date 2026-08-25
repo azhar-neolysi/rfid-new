@@ -59,9 +59,12 @@ export class RolePage implements OnInit {
           text: 'Delete',
           role: 'destructive',
           handler: () => {
-            this.roleService.deleteRole(role.roleId).subscribe(() => {
-              this.toast.success('Role deleted');
-              this.loadRoles();
+            this.roleService.deleteRole(role.roleId).subscribe({
+              next: () => {
+                this.toast.success('Role deleted');
+                this.loadRoles();
+              },
+              error: () => this.toast.danger('Failed to delete role'),
             });
           },
         },

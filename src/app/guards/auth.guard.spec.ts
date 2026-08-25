@@ -1,23 +1,21 @@
-import { TestBed } from '@angular/core/testing';
+﻿import { TestBed } from '@angular/core/testing';
 import { Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from '../services/auth.service';
 
 describe('AuthGuard', () => {
   let guard: AuthGuard;
-  let authSpy: jasmine.SpyObj<AuthService>;
+  let authMock: { isAuthenticated: boolean };
   let routerSpy: jasmine.SpyObj<Router>;
 
   beforeEach(() => {
-    authSpy = jasmine.createSpyObj('AuthService', [], {
-      isAuthenticated: false,
-    });
+    authMock = { isAuthenticated: false };
     routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
     TestBed.configureTestingModule({
       providers: [
         AuthGuard,
-        { provide: AuthService, useValue: authSpy },
+        { provide: AuthService, useValue: authMock },
         { provide: Router, useValue: routerSpy },
       ],
     });
@@ -39,19 +37,19 @@ describe('AuthGuard', () => {
   }
 
   it('should allow access when authenticated', () => {
-    (authSpy as any).isAuthenticated = true;
+    authMock.isAuthenticated = true;
     const result = guard.canActivate(fakeRoute(), fakeState('/dashboard'));
     expect(result).toBeTrue();
   });
 
   it('should block access when not authenticated', () => {
-    (authSpy as any).isAuthenticated = false;
+    authMock.isAuthenticated = false;
     const result = guard.canActivate(fakeRoute(), fakeState('/dashboard'));
     expect(result).toBeFalse();
   });
 
   it('should navigate to /login when not authenticated', () => {
-    (authSpy as any).isAuthenticated = false;
+    authMock.isAuthenticated = false;
     guard.canActivate(fakeRoute(), fakeState('/some-page'));
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/login'], {
       queryParams: { returnUrl: '/some-page' },
@@ -59,13 +57,13 @@ describe('AuthGuard', () => {
   });
 
   it('should not navigate when authenticated', () => {
-    (authSpy as any).isAuthenticated = true;
+    authMock.isAuthenticated = true;
     guard.canActivate(fakeRoute(), fakeState('/dashboard'));
     expect(routerSpy.navigate).not.toHaveBeenCalled();
   });
 
   it('should pass the return URL correctly', () => {
-    (authSpy as any).isAuthenticated = false;
+    authMock.isAuthenticated = false;
     guard.canActivate(fakeRoute(), fakeState('/stock-transfer/42'));
     expect(routerSpy.navigate).toHaveBeenCalledWith(
       ['/login'],

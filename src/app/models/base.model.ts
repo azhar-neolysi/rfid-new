@@ -1,6 +1,6 @@
 export interface BaseEntity {
-  isActive: string | null;
-  isDeleted: string | null;
+  isActive: boolean | null;
+  isDeleted: boolean | null;
   refCreatedBy: string | null;
   createdDate: string | null;
   refModifiedBy: string | null;

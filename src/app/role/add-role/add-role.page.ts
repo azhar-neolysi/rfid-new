@@ -40,15 +40,18 @@ export class AddRolePage implements OnInit {
   }
 
   loadRole() {
-    this.roleService.getRole(this.roleId!).subscribe((res: Role) => {
-      this.roleForm.patchValue({
-        roleId: res.roleId,
-        roleName: res.roleName,
-        description: res.description,
-        refOrgId: res.refOrgId,
-        isActive: res.isActive,
-        isDeleted: res.isDeleted,
-      } as any);
+    this.roleService.getRole(this.roleId!).subscribe({
+      next: (res: Role) => {
+        this.roleForm.patchValue({
+          roleId: res.roleId,
+          roleName: res.roleName,
+          description: res.description,
+          refOrgId: res.refOrgId,
+          isActive: res.isActive,
+          isDeleted: res.isDeleted,
+        } as any);
+      },
+      error: () => this.toast.danger('Failed to load role'),
     });
   }
 
@@ -59,14 +62,20 @@ export class AddRolePage implements OnInit {
     }
     const data = this.roleForm.value;
     if (this.roleId) {
-      this.roleService.updateRole(data as any).subscribe(() => {
-        this.toast.success('Role updated');
-        this.router.navigate(['role']);
+      this.roleService.updateRole(data as any).subscribe({
+        next: () => {
+          this.toast.success('Role updated');
+          this.router.navigate(['role']);
+        },
+        error: () => this.toast.danger('Failed to save role'),
       });
     } else {
-      this.roleService.addRole(data).subscribe(() => {
-        this.toast.success('Role created');
-        this.router.navigate(['role']);
+      this.roleService.addRole(data).subscribe({
+        next: () => {
+          this.toast.success('Role created');
+          this.router.navigate(['role']);
+        },
+        error: () => this.toast.danger('Failed to save role'),
       });
     }
   }

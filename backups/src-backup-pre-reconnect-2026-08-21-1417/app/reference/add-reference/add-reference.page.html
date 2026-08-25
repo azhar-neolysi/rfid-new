@@ -1,0 +1,44 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button> </ion-menu-button>
+    </ion-buttons>
+    <ion-title>Add Reference</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content [fullscreen]="true">
+  <div class="pagewrap">
+    <form class="form" id="form" [formGroup]="referenceForm">
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="refName"
+          name="refName"
+          required
+          formControlName="refName"
+        />
+        <label id="refName" for="refName" class="container__label"
+          >Reference Name</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="refDescription"
+          name="refDescription"
+          required
+          formControlName="refDescription"
+        />
+        <label id="refDescription" for="refDescription" class="container__label"
+          >Description</label
+        >
+      </div>
+
+      <button class="form__submit" id="submit" type="button" value="submit" (click)="addReference()">
+        Submit
+      </button>
+    </form>
+  </div>
+</ion-content>

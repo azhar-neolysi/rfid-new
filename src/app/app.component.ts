@@ -7,6 +7,7 @@ import {
 } from '@ionic/angular';
 import { App } from '@capacitor/app';
 import { HardwareRfidService } from './services/hardware-rfid.service';
+import { AuthService } from './services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -131,10 +132,18 @@ export class AppComponent implements OnInit {
     },
 
     {
-      title: 'Find Tags',
+      title: 'Find Tag',
       open: false,
-      icon: 'search-sharp',
-      url: '/find-tag',
+      icon: 'checkbox-sharp',
+      url: '/tag-count',
+      children: [],
+    },
+
+    {
+      title: 'Tag Locator',
+      open: false,
+      icon: 'locate-sharp',
+      url: '/tag-locator',
       children: [],
     },
   ];
@@ -143,6 +152,7 @@ export class AppComponent implements OnInit {
     private platform: Platform,
     private alertController: AlertController,
     private hardwareRfid: HardwareRfidService,
+    private auth: AuthService,
     @Optional() private routerOutlet?: IonRouterOutlet
   ) {
     this.platform.backButton.subscribeWithPriority(-1, () => {
@@ -194,5 +204,9 @@ export class AppComponent implements OnInit {
     });
 
     await alert.present();
+  }
+
+  logout(): void {
+    this.auth.logout();
   }
 }

@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+﻿import { TestBed } from '@angular/core/testing';
 import {
   HttpClientTestingModule,
   HttpTestingController,
@@ -29,7 +29,7 @@ describe('BaseService', () => {
 
   describe('GET', () => {
     it('should make a GET request with correct URL', () => {
-      (service as any).get('/items').subscribe((res: any) => {
+      (service as any).get('items').subscribe((res: any) => {
         expect(res).toEqual([{ id: 1 }]);
       });
 
@@ -41,7 +41,7 @@ describe('BaseService', () => {
 
   describe('POST', () => {
     it('should make a POST request with body', () => {
-      (service as any).post('/items', { name: 'test' }).subscribe((res: any) => {
+      (service as any).post('items', { name: 'test' }).subscribe((res: any) => {
         expect(res.id).toBe(1);
       });
 
@@ -54,7 +54,7 @@ describe('BaseService', () => {
 
   describe('PUT', () => {
     it('should make a PUT request with body', () => {
-      (service as any).put('/items/1', { name: 'updated' }).subscribe();
+      (service as any).put('items/1', { name: 'updated' }).subscribe();
 
       const req = httpMock.expectOne(`${baseUrl}items/1`);
       expect(req.request.method).toBe('PUT');
@@ -65,7 +65,7 @@ describe('BaseService', () => {
 
   describe('DELETE', () => {
     it('should make a DELETE request', () => {
-      (service as any).delete('/items/1').subscribe();
+      (service as any).delete('items/1').subscribe();
 
       const req = httpMock.expectOne(`${baseUrl}items/1`);
       expect(req.request.method).toBe('DELETE');
@@ -74,7 +74,7 @@ describe('BaseService', () => {
   });
 
   it('should handle typed responses', () => {
-    service['get']('/item/5').subscribe((item: any) => {
+    service['get']('item/5').subscribe((item: any) => {
       expect(item.id).toBe(5);
       expect(item.name).toBe('Widget');
     });

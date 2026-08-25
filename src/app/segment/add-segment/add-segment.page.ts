@@ -5,7 +5,9 @@ import {
   FormControl,
   Validators,
 } from '@angular/forms';
+import { Router } from '@angular/router';
 import { SegmentService } from '../segment.service';
+import { ToastrService } from 'src/app/services/toastr/toastr.service';
 @Component({
   selector: 'app-add-segment',
   templateUrl: './add-segment.page.html',
@@ -24,7 +26,9 @@ export class AddSegmentPage implements OnInit {
   });
   constructor(
     private formBuilder: FormBuilder,
-    private segment: SegmentService
+    private segment: SegmentService,
+    private router: Router,
+    private toast: ToastrService
   ) {}
 
   ngOnInit() {}
@@ -32,8 +36,7 @@ export class AddSegmentPage implements OnInit {
     this.excelUpload = !this.excelUpload ? true : false;
   }
   addSegment() {
-    if(this.segmentForm.valid){
-
+    if (this.segmentForm.valid) {
       if (this.segmentId) {
       } else {
         const data = {
@@ -43,15 +46,16 @@ export class AddSegmentPage implements OnInit {
           segmentName: this.segmentForm.value.segmentName,
           description: this.segmentForm.value.description,
         };
-        console.log(data);
-        // return;
-        this.segment.addSegment(data).subscribe((res: any) => {
-          console.log(res);
-          window.location.reload();
+        this.segment.addSegment(data).subscribe({
+          next: () => {
+            this.toast.success('Record Saved Successfully');
+            this.router.navigate(['segment']);
+          },
+          error: () => this.toast.danger('Failed to save segment'),
         });
       }
-    }else{
-      console.log('Form not Valid',this.segmentForm)
+    } else {
+      this.toast.danger('Please enter segment name');
     }
   }
   upload() {}

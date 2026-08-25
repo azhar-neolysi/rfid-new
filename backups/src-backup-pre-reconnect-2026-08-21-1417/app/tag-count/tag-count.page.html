@@ -1,0 +1,113 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Tag Count</ion-title>
+    <ion-buttons slot="end" (click)="exportExcel()">
+      <ion-icon name="cloud-download-sharp" id="export"></ion-icon>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar color="dark">
+    <div class="statusline">
+      <span [style.background]="readerConnected ? '#2dd36f' : '#eb445a'" class="dot"></span>
+      <span *ngIf="readerConnected">Reader connected</span>
+      <span *ngIf="!readerConnected">Reader disconnected</span>
+      <span *ngIf="loadingProducts">&nbsp;· Loading items...</span>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="count-panel">
+    <div class="counter-grid">
+      <div class="counter">
+        <div class="counter__value">{{ countedRows.length }}</div>
+        <div class="counter__label">Unique Tags</div>
+      </div>
+      <div class="counter">
+        <div class="counter__value">{{ totalReads }}</div>
+        <div class="counter__label">Total Reads</div>
+      </div>
+      <div class="counter">
+        <div class="counter__value">{{ readsPerMin }}</div>
+        <div class="counter__label">Reads/min</div>
+      </div>
+    </div>
+
+    <div class="chip-row">
+      <ion-chip color="success">Found: {{foundRows.length}}</ion-chip>
+      <ion-chip color="warning">Missing: {{missingRows.length}}</ion-chip>
+      <ion-chip color="danger">Unknown: {{unknownRows.length}}</ion-chip>
+    </div>
+
+    <div class="action-row">
+      <button class="form__submit" type="button" (click)="startCount()"
+        [disabled]="counting || !readerConnected">
+        {{counting ? 'Counting...' : 'Start Count'}}
+      </button>
+      <button class="form__submit form__stop" type="button" (click)="stopCount()" [disabled]="!counting">
+        Stop
+      </button>
+      <button class="form__submit form__reset" type="button" (click)="newSession()"
+        [disabled]="counting || !countedRows.length">
+        New Session
+      </button>
+    </div>
+  </div>
+
+  <ion-segment [(ngModel)]="segment" mode="ios" class="seg">
+    <ion-segment-button value="found">Found</ion-segment-button>
+    <ion-segment-button value="missing">Missing</ion-segment-button>
+    <ion-segment-button value="unknown">Unknown</ion-segment-button>
+  </ion-segment>
+
+  <div *ngIf="segment === 'found'" class="taglist">
+    <div class="sort-row">
+      <ion-toggle [(ngModel)]="sortFoundBySignal">Sort by signal (strongest first)</ion-toggle>
+    </div>
+    <ion-item *ngFor="let row of displayFoundRows; trackBy: trackByEpc">
+      <ion-label>
+        <h2>{{row.product?.productName || row.epc}}</h2>
+        <p>{{row.epc}} · {{row.reads}} reads · {{row.lastRssi !== undefined ? row.lastRssi + ' dBm' : '--'}}
+          · ≈{{estimateDistance(row.lastRssi) ?? '--'}} m
+          <ng-container *ngIf="row.channelIndex !== undefined"> · Ch{{row.channelIndex}} ~{{channelMhz(row.channelIndex)}} MHz</ng-container></p>
+      </ion-label>
+      <div class="signal-bars" slot="end" *ngIf="row.lastRssi !== undefined">
+        <span class="bar" [class.filled]="signalLevel(row.lastRssi) >= 1"></span>
+        <span class="bar" [class.filled]="signalLevel(row.lastRssi) >= 2"></span>
+        <span class="bar" [class.filled]="signalLevel(row.lastRssi) >= 3"></span>
+        <span class="bar" [class.filled]="signalLevel(row.lastRssi) >= 4"></span>
+      </div>
+    </ion-item>
+    <div *ngIf="!foundRows.length" class="empty">No tags matched yet</div>
+  </div>
+
+  <div *ngIf="segment === 'missing'" class="taglist">
+    <ion-item *ngFor="let row of missingRows; trackBy: trackByEpc">
+      <ion-label>
+        <h2>{{row.product?.productName || row.epc}}</h2>
+        <p>{{row.epc}}</p>
+      </ion-label>
+    </ion-item>
+    <div *ngIf="!missingRows.length" class="empty empty--ok">All expected items counted</div>
+  </div>
+
+  <div *ngIf="segment === 'unknown'" class="taglist">
+    <ion-item *ngFor="let row of unknownRows; trackBy: trackByEpc">
+      <ion-label>
+        <h2>{{row.epc}}</h2>
+        <p>Not in item master · {{row.reads}} reads · {{row.lastRssi !== undefined ? row.lastRssi + ' dBm' : '--'}}
+          · ≈{{estimateDistance(row.lastRssi) ?? '--'}} m
+          <ng-container *ngIf="row.channelIndex !== undefined"> · Ch{{row.channelIndex}} ~{{channelMhz(row.channelIndex)}} MHz</ng-container></p>
+      </ion-label>
+      <div class="signal-bars" slot="end" *ngIf="row.lastRssi !== undefined">
+        <span class="bar" [class.filled]="signalLevel(row.lastRssi) >= 1"></span>
+        <span class="bar" [class.filled]="signalLevel(row.lastRssi) >= 2"></span>
+        <span class="bar" [class.filled]="signalLevel(row.lastRssi) >= 3"></span>
+        <span class="bar" [class.filled]="signalLevel(row.lastRssi) >= 4"></span>
+      </div>
+    </ion-item>
+    <div *ngIf="!unknownRows.length" class="empty">No unknown tags scanned</div>
+  </div>
+</ion-content>
