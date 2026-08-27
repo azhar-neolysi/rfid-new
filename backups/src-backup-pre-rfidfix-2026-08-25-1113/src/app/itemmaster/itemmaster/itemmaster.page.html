@@ -1,0 +1,345 @@
+<!-- <ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button> </ion-menu-button>
+    </ion-buttons>
+    <ion-title>Product Master</ion-title>
+  </ion-toolbar>
+</ion-header> -->
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button> </ion-menu-button>
+    </ion-buttons>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>Product Entry</ion-title>
+    <ion-buttons slot="end" (click)="excelUploadEnable()">
+      <ion-icon name="cloud-upload-sharp" id="upload"></ion-icon>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar color="dark">
+    <div style="display:flex;align-items:center;gap:6px;padding:0 12px;font-size:13px;">
+      <span [style.background]="readerConnected ? '#2dd36f' : '#eb445b'" style="width:10px;height:10px;border-radius:50%;display:inline-block;"></span>
+      <span *ngIf="readerConnected">Reader connected</span>
+      <span *ngIf="!readerConnected">Reader disconnected</span>
+    </div>
+  </ion-toolbar>
+</ion-header>
+<ion-content [fullscreen]="true" *ngIf="!excelUpload">
+  <div class="pagewrap">
+    <form class="form" id="form" [formGroup]="productForm">
+      <div class="container">
+        <input class="container__input" type="text" id="productName" name="productName" value=""
+          formControlName="productName" />
+        <label id="productName" for="productName" class="container__label">Name <span>*</span></label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="text" id="printName" name="printName" value=""
+          formControlName="printName" />
+        <label id="printName" for="printName" class="container__label">Print Name <span>*</span></label>
+      </div>
+      <div class="container">
+        <input inputmode="none" class="container__input" type="text" id="rfidcode" name="rfidcode" value=""
+          formControlName="rfidcode" autofocus="true" (input)="calculateByteLength($event)" />
+        <!-- <button (click)="clearRfid()" ></button> -->
+        <label id="rfidcode" for="rfidcode" class="container__label">RFID Code </label>
+        <ion-grid>
+          <ion-row>
+            <ion-col></ion-col>
+            <ion-col>
+              <!-- <ion-button color="danger"
+                ><ion-icon slot="end" name="star"></ion-icon>
+              </ion-button> -->
+            </ion-col>
+            <ion-col>
+              <ion-button color="danger" (click)="clear()"><ion-icon name="close"></ion-icon></ion-button>
+              <!-- <ion-button (click)="editSale()"><ion-icon name="arrow-redo"></ion-icon> </ion-button> -->
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </div>
+      <div class="container">
+        <input class="container__input" type="text" id="itemCode" name="itemCode" value="" formControlName="itemCode" />
+        <label id="itemCode" for="itemCode" class="container__label">Item Code</label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="text" id="barCode" name="barCode" value="" formControlName="barCode"
+          inputmode="none" />
+        <label id="userLabel" for="barCode" class="container__label">Barcode <span>*</span></label>
+      </div>
+      <!-- <div class="container">
+        <input class="container__input" type="text" id="itemCode" name="itemCode" value="" formControlName="itemCode" />
+        <label id="itemCode" for="itemCode" class="container__label">Style  Code</label>
+      </div> -->
+      <!-- <div class="container">
+        <input class="container__input" type="text" id="barCode" name="barCode" value="" formControlName="barCode"
+          inputmode="none" />
+        <label id="userLabel" for="barCode" class="container__label">Barcode <span>*</span></label>
+      </div> -->
+      <!-- <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="brand"
+          name="brand"
+          value=""
+          formControlName="brand"
+          
+        />
+        <label id="brand" for="brand" class="container__label"
+          >Brand</label
+        >
+      </div> -->
+      <!-- <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="type"
+          name="type"
+          value=""
+          
+          formControlName="type"
+        />
+        <label id="type" for="type" class="container__label"
+          >Type</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="style"
+          name="style"
+          value=""
+          
+          formControlName="style"
+        />
+        <label id="style" for="style" class="container__label"
+          >Style</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="pattern"
+          name="pattern"
+          value=""
+          
+          formControlName="pattern"
+        />
+        <label id="pattern" for="pattern" class="container__label"
+          >Pattern</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="size"
+          name="size"
+          value=""
+          
+          formControlName="size"
+        />
+        <label id="size" for="size" class="container__label"
+          >Size</label
+        >
+      </div> -->
+      <div class="container">
+        <input class="container__input" type="text" id="styleCode" name="styleCode" value=""
+          formControlName="styleCode" />
+        <label id="styleCode" for="styleCode" class="container__label">Style Code</label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="text" id="rack" name="rack" value="" formControlName="rack" />
+        <label id="rack" for="rack" class="container__label">Rack <span>*</span></label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="text" id="eancode" name="eancode" value="" formControlName="eancode" />
+        <label id="eancode" for="eancode" class="container__label">EAN <span>*</span></label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="date" id="date" name="date" value="" formControlName="date"
+          [max]="maxDate" />
+        <label id="date" for="date" class="container__label">Date</label>
+      </div>
+      <!-- <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="category"
+          name="category"
+          value=""
+          formControlName="category"
+          
+        />
+        <label id="category" for="category" class="container__label"
+          >Category</label
+        >
+      </div> -->
+      <!-- <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="subCategory"
+          name="subCategory"
+          value=""
+          formControlName="subCategory"
+          
+        />
+        <label id="subCategory" for="subCategory" class="container__label"
+          >Sub Category</label
+        >
+      </div> -->
+      <div class="container">
+        <input class="container__input" type="text" id="hsnsaccode" name="hsnsaccode" value=""
+          formControlName="hsnsaccode" />
+        <label id="hsnsaccode" for="hsnsaccode" class="container__label">Hsnsac Code <span>*</span></label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="date" id="manufactureDate" name="manufactureDate" value=""
+          formControlName="manufactureDate" [max]="maxDate" />
+        <label id="manufactureDate" for="manufactureDate" class="container__label">Manufacture Date</label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="date" id="expiryDate" name="expiryDate" value=""
+          formControlName="expiryDate" [max]="maxDate" />
+        <label id="expiryDate" for="expiryDate" class="container__label">Expiry Date</label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="number" id="itemWeight" name="itemWeight" value=""
+          formControlName="itemWeight" />
+        <label id="itemWeight" for="itemWeight" class="container__label">Item Weight</label>
+      </div>
+      <div class="container">
+
+        <select formControlName="refRefListUomid" class="container__input">
+          <option [ngValue]="null" disabled selected="selected">
+            Select UoM
+          </option>
+          <option *ngFor="let ref of uom" [ngValue]="ref.referenceListId">
+            {{ref.referenceListIdName}}
+          </option>
+        </select>
+        <label id="refRefListUomid" for="refRefListUomid" class="container__label">UoM</label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="text" id="gst" name="gst" value="" formControlName="gst" />
+        <label id="gst" for="gst" class="container__label">GST</label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="number" id="discount" name="discount" value=""
+          formControlName="discount" />
+        <label id="discount" for="discount" class="container__label">Discount</label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="number" id="quantity" name="quantity" value=""
+          formControlName="quantity" />
+        <label id="quantity" for="quantity" class="container__label">Quantity <span>*</span></label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="number" id="costRate" name="costRate" value=""
+          formControlName="costRate" />
+        <label id="costRate" for="costRate" class="container__label">Cost Rate <span>*</span></label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="number" id="salesRate" name="salesRate" value=""
+          formControlName="salesRate" />
+        <label id="salesRate" for="salesRate" class="container__label">Sales Rate <span>*</span></label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="number" id="mrp" name="mrp" value="" formControlName="mrp" />
+        <label id="mrp" for="mrp" class="container__label">MRP <span>*</span></label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="number" id="amount" name="amount" value="" formControlName="amount" />
+        <label id="amount" for="amount" class="container__label">Amount <span>*</span></label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="text" id="mcDesc" name="mcDesc" value="" formControlName="mcDesc" />
+        <label id="mcDesc" for="mcDesc" class="container__label">MC Description</label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="text" id="description" name="description" value=""
+          formControlName="description" />
+        <label id="description" for="description" class="container__label">Description</label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="number" id="openingQty" name="openingQty" value=""
+          formControlName="openingQty" />
+        <label id="openingQty" for="openingQty" class="container__label">Opening Qty</label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="number" id="closingQty" name="closingQty" value=""
+          formControlName="closingQty" />
+        <label id="closingQty" for="closingQty" class="container__label">Closing Qty</label>
+      </div>
+      <div class="container">
+
+        <select formControlName="segmentName" class="container__input" (change)="getSegmentRef()">
+          <option [ngValue]="null" disabled selected="selected">
+            Select Segment
+          </option>
+          <option *ngFor="let ref of segments" [ngValue]="ref.segmentName">
+            {{ref.segmentName}}
+          </option>
+        </select>
+        <label id="segment" for="segment" class="container__label">Segment</label>
+      </div>
+      <div class="container" *ngFor="let segment of segmentList; let i = index">
+        <select [formControlName]="i" [(ngModel)]="dynamicValues[i]" name="segList" class="container__input"
+          (change)="addSegmentList($event,segment.element)">
+          <option [ngValue]="null" disabled selected="selected">
+            Select {{segment.element}}
+          </option>
+          <option *ngFor="let ref of segment.list" [value]="ref.referenceListId">
+            {{ref.referenceListName}}
+          </option>
+        </select>
+        <label id="segment" for="segment" class="container__label">{{segment.element}}</label>
+      </div>
+      <button class="form__submit" id="submit" type="button" value="submit" (click)="addProduct()">
+        Submit
+      </button>
+    </form>
+  </div>
+</ion-content>
+<ion-content [fullscreen]="true" *ngIf="excelUpload">
+  <div class="pagewrap">
+    <form class="form" id="form" [formGroup]="productForm">
+      <div class="container">
+        <input class="container__input" type="date" id="printName" name="printName" value=""
+          formControlName="date" />
+        <label id="printName" for="printName" class="container__label">Date <span>*</span></label>
+      </div>
+      <div class="container">
+        <select class="container__input" formControlName="uploadType" name="uploadType" id="uploadType">
+          <option value="" disabled selected="selected">
+            Select Type
+          </option>
+          <option value="bar">
+            Barcode
+          </option>
+          <option value="uan">
+            UAN Code
+          </option>
+
+        </select>
+        <!-- <button (click)="clearRfid()" ></button> -->
+        <label id="rfidcode" for="rfidcode" class="container__label">Excel Type</label>
+
+      </div>
+      <div class="container">
+        <input class="container__input" type="file" id="" name="tagId" value="" (change)="onFileSelected($event)" />
+        <label id="userLabel" for="tagId" class="container__label">Excel</label>
+      </div>
+
+      <button class="form__submit" id="submit" type="button" value="submit" (click)="upload()">
+        Upload
+      </button>
+    </form>
+  </div>
+</ion-content>

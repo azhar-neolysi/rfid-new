@@ -1,0 +1,48 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button> </ion-menu-button>
+      <!-- <ion-icon name="add-sharp" slot="end"></ion-icon> -->
+    </ion-buttons>
+    <ion-title>Tagging</ion-title>
+  </ion-toolbar>
+  <ion-toolbar color="dark">
+    <div style="display:flex;align-items:center;gap:6px;padding:0 12px;font-size:13px;">
+      <span [style.background]="readerConnected ? '#2dd36f' : '#eb445b'" style="width:10px;height:10px;border-radius:50%;display:inline-block;"></span>
+      <span *ngIf="readerConnected">Reader connected</span>
+      <span *ngIf="!readerConnected">Reader disconnected</span>
+    </div>
+  </ion-toolbar>
+</ion-header>
+<ion-content [fullscreen]="true">
+  <ion-card>
+    <ion-input
+      #myInput
+      (ionInput)="search($event)"
+      class="container__input"
+      type="text"
+      id="tagId"
+      name="tagId"
+      expand="full"
+      placeholder="Barcode"
+      [(ngModel)]="tagId"
+      inputmode="none"
+    />
+  </ion-card>
+  <ion-grid>
+    <ion-row>
+      <ion-col></ion-col>
+      <ion-col>
+        <!-- <ion-button color="danger"
+          ><ion-icon slot="end" name="star"></ion-icon>
+        </ion-button> -->
+      </ion-col>
+      <ion-col>
+        <ion-button color="danger" (click)="clear()"
+          ><ion-icon name="close"></ion-icon
+        ></ion-button>
+        <!-- <ion-button (click)="editSale()"><ion-icon name="arrow-redo"></ion-icon> </ion-button> -->
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

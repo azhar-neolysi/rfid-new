@@ -1,0 +1,157 @@
+.statusline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  font-size: 13px;
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+}
+
+#export {
+  color: #fff;
+  font-size: 26px;
+  margin-right: 12px;
+}
+
+.count-panel {
+  padding: 12px;
+}
+
+.counter-grid {
+  display: flex;
+  gap: 8px;
+
+  .counter {
+    flex: 1;
+    background: #fff;
+    border: 2px solid var(--brand-navy);
+    border-radius: 6px;
+    text-align: center;
+    padding: 10px 4px;
+
+    &__value {
+      font-size: 26px;
+      font-weight: bold;
+      color: #000;
+      line-height: 1.1;
+    }
+
+    &__label {
+      font-size: 11px;
+      font-weight: bold;
+      text-transform: uppercase;
+      color: #666;
+    }
+  }
+}
+
+.chip-row {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 10px;
+
+  ion-chip {
+    margin: 0;
+    font-weight: bold;
+  }
+}
+
+.action-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+
+  .form__submit {
+    flex: 1;
+    margin: 0;
+    padding: 0.7em 0.5em;
+    font-size: 0.85rem;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    &.form__stop:not(:disabled) {
+      background-color: var(--ion-color-danger, #eb445a);
+      box-shadow: -3px 5px #a02838;
+    }
+
+    &.form__reset:not(:disabled) {
+      background-color: var(--ion-color-medium, #92949c);
+      box-shadow: -3px 5px #5b5d64;
+    }
+  }
+}
+
+.seg {
+  margin: 8px 12px 0;
+}
+
+.sort-row {
+  padding: 0 8px;
+
+  ion-toggle {
+    font-size: 13px;
+    font-weight: bold;
+    color: #444;
+  }
+}
+
+.taglist {
+  margin: 8px 12px 24px;
+  background: #fff;
+  border-radius: 6px;
+
+  ion-item h2 {
+    font-weight: bold;
+  }
+}
+
+.signal-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 16px;
+  margin-right: 8px;
+
+  .bar {
+    width: 4px;
+    border-radius: 1px;
+    background: #d0d0d0;
+
+    &:nth-child(1) { height: 4px; }
+    &:nth-child(2) { height: 8px; }
+    &:nth-child(3) { height: 12px; }
+    &:nth-child(4) { height: 16px; }
+
+    &.filled:nth-child(1) { background: #eb445a; }
+    &.filled:nth-child(2) { background: #ffc409; }
+    &.filled:nth-child(3) { background: #8bc34a; }
+    &.filled:nth-child(4) { background: #2dd36f; }
+  }
+}
+
+.empty {
+  text-align: center;
+  padding: 28px 12px;
+  color: #777;
+  font-weight: bold;
+
+  &--ok {
+    color: #2dd36f;
+  }
+}
+
+.locate-ico {
+  color: #3880ff;
+  font-size: 20px;
+  margin-left: 6px;
+}

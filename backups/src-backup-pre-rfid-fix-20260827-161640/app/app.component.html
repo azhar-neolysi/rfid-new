@@ -1,0 +1,74 @@
+<ion-menu contentId="content">
+  <ion-header>
+    <ion-toolbar color="primary" class="sidebar-header">
+      <div class="sidebar-logo">
+        <img src="assets/logos/rfid-icon-light.png" alt="RFID Logo" />
+        <ion-title>RFID</ion-title>
+      </div>
+    </ion-toolbar>
+  </ion-header>
+  <ion-content>
+    <div class="reader-status">
+      <span class="reader-dot" [class.connected]="readerConnected"></span>
+      <span *ngIf="readerConnected">Reader{{ readerName ? ': ' + readerName : '' }}</span>
+      <span *ngIf="!readerConnected">Reader disconnected</span>
+    </div>
+    <div *ngFor="let p of pages">
+      <ion-menu-toggle *ngIf="p.children.length === 0">
+        <ion-item  class="active" [routerLink]="p.url" >
+          <ion-icon [name]="p.icon" slot="start"></ion-icon>
+          <ion-label>{{p.title}}</ion-label>
+        </ion-item>
+      </ion-menu-toggle>
+      <ion-item
+        class="active"
+        button
+        *ngIf="p.children.length > 0"
+        (click)="p.open = !p.open"
+        [class.active-parent]="p.open"
+        detail="false"
+      >
+        <!-- <ion-icon slot="end" name="arrow-forward" *ngIf="!p.open"></ion-icon> -->
+        <ion-icon
+          slot="end"
+          name="caret-forward-outline"
+          *ngIf="!p.open"
+        ></ion-icon>
+        <!-- <ion-icon slot="end" name="arrow-down" *ngIf="p.open"></ion-icon> -->
+        <ion-icon
+          slot="end"
+          name="caret-down-outline"
+          *ngIf="p.open"
+        ></ion-icon>
+        <ion-icon [name]="p.icon" slot="start"></ion-icon>
+        <ion-label>{{ p.title }}</ion-label>
+      </ion-item>
+
+      <ion-list *ngIf="p.open">
+        <ion-menu-toggle>
+          <ion-item
+            class="sub-item active"
+            *ngFor="let sub of p.children"
+            [routerLink]="sub.url"
+            (click)="p.open = !p.open"
+          >
+            <ion-icon [name]="sub.icon" slot="start"></ion-icon>
+            <ion-label>{{ sub.title }}</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+      </ion-list>
+    </div>
+  </ion-content>
+  <ion-footer>
+    <div class="logout-wrapper">
+      <button class="logout-btn" (click)="logout()">
+        <ion-icon name="log-out-outline"></ion-icon>
+        <span>Logout</span>
+      </button>
+    </div>
+  </ion-footer>
+</ion-menu>
+<ion-router-outlet id="content"></ion-router-outlet>
+
+<!-- <ion-app>
+</ion-app> -->

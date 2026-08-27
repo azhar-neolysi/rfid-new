@@ -1,0 +1,133 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button> </ion-menu-button>
+    </ion-buttons>
+    <ion-title>RFID Master</ion-title>
+    <ion-buttons slot="end" (click)="excelUploadEnable()">
+      <ion-icon name="cloud-upload-sharp" id="upload"></ion-icon>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar color="dark" *ngIf="!excelUpload">
+    <div style="display:flex;align-items:center;gap:6px;padding:0 12px;font-size:13px;">
+      <span [style.background]="readerConnected ? '#2dd36f' : '#eb445b'" style="width:10px;height:10px;border-radius:50%;display:inline-block;"></span>
+      <span *ngIf="readerConnected">Reader connected</span>
+      <span *ngIf="!readerConnected">Reader disconnected</span>
+    </div>
+  </ion-toolbar>
+</ion-header>
+<ion-content [fullscreen]="true" *ngIf="!excelUpload">
+  <div class="pagewrap">
+    <form class="form" id="form" [formGroup]="rfidForm">
+      <div class="container">
+        <input class="container__input" type="text" id="tagId" name="tagId" value="" required formControlName="tagID" />
+        <label id="userLabel" for="tagId" class="container__label">Tag ID</label>
+        <span *ngIf="readingDetails" class="reading-hint">Reading TID / User memory...</span>
+      </div>
+      <div class="container">
+        <input class="container__input" type="text" id="tagSize" name="tagSize" value="" required
+          formControlName="tagSize" />
+        <label id="tagSize" for="tagSize" class="container__label">Tag Size</label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="text" id="tagModel" name="tagModel" value="" required
+          formControlName="tagModel" />
+        <label id="userLabel" for="tagModel" class="container__label">Tag Model</label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="text" id="tagStatus" name="tagStatus" value="" required
+          formControlName="tagStatus" />
+        <label id="tagStatus" for="tagStatus" class="container__label">Tag Status</label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="text" id="frequency" name="frequency" value="" required
+          formControlName="frequency" />
+        <label id="frequency" for="frequency" class="container__label">Frequency</label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="date" id="frequency" name="date" formControlName="date" value="" required
+          [max]="maxDate" />
+        <label id="frequency" for="frequency" class="container__label">Date</label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="text" id="type" name="type" value="" formControlName="type" required />
+        <label id="type" for="type" class="container__label">Type</label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="text" id="style" name="style" value="" formControlName="style" required />
+        <label id="style" for="style" class="container__label">Style</label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="text" id="size" name="size" value="" formControlName="size" required />
+        <label id="size" for="size" class="container__label">Size</label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="text" id="encodingType" name="encodingType" value="" required
+          formControlName="encodingType" [readonly]="scanLocked" />
+        <label id="encodingType" for="encodingType" class="container__label">Encoding Type</label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="text" id="sysMemoryId" name="sysMemoryId" formControlName="sysMemoryId"
+          value="" required [readonly]="scanLocked" />
+        <label id="sysMemoryId" for="sysMemoryId" class="container__label">Sys Memory Id</label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="text" id="systemId" name="systemId" formControlName="systemId" value=""
+          required [readonly]="scanLocked" />
+        <label id="systemId" for="systemId" class="container__label">System ID</label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="text" id="userMemoryId" name="userMemoryId" formControlName="userMemoryId"
+          value="" required [readonly]="scanLocked" />
+        <label id="userMemoryId" for="userMemoryId" class="container__label">User Memory ID</label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="text" id="memorySize" name="memorySize" value=""
+          formControlName="memorySize" required [readonly]="scanLocked" />
+        <label id="memorySize" for="memorySize" class="container__label">Memory Size</label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="text" id="isRewritable" name="isRewritable" value="" required />
+        <label id="isRewritable" for="isRewritable" class="container__label">Is Rewritable</label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="text" id="isAssigned" name="isAssigned" value="" required />
+        <label id="isAssigned" for="isAssigned" class="container__label">Is Assigned</label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="text" id="descritpion1" name="descritpion1" value=""
+          formControlName="descritpion1" required />
+        <label id="descritpion1" for="descritpion1" class="container__label">Descritpion-1</label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="text" id="descritpion2" name="descritpion2" value=""
+          formControlName="descritpion2" required />
+        <label id="descritpion2" for="descritpion2" class="container__label">Descritpion-2</label>
+      </div>
+      <div class="container">
+        <input class="container__input" type="text" id="descritpion2" name="descritpion3" formControlName="descritpion3"
+          value="" required />
+        <label id="descritpion3" for="descritpion3" class="container__label">Descritpion-3</label>
+      </div>
+
+      <button class="form__submit" id="submit" type="button" value="submit" (click)="addRFID()">
+        Submit
+      </button>
+    </form>
+  </div>
+</ion-content>
+<ion-content [fullscreen]="true" *ngIf="excelUpload">
+  <div class="pagewrap">
+    <form class="form" id="form">
+      <div class="container">
+        <input class="container__input" type="file" id="" name="tagId" value="" required
+          (change)="onFileSelected($event)" />
+        <label id="userLabel" for="tagId" class="container__label">Excel</label>
+      </div>
+
+      <button class="form__submit" id="submit" type="button" value="submit" (click)="upload()">
+        Upload
+      </button>
+    </form>
+  </div>
+</ion-content>
