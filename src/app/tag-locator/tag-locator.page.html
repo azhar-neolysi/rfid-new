@@ -32,6 +32,16 @@
         </button>
       </div>
 
+      <!-- Excel upload -->
+      <div class="upload-row">
+        <label class="upload-btn pill pill--upload">
+          <ion-icon name="document-text-outline"></ion-icon>
+          Upload Excel
+          <input type="file" accept=".xlsx,.xls,.csv" hidden
+            (change)="onFileSelected($event)" />
+        </label>
+      </div>
+
       <!-- Target chips -->
       <div class="chip-list" *ngIf="targets.length">
         <span class="target-chip" *ngFor="let t of targets; trackBy: trackByEpc">

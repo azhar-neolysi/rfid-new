@@ -50,9 +50,14 @@ export class ItemListPage implements OnInit, OnDestroy {
   ionViewDidEnter() {
     this.pageActive = true;
     this.barcodeScan = null;
+    this.hardwareRfid
+      .ensureConnected()
+      .then(() => this.hardwareRfid.startTriggerScan())
+      .catch(() => {});
   }
   ionViewDidLeave() {
     this.pageActive = false;
+    this.hardwareRfid.stopTriggerScan().catch(() => {});
   }
   getProducts() {
     this.product.GetLastProducts().subscribe({

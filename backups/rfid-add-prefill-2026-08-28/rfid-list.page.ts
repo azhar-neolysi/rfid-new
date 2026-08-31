@@ -86,16 +86,9 @@ export class RfidListPage implements OnInit, OnDestroy {
       this.scannedNotFound = false;
       this.scannedTag = '';
     } else {
-      const matches = this.rfidItemsTemp.filter((item: any) =>
+      this.rfidItems = this.rfidItemsTemp.filter((item: any) =>
         item.tagId.toLowerCase().includes(value)
       );
-      this.rfidItems = matches;
-      if (matches.length === 0) {
-        this.scannedNotFound = true;
-        this.scannedTag = value;
-      } else {
-        this.scannedNotFound = false;
-      }
     }
   }
   onTagScanned(epc: string) {
@@ -113,10 +106,7 @@ export class RfidListPage implements OnInit, OnDestroy {
     }
   }
   addScannedTag() {
-    if (!this.scannedTag) return;
-    this.router.navigate(['rfidmaster'], {
-      queryParams: { tagId: this.scannedTag },
-    });
+    this.router.navigate(['rfidmaster', this.scannedTag]);
   }
   async deleteRFID(id: any) {
     const alert = await this.alertCtrl.create({

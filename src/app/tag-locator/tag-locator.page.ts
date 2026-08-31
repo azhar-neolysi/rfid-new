@@ -2,6 +2,7 @@ import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Haptics } from '@capacitor/haptics';
 import { Subscription } from 'rxjs';
+import * as XLSX from 'xlsx';
 import { HardwareRfidService } from '../services/hardware-rfid.service';
 
 const RING_CIRCUMFERENCE = 2 * Math.PI * 84;
@@ -137,6 +138,27 @@ export class TagLocatorPage implements OnDestroy {
       lastVibrateAt: 0,
     });
     if (!silent) this.newEpc = '';
+  }
+
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.readAsBinaryString(file);
+    reader.onload = () => {
+      const wb = XLSX.read(reader.result, { type: 'binary' });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      if (!sheet) return;
+      const rows: any[] = XLSX.utils.sheet_to_json(sheet);
+      for (const row of rows) {
+        const epc =
+          row.EPC || row.epc || row.TagID || row.tagid ||
+          row.RFIDCode || row.rfidcode || row.A;
+        if (epc) this.addTarget(String(epc).trim(), true);
+      }
+      (event.target as HTMLInputElement).value = '';
+      this.newEpc = '';
+    };
   }
 
   removeTarget(epc: string) {

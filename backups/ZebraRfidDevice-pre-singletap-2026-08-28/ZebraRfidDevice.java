@@ -56,10 +56,6 @@ public class ZebraRfidDevice implements IRfidDevice, Readers.RFIDReaderEventHand
     private volatile boolean inventoryRunningNative = false;
     private volatile boolean continuousMode = false;
 
-    private static final long SINGLE_TAP_THRESHOLD_MS = 300;
-    private volatile long triggerPressedTime = 0;
-    private volatile boolean singleTapMode = false;
-
     private RfidDeviceCallback callback;
     private Context context;
 
@@ -94,32 +90,6 @@ public class ZebraRfidDevice implements IRfidDevice, Readers.RFIDReaderEventHand
                     });
                 }
                 if (batch.isEmpty()) return;
-
-                // Single-tap mode (handheld, non-continuous): a quick trigger
-                // press should yield exactly ONE tag, then re-arm for the next tap.
-                if (singleTapMode && !continuousMode) {
-                    singleTapMode = false;
-                    long elapsed = System.currentTimeMillis() - triggerPressedTime;
-                    if (elapsed < SINGLE_TAP_THRESHOLD_MS) {
-                        // Pick the nearest tag (strongest RSSI) in this batch so
-                        // the tag held in hand wins over tags further away.
-                        Object[] best = batch.get(0);
-                        for (Object[] t : batch) {
-                            if ((Integer) t[1] > (Integer) best[1]) {
-                                best = t;
-                            }
-                        }
-                        final Object[] first = best;
-                        mainHandler.post(() -> {
-                            if (callback == null) return;
-                            callback.onTagReadWithChannel((String) first[0], (Integer) first[1], (Integer) first[2], (Integer) first[3]);
-                        });
-                        try { reader.Actions.Inventory.stop(); } catch (Exception ignored) {}
-                        try { reader.Actions.Inventory.perform(); } catch (Exception ignored) {}
-                        return;
-                    }
-                }
-
                 mainHandler.post(() -> {
                     if (callback == null) return;
                     for (Object[] t : batch) {
@@ -149,15 +119,7 @@ public class ZebraRfidDevice implements IRfidDevice, Readers.RFIDReaderEventHand
                 });
             } else if (type == STATUS_EVENT_TYPE.HANDHELD_TRIGGER_EVENT) {
                 HANDHELD_TRIGGER_EVENT_TYPE triggerEvent = rfidStatusEvents.StatusEventData.HandheldTriggerEventData.getHandheldEvent();
-                if (triggerEvent == HANDHELD_TRIGGER_EVENT_TYPE.HANDHELD_TRIGGER_PRESSED) {
-                    triggerPressedTime = System.currentTimeMillis();
-                    // Only drive single-tap in handheld (non-continuous) mode.
-                    singleTapMode = !continuousMode;
-                    Log.d(TAG, "Handheld trigger pressed");
-                } else if (triggerEvent == HANDHELD_TRIGGER_EVENT_TYPE.HANDHELD_TRIGGER_RELEASED) {
-                    singleTapMode = false;
-                    Log.d(TAG, "Handheld trigger released");
-                }
+                Log.d(TAG, "Handheld trigger: " + triggerEvent);
             }
         }
     };
@@ -777,9 +739,9 @@ public class ZebraRfidDevice implements IRfidDevice, Readers.RFIDReaderEventHand
     private void applyHandheldTriggers() throws Exception {
         TriggerInfo triggerInfo = new TriggerInfo();
         triggerInfo.StartTrigger.setTriggerType(START_TRIGGER_TYPE.START_TRIGGER_TYPE_HANDHELD);
-        // HANDHELD_WITH_TIMEOUT stop (proven working config): scanning stops on
-        // trigger release; a short timeout guards against a stuck trigger.
-        triggerInfo.StopTrigger.setTriggerType(STOP_TRIGGER_TYPE.STOP_TRIGGER_TYPE_HANDHELD_WITH_TIMEOUT);
+        // IMMEDIATE stop (same as the proven reference plugin): RF stops the
+        // moment the trigger is released, no grace period.
+        triggerInfo.StopTrigger.setTriggerType(STOP_TRIGGER_TYPE.STOP_TRIGGER_TYPE_IMMEDIATE);
         reader.Config.setStartTrigger(triggerInfo.StartTrigger);
         reader.Config.setStopTrigger(triggerInfo.StopTrigger);
     }

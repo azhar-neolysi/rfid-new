@@ -16,8 +16,6 @@ export class RfidListPage implements OnInit, OnDestroy {
   rfidItemsTemp: any = [];
   readerConnected = false;
   pageActive = false;
-  scannedNotFound = false;
-  scannedTag = '';
   private subs: Subscription[] = [];
   constructor(
     private rfid: RfidService,
@@ -36,7 +34,7 @@ export class RfidListPage implements OnInit, OnDestroy {
         if (!this.pageActive) return;
         const tagId = event.epc;
         if (tagId) {
-          this.onTagScanned(tagId);
+          this.router.navigate(['rfidmaster', tagId]);
         }
       })
     );
@@ -83,40 +81,11 @@ export class RfidListPage implements OnInit, OnDestroy {
 
     if (!value) {
       this.rfidItems = [...this.rfidItemsTemp];
-      this.scannedNotFound = false;
-      this.scannedTag = '';
     } else {
-      const matches = this.rfidItemsTemp.filter((item: any) =>
+      this.rfidItems = this.rfidItemsTemp.filter((item: any) =>
         item.tagId.toLowerCase().includes(value)
       );
-      this.rfidItems = matches;
-      if (matches.length === 0) {
-        this.scannedNotFound = true;
-        this.scannedTag = value;
-      } else {
-        this.scannedNotFound = false;
-      }
     }
-  }
-  onTagScanned(epc: string) {
-    this.scannedNotFound = false;
-    this.scannedTag = epc;
-    const found = this.rfidItemsTemp.filter(
-      (item: any) => String(item.tagId).trim().toLowerCase() === epc.trim().toLowerCase()
-    );
-    if (found.length > 0) {
-      this.rfidItems = found;
-    } else {
-      this.rfidItems = [];
-      this.scannedNotFound = true;
-      this.toast.warning('Tag not available');
-    }
-  }
-  addScannedTag() {
-    if (!this.scannedTag) return;
-    this.router.navigate(['rfidmaster'], {
-      queryParams: { tagId: this.scannedTag },
-    });
   }
   async deleteRFID(id: any) {
     const alert = await this.alertCtrl.create({

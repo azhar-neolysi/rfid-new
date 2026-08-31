@@ -89,11 +89,6 @@ export class RfidMasterPage implements OnInit, OnDestroy {
       this.rfid_Id = param['id'];
       if (this.rfid_Id) {
         this.getRFIDById();
-        return;
-      }
-      const pendingTag = this.route.snapshot.queryParamMap.get('tagId');
-      if (pendingTag) {
-        this.prefillFromTag(pendingTag);
       }
     });
   }
@@ -131,6 +126,7 @@ export class RfidMasterPage implements OnInit, OnDestroy {
     this.currentScanEpc = epc;
     this.rfidForm.controls.tagID.setValue(epc);
     this.rfidForm.controls.encodingType.setValue(decodeEpcHeader(epc));
+
     const existing = this.existingByTag.get(epcKey);
     if (existing) {
       this.readingDetails = false;
@@ -148,18 +144,6 @@ export class RfidMasterPage implements OnInit, OnDestroy {
     this.rfidForm.controls.userMemoryId.setValue('');
     this.rfidForm.controls.memorySize.setValue('');
     this.readTagMemoryDetails(epc);
-  }
-  private prefillFromTag(tag: string) {
-    this.rfid_Id = null;
-    this.scanLocked = false;
-    this.readingDetails = false;
-    this.currentScanEpc = tag;
-    this.rfidForm.controls.tagID.setValue(tag);
-    this.rfidForm.controls.encodingType.setValue(decodeEpcHeader(tag));
-    this.rfidForm.controls.systemId.setValue('');
-    this.rfidForm.controls.sysMemoryId.setValue('');
-    this.rfidForm.controls.userMemoryId.setValue('');
-    this.rfidForm.controls.memorySize.setValue('');
   }
   private readTagMemoryBusy = false;
   /**

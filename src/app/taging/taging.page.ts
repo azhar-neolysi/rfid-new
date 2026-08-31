@@ -50,9 +50,14 @@ export class TagingPage implements OnInit, OnDestroy {
   ionViewDidEnter() {
     this.pageActive = true;
     this.tagId = null;
+    this.hardwareRfid
+      .ensureConnected()
+      .then(() => this.hardwareRfid.startTriggerScan())
+      .catch(() => {});
   }
   ionViewDidLeave() {
     this.pageActive = false;
+    this.hardwareRfid.stopTriggerScan().catch(() => {});
   }
   getProducts() {
     this.product.getProducts().subscribe({

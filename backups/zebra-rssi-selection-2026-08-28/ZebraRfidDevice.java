@@ -101,15 +101,7 @@ public class ZebraRfidDevice implements IRfidDevice, Readers.RFIDReaderEventHand
                     singleTapMode = false;
                     long elapsed = System.currentTimeMillis() - triggerPressedTime;
                     if (elapsed < SINGLE_TAP_THRESHOLD_MS) {
-                        // Pick the nearest tag (strongest RSSI) in this batch so
-                        // the tag held in hand wins over tags further away.
-                        Object[] best = batch.get(0);
-                        for (Object[] t : batch) {
-                            if ((Integer) t[1] > (Integer) best[1]) {
-                                best = t;
-                            }
-                        }
-                        final Object[] first = best;
+                        final Object[] first = batch.get(0);
                         mainHandler.post(() -> {
                             if (callback == null) return;
                             callback.onTagReadWithChannel((String) first[0], (Integer) first[1], (Integer) first[2], (Integer) first[3]);

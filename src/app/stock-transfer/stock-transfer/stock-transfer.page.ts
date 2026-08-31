@@ -243,9 +243,14 @@ export class StockTransferPage implements OnInit, OnDestroy {
   }
   ionViewDidEnter() {
     this.pageActive = true;
+    this.hardwareRfid
+      .ensureConnected()
+      .then(() => this.hardwareRfid.startTriggerScan())
+      .catch(() => {});
   }
   ionViewDidLeave() {
     this.pageActive = false;
+    this.hardwareRfid.stopTriggerScan().catch(() => {});
   }
   transferList(){
     this.router.navigate(['stock-transfer-list']);

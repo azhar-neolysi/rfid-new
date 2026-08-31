@@ -29,14 +29,6 @@
     </ion-input>
   </ion-card>
 
-  <ion-item *ngIf="scannedNotFound" class="not-found-banner">
-    <ion-label>
-      <b>Tag not available</b>
-      <p>Tag ID: {{scannedTag}}</p>
-    </ion-label>
-    <ion-button slot="end" (click)="addScannedTag()">Add</ion-button>
-  </ion-item>
-
   <ion-card *ngFor="let rfid of rfidItems">
     <ion-card-header>
       <ion-row>
