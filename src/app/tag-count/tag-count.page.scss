@@ -13,15 +13,173 @@
   }
 }
 
+.header-icon {
+  color: #fff;
+  font-size: 22px;
+  margin-right: 4px;
+  cursor: pointer;
+}
+
+#select {
+  color: #fff;
+  font-size: 24px;
+  margin-right: 10px;
+
+  &.select--active {
+    color: #ffeb3b;
+  }
+}
+
 #export {
   color: #fff;
   font-size: 26px;
   margin-right: 12px;
 }
 
+// ── Select bar ─────────────────────────────────────────────────────────
+
+.select-bar {
+  display: flex;
+  gap: 8px;
+  margin: 10px 12px 0;
+  padding: 8px;
+  background: #fff;
+  border: 2px solid var(--brand-navy, #011644);
+  border-radius: 8px;
+}
+
+.select-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 6px;
+  border: none;
+  border-radius: 6px;
+  background: #eef2f7;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+
+  ion-icon {
+    font-size: 16px;
+  }
+
+  &--locate {
+    background: var(--brand-navy, #011644);
+    color: #fff;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.tag-selected {
+  --background: #e3f2fd;
+}
+
+
 .count-panel {
   padding: 12px;
 }
+
+// ── Setting rows ───────────────────────────────────────────────────────
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.setting-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #555;
+  white-space: nowrap;
+  min-width: 80px;
+}
+
+.mode-seg {
+  flex: 1;
+}
+
+// ── Distance pills ─────────────────────────────────────────────────────
+
+.distance-pills {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+}
+
+.distance-pill {
+  flex: 1;
+  padding: 6px 0;
+  border: 2px solid var(--brand-navy, #011644);
+  border-radius: 20px;
+  background: #fff;
+  color: var(--brand-navy, #011644);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+
+  &--active {
+    background: var(--brand-navy, #011644);
+    color: #fff;
+  }
+}
+
+// ── Import badge ───────────────────────────────────────────────────────
+
+.import-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #e8f5e9;
+  border: 1px solid #a5d6a7;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #2e7d32;
+  margin-bottom: 8px;
+
+  ion-icon {
+    font-size: 16px;
+  }
+}
+
+.import-clear {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-left: auto;
+  cursor: pointer;
+
+  ion-icon {
+    font-size: 18px;
+    color: #c62828;
+  }
+}
+
+// ── Search bar ─────────────────────────────────────────────────────────
+
+.tag-search {
+  --background: #f0f0f0;
+  --border-radius: 8px;
+  --box-shadow: none;
+  padding: 0;
+  margin: 0 0 8px;
+}
+
+// ── Counter grid ───────────────────────────────────────────────────────
 
 .counter-grid {
   display: flex;
@@ -42,6 +200,12 @@
       line-height: 1.1;
     }
 
+    &__limit {
+      font-size: 14px;
+      color: #888;
+      font-weight: 400;
+    }
+
     &__label {
       font-size: 11px;
       font-weight: bold;
@@ -50,6 +214,8 @@
     }
   }
 }
+
+// ── Chips ──────────────────────────────────────────────────────────────
 
 .chip-row {
   display: flex;
@@ -62,6 +228,8 @@
     font-weight: bold;
   }
 }
+
+// ── Action buttons ─────────────────────────────────────────────────────
 
 .action-row {
   display: flex;
@@ -91,9 +259,13 @@
   }
 }
 
+// ── Segment tabs ───────────────────────────────────────────────────────
+
 .seg {
   margin: 8px 12px 0;
 }
+
+// ── Sort row ───────────────────────────────────────────────────────────
 
 .sort-row {
   padding: 0 8px;
@@ -105,6 +277,8 @@
   }
 }
 
+// ── Tag list ───────────────────────────────────────────────────────────
+
 .taglist {
   margin: 8px 12px 24px;
   background: #fff;
@@ -114,6 +288,19 @@
     font-weight: bold;
   }
 }
+
+.tag-highlight {
+  --background: #fff9c4;
+  --min-height: 60px;
+  animation: highlight-fade 2s ease-out;
+}
+
+@keyframes highlight-fade {
+  0% { --background: #fff176; }
+  100% { --background: #fff9c4; }
+}
+
+// ── Signal bars ────────────────────────────────────────────────────────
 
 .signal-bars {
   display: flex;
@@ -139,6 +326,8 @@
   }
 }
 
+// ── Empty states ───────────────────────────────────────────────────────
+
 .empty {
   text-align: center;
   padding: 28px 12px;
@@ -149,6 +338,8 @@
     color: #2dd36f;
   }
 }
+
+// ── Locate icon ────────────────────────────────────────────────────────
 
 .locate-ico {
   color: #3880ff;

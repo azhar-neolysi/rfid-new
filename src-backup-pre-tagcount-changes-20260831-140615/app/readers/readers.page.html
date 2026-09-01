@@ -1,0 +1,70 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Reader</ion-title>
+  </ion-toolbar>
+  <ion-toolbar color="dark">
+    <div class="statusline">
+      <span [style.background]="readerConnected ? '#2dd36f' : '#eb445a'" class="dot"></span>
+      <span *ngIf="readerConnected">Connected{{ activeReaderName ? ': ' + activeReaderName : '' }}</span>
+      <span *ngIf="!readerConnected">No reader connected</span>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="readers-content">
+  <div class="wrap">
+    <div class="card">
+      <div class="card__title">
+        <ion-icon name="bluetooth-outline"></ion-icon>
+        <span>Available readers</span>
+      </div>
+
+      <div class="btnrow">
+        <button class="pill pill--refresh" type="button" (click)="refresh()" [disabled]="loading">
+          <ion-icon name="refresh-outline"></ion-icon>
+          {{ loading ? 'Scanning...' : 'Scan for readers' }}
+        </button>
+        <button class="pill pill--disconnect" type="button" (click)="disconnect()"
+          [disabled]="!readerConnected || connectingTo !== null">
+          <ion-icon name="power-outline"></ion-icon>
+          Disconnect
+        </button>
+      </div>
+
+      <div class="reader-list" *ngIf="readers.length">
+        <div class="reader-item" *ngFor="let r of readers"
+          [class.reader-item--active]="r.active"
+          (click)="select(r)">
+          <ion-icon [name]="r.builtIn ? 'phone-portrait-outline' : 'radio-outline'"
+            class="reader-item__icon"></ion-icon>
+          <div class="reader-item__info">
+            <span class="reader-item__name">{{ r.name || r.address }}</span>
+            <span class="reader-item__meta">
+              {{ r.builtIn ? 'Built-in' : 'Zebra' }}
+              <ng-container *ngIf="r.address"> · {{ r.address }}</ng-container>
+            </span>
+          </div>
+          <span *ngIf="connectingTo === (r.name || r.address)" class="reader-item__state">Connecting…</span>
+          <ion-icon *ngIf="r.active" name="checkmark-circle" class="reader-item__check"></ion-icon>
+        </div>
+      </div>
+
+      <p class="hint" *ngIf="!loading && !readers.length">
+        No RFID readers found. Make sure Bluetooth is on and your reader(s) are
+        powered on and paired in Android Bluetooth settings, then tap
+        <b>Scan for readers</b>.
+      </p>
+    </div>
+
+    <div class="note-card" *ngIf="readers.length > 1">
+      <ion-icon name="information-circle-outline"></ion-icon>
+      <span>
+        Multiple readers detected. Tap the one you want. Your choice is saved on
+        this phone for future sessions.
+      </span>
+    </div>
+  </div>
+</ion-content>

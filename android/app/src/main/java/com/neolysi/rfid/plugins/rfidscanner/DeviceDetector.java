@@ -12,6 +12,7 @@ import com.zebra.rfid.api3.ReaderDevice;
 import com.zebra.rfid.api3.Readers;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -23,6 +24,49 @@ public class DeviceDetector {
 
     private static final String TAG = "DeviceDetector";
     private static final String RFD_NAME_PATTERN = "RFD40";
+
+    /** One discoverable reader entry exposed to the JS layer. */
+    public static class ReaderInfo {
+        public final String name;
+        public final String address;
+        public final String type; // "ZEBRA" | "UROVO"
+        public final boolean builtIn;
+        public ReaderInfo(String name, String address, String type, boolean builtIn) {
+            this.name = name;
+            this.address = address;
+            this.type = type;
+            this.builtIn = builtIn;
+        }
+    }
+
+    /**
+     * List every reader the app could show the user for selection:
+     * the built-in Urovo RFID (if this is a Urovo device) plus every bonded
+     * external Zebra RFD reader (by name and Bluetooth MAC address).
+     */
+    public static List<ReaderInfo> listReaders(Context context) {
+        List<ReaderInfo> readers = new ArrayList<>();
+        if (isUrovoDevice()) {
+            readers.add(new ReaderInfo("Urovo DT50 (built-in)", "", "UROVO", true));
+        }
+        BluetoothManager btManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
+        if (btManager == null) return readers;
+        BluetoothAdapter adapter = btManager.getAdapter();
+        if (adapter == null || !adapter.isEnabled()) return readers;
+        try {
+            Set<BluetoothDevice> bondedDevices = adapter.getBondedDevices();
+            if (bondedDevices == null) return readers;
+            for (BluetoothDevice device : bondedDevices) {
+                String name = device.getName();
+                if (name != null && name.toUpperCase(Locale.US).contains(RFD_NAME_PATTERN)) {
+                    readers.add(new ReaderInfo(name, device.getAddress(), "ZEBRA", false));
+                }
+            }
+        } catch (SecurityException e) {
+            Log.w(TAG, "SecurityException listing bonded readers: " + e.getMessage());
+        }
+        return readers;
+    }
 
     public enum DeviceType {
         ZEBRA,

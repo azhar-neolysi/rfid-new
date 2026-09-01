@@ -1,0 +1,75 @@
+<ion-header class="app-header">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button class="menu-btn"></ion-menu-button>
+    </ion-buttons>
+    <ion-title>
+      <div class="brand">
+        <span class="brand-dot"></span>
+        Sale
+      </div>
+    </ion-title>
+    <ion-buttons slot="end" class="addbtn" (click)="saleEntry()">
+      <ion-icon name="add-sharp" slot="end"></ion-icon>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar color="dark">
+    <div style="display:flex;align-items:center;gap:6px;padding:0 12px;font-size:13px;">
+      <span [style.background]="readerConnected ? '#2dd36f' : '#eb445b'" style="width:10px;height:10px;border-radius:50%;display:inline-block;"></span>
+      <span *ngIf="readerConnected">Reader connected</span>
+      <span *ngIf="!readerConnected">Reader disconnected</span>
+    </div>
+  </ion-toolbar>
+  <div class="header-accent"></div>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="sale-content">
+  <div class="hero">
+    <div class="hero-title">
+      <h1>RFID Sale</h1>
+      <p>Scan a tag to open the sale entry</p>
+    </div>
+  </div>
+
+  <div class="scan-card">
+    <div class="scan-card__top">
+      <div class="scan-icon">
+        <ion-icon name="radio-outline"></ion-icon>
+      </div>
+      <div class="scan-info">
+        <span class="scan-label">RFID Code</span>
+        <span class="scan-value">{{ tagId || 'Waiting for scan...' }}</span>
+      </div>
+    </div>
+    <ion-input
+      class="scan-input"
+      type="text"
+      id="tagId"
+      name="tagId"
+      expand="full"
+      placeholder="Scan RFID code"
+      [(ngModel)]="tagId"
+      appScanner
+      (scanComplete)="onScan($event)"
+      autofocus="true"
+      inputmode="none"
+    ></ion-input>
+  </div>
+
+  <ion-grid class="actions">
+    <ion-row>
+      <ion-col size="6">
+        <ion-button expand="block" class="btn-proceed" (click)="editSale()">
+          <ion-icon name="arrow-redo" slot="start"></ion-icon>
+          Proceed
+        </ion-button>
+      </ion-col>
+      <ion-col size="6">
+        <ion-button expand="block" class="btn-clear" (click)="clear()">
+          <ion-icon name="close" slot="start"></ion-icon>
+          Clear
+        </ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

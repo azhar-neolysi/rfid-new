@@ -4,8 +4,14 @@
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
     <ion-title>Tag Count</ion-title>
-    <ion-buttons slot="end" (click)="exportExcel()">
-      <ion-icon name="cloud-download-sharp" id="export"></ion-icon>
+    <ion-buttons slot="end">
+      <ion-icon name="checkbox-outline" id="select" (click)="toggleSelectMode()"
+        [class.select--active]="selectMode"></ion-icon>
+      <label class="header-icon" (click)="$event.stopPropagation()">
+        <ion-icon name="document-attach-sharp"></ion-icon>
+        <input type="file" accept=".xlsx,.xls,.csv" hidden (change)="onImportFile($event)" />
+      </label>
+      <ion-icon name="cloud-download-sharp" id="export" (click)="exportExcel()"></ion-icon>
     </ion-buttons>
   </ion-toolbar>
   <ion-toolbar color="dark">
@@ -20,9 +26,45 @@
 
 <ion-content [fullscreen]="true">
   <div class="count-panel">
+
+    <!-- Scan Mode -->
+    <div class="setting-row">
+      <span class="setting-label">Scan Mode</span>
+      <ion-segment [(ngModel)]="scanMode" (ionChange)="onScanModeChange()" mode="ios" class="mode-seg">
+        <ion-segment-button value="single">Single</ion-segment-button>
+        <ion-segment-button value="multi">Multi ({{maxTags}} max)</ion-segment-button>
+      </ion-segment>
+    </div>
+
+    <!-- Distance Presets -->
+    <div class="setting-row">
+      <span class="setting-label">Scan Range</span>
+      <div class="distance-pills">
+        <button *ngFor="let p of distancePresets" type="button" class="distance-pill"
+          [class.distance-pill--active]="isPresetActive(p.dbm)"
+          (click)="onDistancePresetChange(p.dbm)">
+          {{p.shortLabel}}
+        </button>
+      </div>
+    </div>
+
+    <!-- Import badge -->
+    <div *ngIf="importedEpcs.length > 0" class="import-badge">
+      <ion-icon name="document-text-sharp"></ion-icon>
+      <span>{{importedFileName}} ({{importedEpcs.length}} tags)</span>
+      <button type="button" class="import-clear" (click)="clearImport()">
+        <ion-icon name="close-circle-sharp"></ion-icon>
+      </button>
+    </div>
+
+    <!-- Search -->
+    <ion-searchbar [(ngModel)]="searchTerm" placeholder="Search by tag code" debounce="300"
+      search-icon="search" mode="ios" class="tag-search"></ion-searchbar>
+
+    <!-- Counter grid -->
     <div class="counter-grid">
       <div class="counter">
-        <div class="counter__value">{{ countedRows.length }}</div>
+        <div class="counter__value">{{ countedRows.length }}<span *ngIf="scanMode === 'multi'" class="counter__limit">/{{maxTags}}</span></div>
         <div class="counter__label">Unique Tags</div>
       </div>
       <div class="counter">
@@ -35,16 +77,18 @@
       </div>
     </div>
 
+    <!-- Chips -->
     <div class="chip-row">
       <ion-chip color="success">Found: {{foundRows.length}}</ion-chip>
-      <ion-chip color="warning">Missing: {{missingRows.length}}</ion-chip>
+      <ion-chip color="warning">Missing: {{missingCount}}</ion-chip>
       <ion-chip color="danger">Unknown: {{unknownRows.length}}</ion-chip>
     </div>
 
+    <!-- Action buttons -->
     <div class="action-row">
       <button class="form__submit" type="button" (click)="startCount()"
-        [disabled]="counting || !readerConnected">
-        {{counting ? 'Counting...' : 'Start Count'}}
+        [disabled]="counting || !readerConnected || limitReached">
+        {{counting ? 'Counting...' : scanMode === 'single' ? 'Scan Tag' : 'Start Count'}}
       </button>
       <button class="form__submit form__stop" type="button" (click)="stopCount()" [disabled]="!counting">
         Stop
@@ -56,18 +100,38 @@
     </div>
   </div>
 
+  <!-- Select bar (only in select mode) -->
+  <div *ngIf="selectMode" class="select-bar">
+    <button type="button" class="select-btn" (click)="selectAll()">
+      <ion-icon name="checkmark-done-outline"></ion-icon> Select All
+    </button>
+    <button type="button" class="select-btn" (click)="clearSelection()">
+      <ion-icon name="close-outline"></ion-icon> Clear
+    </button>
+    <button type="button" class="select-btn select-btn--locate" (click)="locateSelected()"
+      [disabled]="!selectedCount">
+      <ion-icon name="navigate-outline"></ion-icon> Locate ({{selectedCount}})
+    </button>
+  </div>
+
+  <!-- Tabs -->
   <ion-segment [(ngModel)]="segment" mode="ios" class="seg">
     <ion-segment-button value="found">Found</ion-segment-button>
     <ion-segment-button value="missing">Missing</ion-segment-button>
     <ion-segment-button value="unknown">Unknown</ion-segment-button>
   </ion-segment>
 
+  <!-- Found list -->
   <div *ngIf="segment === 'found'" class="taglist">
     <div class="sort-row">
       <ion-toggle [(ngModel)]="sortFoundBySignal">Sort by signal (strongest first)</ion-toggle>
     </div>
-    <ion-item *ngFor="let row of displayFoundRows; trackBy: trackByEpc" button detail="false"
-      (click)="locateTag(row.epc)">
+    <ion-item *ngFor="let row of filteredFoundRows; trackBy: trackByEpc" button detail="false"
+      (click)="selectMode ? toggleSelect(row.epc) : locateTag(row.epc)"
+      [class.tag-highlight]="row.epc === singleHighlightEpc"
+      [class.tag-selected]="isSelected(row.epc)">
+      <ion-checkbox slot="start" *ngIf="selectMode" [checked]="isSelected(row.epc)"
+        (ionChange)="toggleSelect(row.epc)"></ion-checkbox>
       <ion-label>
         <h2>{{row.product?.productName || row.epc}}</h2>
         <p>{{row.epc}} · {{row.reads}} reads · {{row.lastRssi !== undefined ? row.lastRssi + ' dBm' : '--'}}
@@ -80,26 +144,34 @@
         <span class="bar" [class.filled]="signalLevel(row.lastRssi) >= 3"></span>
         <span class="bar" [class.filled]="signalLevel(row.lastRssi) >= 4"></span>
       </div>
-      <ion-icon slot="end" name="locate-outline" class="locate-ico"></ion-icon>
+      <ion-icon slot="end" name="locate-outline" class="locate-ico" *ngIf="!selectMode"></ion-icon>
     </ion-item>
-    <div *ngIf="!foundRows.length" class="empty">No tags matched yet</div>
+    <div *ngIf="!filteredFoundRows.length" class="empty">No tags matched yet</div>
   </div>
 
+  <!-- Missing list -->
   <div *ngIf="segment === 'missing'" class="taglist">
-    <ion-item *ngFor="let row of missingRows; trackBy: trackByEpc" button detail="false"
-      (click)="locateTag(row.epc)">
+    <ion-item *ngFor="let row of filteredMissingRows; trackBy: trackByEpc" button detail="false"
+      (click)="selectMode ? toggleSelect(row.epc) : locateTag(row.epc)"
+      [class.tag-selected]="isSelected(row.epc)">
+      <ion-checkbox slot="start" *ngIf="selectMode" [checked]="isSelected(row.epc)"
+        (ionChange)="toggleSelect(row.epc)"></ion-checkbox>
       <ion-label>
         <h2>{{row.product?.productName || row.epc}}</h2>
         <p>{{row.epc}}</p>
       </ion-label>
-      <ion-icon slot="end" name="locate-outline" class="locate-ico"></ion-icon>
+      <ion-icon slot="end" name="locate-outline" class="locate-ico" *ngIf="!selectMode"></ion-icon>
     </ion-item>
-    <div *ngIf="!missingRows.length" class="empty empty--ok">All expected items counted</div>
+    <div *ngIf="!filteredMissingRows.length" class="empty empty--ok">All expected items counted</div>
   </div>
 
+  <!-- Unknown list -->
   <div *ngIf="segment === 'unknown'" class="taglist">
-    <ion-item *ngFor="let row of unknownRows; trackBy: trackByEpc" button detail="false"
-      (click)="locateTag(row.epc)">
+    <ion-item *ngFor="let row of filteredUnknownRows; trackBy: trackByEpc" button detail="false"
+      (click)="selectMode ? toggleSelect(row.epc) : locateTag(row.epc)"
+      [class.tag-selected]="isSelected(row.epc)">
+      <ion-checkbox slot="start" *ngIf="selectMode" [checked]="isSelected(row.epc)"
+        (ionChange)="toggleSelect(row.epc)"></ion-checkbox>
       <ion-label>
         <h2>{{row.epc}}</h2>
         <p>Not in item master · {{row.reads}} reads · {{row.lastRssi !== undefined ? row.lastRssi + ' dBm' : '--'}}
@@ -112,8 +184,8 @@
         <span class="bar" [class.filled]="signalLevel(row.lastRssi) >= 3"></span>
         <span class="bar" [class.filled]="signalLevel(row.lastRssi) >= 4"></span>
       </div>
-      <ion-icon slot="end" name="locate-outline" class="locate-ico"></ion-icon>
+      <ion-icon slot="end" name="locate-outline" class="locate-ico" *ngIf="!selectMode"></ion-icon>
     </ion-item>
-    <div *ngIf="!unknownRows.length" class="empty">No unknown tags scanned</div>
+    <div *ngIf="!filteredUnknownRows.length" class="empty">No unknown tags scanned</div>
   </div>
 </ion-content>

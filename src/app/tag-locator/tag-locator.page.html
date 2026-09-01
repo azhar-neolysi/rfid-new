@@ -22,6 +22,31 @@
         <span>Locate tags</span>
       </div>
 
+      <!-- Scan Mode -->
+      <div class="setting-row">
+        <span class="setting-label">Scan Mode</span>
+        <ion-segment [(ngModel)]="scanMode" (ionChange)="onScanModeChange()" mode="ios" class="mode-seg">
+          <ion-segment-button value="single">Single</ion-segment-button>
+          <ion-segment-button value="multi">Multi ({{maxTags}} max)</ion-segment-button>
+        </ion-segment>
+      </div>
+
+      <!-- Scan Range -->
+      <div class="setting-row">
+        <span class="setting-label">Scan Range</span>
+        <div class="distance-pills">
+          <button *ngFor="let p of distancePresets" type="button" class="distance-pill"
+            [class.distance-pill--active]="isPresetActive(p.dbm)"
+            (click)="onDistancePresetChange(p.dbm)">
+            {{p.shortLabel}}
+          </button>
+        </div>
+      </div>
+
+      <p class="mode-hint" *ngIf="scanMode === 'single'">
+        Single mode tracks 1 tag — auto-stops when located.
+      </p>
+
       <div class="add-row">
         <ion-input class="add-row__input" [(ngModel)]="newEpc" name="newEpc"
           placeholder="Enter EPC and tap Add" (keydown.enter)="addTarget()"
@@ -43,10 +68,13 @@
       </div>
 
       <!-- Target chips -->
-      <div class="chip-list" *ngIf="targets.length">
-        <span class="target-chip" *ngFor="let t of targets; trackBy: trackByEpc">
-          <ion-icon name="bookmark-outline"></ion-icon>
+      <div class="chip-list">
+        <span class="target-count" *ngIf="targets.length">({{targets.length}}/{{maxTags}} targets)</span>
+        <span class="target-chip" *ngFor="let t of targets; trackBy: trackByEpc"
+          [style.--tagc]="colorFor(t)">
+          <ion-icon name="bookmark-outline" style="color: var(--tagc)"></ion-icon>
           {{t.epc}}
+          <span class="target-chip__rank" *ngIf="locateMode" [style.background]="colorFor(t)">#{{rankOf(t.epc)}}</span>
           <ion-icon name="close-circle" class="target-chip__rm" (click)="removeTarget(t.epc)"
             [hidden]="locating"></ion-icon>
         </span>
@@ -67,24 +95,36 @@
       <!-- No targets hint -->
       <p class="hint" *ngIf="!targets.length">
         Add one or more target EPCs above, or pick tags from the Tag Count list.
-        Walk slowly toward the tags — the ring fills and vibration speeds up as you get closer.
+        Locator holds up to {{maxTags}} tags. Walk slowly toward the tags — the ring fills and vibration speeds up as you get closer.
       </p>
     </div>
 
+    <!-- Closest banner (only when 2+ targets active) -->
+    <div class="closest-banner" *ngIf="locateMode && closestTarget"
+      [style.--tagc]="colorFor(closestTarget)">
+      <ion-icon name="navigate-outline"></ion-icon>
+      <span>Closest: <b style="color: var(--tagc)">{{closestTarget.epc}}</b></span>
+      <span class="closest-banner__rank" *ngIf="targets.length > 1">#{{closestRank}}</span>
+    </div>
+
     <!-- One card per target -->
-    <div class="target-card" *ngFor="let t of targets; trackBy: trackByEpc">
+    <div class="target-card" *ngFor="let t of targets; trackBy: trackByEpc"
+      [class.target-card--found]="t.epc === singleFoundEpc"
+      [style.--tagc]="colorFor(t)">
       <div class="target-card__header">
-        <ion-icon name="bookmark-outline"></ion-icon>
+        <ion-icon name="bookmark-outline" style="color: var(--tagc)"></ion-icon>
         <span class="target-card__header__epc">{{t.epc}}</span>
+        <span class="target-card__rank" *ngIf="locateMode && targets.length > 1"
+          [style.background]="colorFor(t)">#{{rankOf(t.epc)}}</span>
       </div>
 
       <!-- Gauge ring -->
-      <div class="gauge" *ngIf="locateMode" [class.gauge--hot]="t.proximity >= 75">
+      <div class="gauge" *ngIf="locateMode" [class.gauge--hot]="t.proximity >= 75 && !t.outOfRange">
         <svg viewBox="0 0 200 200">
           <defs>
             <linearGradient [attr.id]="'ringGrad-' + t.epc" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#22d3ee" />
-              <stop offset="100%" stop-color="#22c55e" />
+              <stop offset="0%" [attr.stop-color]="colorFor(t)" />
+              <stop offset="100%" [attr.stop-color]="colorFor(t)" />
             </linearGradient>
           </defs>
           <circle class="ring-bg" cx="100" cy="100" r="84"></circle>
@@ -93,16 +133,16 @@
             [style.stroke-dashoffset]="ringOffset(t)"></circle>
         </svg>
         <div class="gauge__center">
-          <span class="gauge__pct">{{t.proximity}}%</span>
+          <span class="gauge__pct">{{t.outOfRange ? 0 : t.proximity}}%</span>
           <span class="gauge__label">{{signalLabel(t)}}</span>
-          <span class="gauge__dbm">{{t.targetRssi !== undefined ? t.targetRssi + ' dBm' : '-- dBm'}}</span>
+          <span class="gauge__dbm">{{!t.outOfRange && t.targetRssi !== undefined ? t.targetRssi + ' dBm' : '-- dBm'}}</span>
         </div>
       </div>
 
       <!-- Live stats -->
       <div class="stats" *ngIf="locateMode">
         <div class="stat">
-          <span class="stat__v">≈{{distanceText(t)}} m</span>
+          <span class="stat__v">{{t.outOfRange ? '--' : '≈' + distanceText(t) + ' m'}}</span>
           <span class="stat__l">Distance</span>
         </div>
         <div class="stat">
@@ -142,8 +182,8 @@
       </div>
 
       <p class="seen" *ngIf="locateMode && t.lastSeenAgo !== null"
-        [class.seen--stale]="t.lastSeenAgo > 3">
-        {{t.lastSeenAgo > 3 ? 'Last seen ' + t.lastSeenAgo + 's ago' : 'Tag in view'}}
+        [class.seen--stale]="t.outOfRange || t.lastSeenAgo > 3">
+        {{t.outOfRange ? 'Out of range — no signal' : (t.lastSeenAgo > 3 ? 'Last seen ' + t.lastSeenAgo + 's ago' : 'Tag in view')}}
       </p>
 
       <p class="hint" *ngIf="!locateMode">

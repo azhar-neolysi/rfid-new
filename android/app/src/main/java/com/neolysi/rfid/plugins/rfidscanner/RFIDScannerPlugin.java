@@ -169,6 +169,22 @@ public class RFIDScannerPlugin extends Plugin {
     }
 
     @PluginMethod
+    public void getAvailableReaders(PluginCall call) {
+        Log.d(TAG, "getAvailableReaders() called");
+        java.util.List<DeviceDetector.ReaderInfo> list = DeviceDetector.listReaders(getContext());
+        com.getcapacitor.JSArray arr = new com.getcapacitor.JSArray();
+        for (DeviceDetector.ReaderInfo r : list) {
+            JSObject o = new JSObject();
+            o.put("name", r.name != null ? r.name : "");
+            o.put("address", r.address != null ? r.address : "");
+            o.put("type", r.type);
+            o.put("builtIn", r.builtIn);
+            arr.put(o);
+        }
+        call.resolve(new JSObject().put("readers", arr));
+    }
+
+    @PluginMethod
     public void getDiagnosticInfo(PluginCall call) {
         Log.d(TAG, "getDiagnosticInfo() called");
         BluetoothAdapter adapter = getBluetoothAdapter();

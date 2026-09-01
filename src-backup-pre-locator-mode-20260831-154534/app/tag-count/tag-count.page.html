@@ -1,0 +1,165 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Tag Count</ion-title>
+    <ion-buttons slot="end">
+      <label class="header-icon" (click)="$event.stopPropagation()">
+        <ion-icon name="document-attach-sharp"></ion-icon>
+        <input type="file" accept=".xlsx,.xls,.csv" hidden (change)="onImportFile($event)" />
+      </label>
+      <ion-icon name="cloud-download-sharp" id="export" (click)="exportExcel()"></ion-icon>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar color="dark">
+    <div class="statusline">
+      <span [style.background]="readerConnected ? '#2dd36f' : '#eb445a'" class="dot"></span>
+      <span *ngIf="readerConnected">Reader connected</span>
+      <span *ngIf="!readerConnected">Reader disconnected</span>
+      <span *ngIf="loadingProducts">&nbsp;· Loading items...</span>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="count-panel">
+
+    <!-- Scan Mode -->
+    <div class="setting-row">
+      <span class="setting-label">Scan Mode</span>
+      <ion-segment [(ngModel)]="scanMode" (ionChange)="onScanModeChange()" mode="ios" class="mode-seg">
+        <ion-segment-button value="single">Single</ion-segment-button>
+        <ion-segment-button value="multi">Multi ({{maxTags}} max)</ion-segment-button>
+      </ion-segment>
+    </div>
+
+    <!-- Distance Presets -->
+    <div class="setting-row">
+      <span class="setting-label">Scan Range</span>
+      <div class="distance-pills">
+        <button *ngFor="let p of distancePresets" type="button" class="distance-pill"
+          [class.distance-pill--active]="isPresetActive(p.dbm)"
+          (click)="onDistancePresetChange(p.dbm)">
+          {{p.shortLabel}}
+        </button>
+      </div>
+    </div>
+
+    <!-- Import badge -->
+    <div *ngIf="importedEpcs.length > 0" class="import-badge">
+      <ion-icon name="document-text-sharp"></ion-icon>
+      <span>{{importedFileName}} ({{importedEpcs.length}} tags)</span>
+      <button type="button" class="import-clear" (click)="clearImport()">
+        <ion-icon name="close-circle-sharp"></ion-icon>
+      </button>
+    </div>
+
+    <!-- Search -->
+    <ion-searchbar [(ngModel)]="searchTerm" placeholder="Search by tag code" debounce="300"
+      search-icon="search" mode="ios" class="tag-search"></ion-searchbar>
+
+    <!-- Counter grid -->
+    <div class="counter-grid">
+      <div class="counter">
+        <div class="counter__value">{{ countedRows.length }}<span *ngIf="scanMode === 'multi'" class="counter__limit">/{{maxTags}}</span></div>
+        <div class="counter__label">Unique Tags</div>
+      </div>
+      <div class="counter">
+        <div class="counter__value">{{ totalReads }}</div>
+        <div class="counter__label">Total Reads</div>
+      </div>
+      <div class="counter">
+        <div class="counter__value">{{ readsPerMin }}</div>
+        <div class="counter__label">Reads/min</div>
+      </div>
+    </div>
+
+    <!-- Chips -->
+    <div class="chip-row">
+      <ion-chip color="success">Found: {{foundRows.length}}</ion-chip>
+      <ion-chip color="warning">Missing: {{missingCount}}</ion-chip>
+      <ion-chip color="danger">Unknown: {{unknownRows.length}}</ion-chip>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="action-row">
+      <button class="form__submit" type="button" (click)="startCount()"
+        [disabled]="counting || !readerConnected || limitReached">
+        {{counting ? 'Counting...' : scanMode === 'single' ? 'Scan Tag' : 'Start Count'}}
+      </button>
+      <button class="form__submit form__stop" type="button" (click)="stopCount()" [disabled]="!counting">
+        Stop
+      </button>
+      <button class="form__submit form__reset" type="button" (click)="newSession()"
+        [disabled]="counting || !countedRows.length">
+        New Session
+      </button>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <ion-segment [(ngModel)]="segment" mode="ios" class="seg">
+    <ion-segment-button value="found">Found</ion-segment-button>
+    <ion-segment-button value="missing">Missing</ion-segment-button>
+    <ion-segment-button value="unknown">Unknown</ion-segment-button>
+  </ion-segment>
+
+  <!-- Found list -->
+  <div *ngIf="segment === 'found'" class="taglist">
+    <div class="sort-row">
+      <ion-toggle [(ngModel)]="sortFoundBySignal">Sort by signal (strongest first)</ion-toggle>
+    </div>
+    <ion-item *ngFor="let row of filteredFoundRows; trackBy: trackByEpc" button detail="false"
+      (click)="locateTag(row.epc)" [class.tag-highlight]="row.epc === singleHighlightEpc">
+      <ion-label>
+        <h2>{{row.product?.productName || row.epc}}</h2>
+        <p>{{row.epc}} · {{row.reads}} reads · {{row.lastRssi !== undefined ? row.lastRssi + ' dBm' : '--'}}
+          · ≈{{estimateDistance(row.lastRssi) ?? '--'}} m
+          <ng-container *ngIf="row.channelIndex !== undefined"> · Ch{{row.channelIndex}} ~{{channelMhz(row.channelIndex)}} MHz</ng-container></p>
+      </ion-label>
+      <div class="signal-bars" slot="end" *ngIf="row.lastRssi !== undefined">
+        <span class="bar" [class.filled]="signalLevel(row.lastRssi) >= 1"></span>
+        <span class="bar" [class.filled]="signalLevel(row.lastRssi) >= 2"></span>
+        <span class="bar" [class.filled]="signalLevel(row.lastRssi) >= 3"></span>
+        <span class="bar" [class.filled]="signalLevel(row.lastRssi) >= 4"></span>
+      </div>
+      <ion-icon slot="end" name="locate-outline" class="locate-ico"></ion-icon>
+    </ion-item>
+    <div *ngIf="!filteredFoundRows.length" class="empty">No tags matched yet</div>
+  </div>
+
+  <!-- Missing list -->
+  <div *ngIf="segment === 'missing'" class="taglist">
+    <ion-item *ngFor="let row of filteredMissingRows; trackBy: trackByEpc" button detail="false"
+      (click)="locateTag(row.epc)">
+      <ion-label>
+        <h2>{{row.product?.productName || row.epc}}</h2>
+        <p>{{row.epc}}</p>
+      </ion-label>
+      <ion-icon slot="end" name="locate-outline" class="locate-ico"></ion-icon>
+    </ion-item>
+    <div *ngIf="!filteredMissingRows.length" class="empty empty--ok">All expected items counted</div>
+  </div>
+
+  <!-- Unknown list -->
+  <div *ngIf="segment === 'unknown'" class="taglist">
+    <ion-item *ngFor="let row of filteredUnknownRows; trackBy: trackByEpc" button detail="false"
+      (click)="locateTag(row.epc)">
+      <ion-label>
+        <h2>{{row.epc}}</h2>
+        <p>Not in item master · {{row.reads}} reads · {{row.lastRssi !== undefined ? row.lastRssi + ' dBm' : '--'}}
+          · ≈{{estimateDistance(row.lastRssi) ?? '--'}} m
+          <ng-container *ngIf="row.channelIndex !== undefined"> · Ch{{row.channelIndex}} ~{{channelMhz(row.channelIndex)}} MHz</ng-container></p>
+      </ion-label>
+      <div class="signal-bars" slot="end" *ngIf="row.lastRssi !== undefined">
+        <span class="bar" [class.filled]="signalLevel(row.lastRssi) >= 1"></span>
+        <span class="bar" [class.filled]="signalLevel(row.lastRssi) >= 2"></span>
+        <span class="bar" [class.filled]="signalLevel(row.lastRssi) >= 3"></span>
+        <span class="bar" [class.filled]="signalLevel(row.lastRssi) >= 4"></span>
+      </div>
+      <ion-icon slot="end" name="locate-outline" class="locate-ico"></ion-icon>
+    </ion-item>
+    <div *ngIf="!filteredUnknownRows.length" class="empty">No unknown tags scanned</div>
+  </div>
+</ion-content>

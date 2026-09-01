@@ -555,7 +555,10 @@ public class ZebraRfidDevice implements IRfidDevice, Readers.RFIDReaderEventHand
             if (list == null || list.isEmpty()) return null;
             if (btName == null || btName.isEmpty()) return list.get(0);
             for (ReaderDevice d : list) {
-                if (d.getName() != null && d.getName().equalsIgnoreCase(btName)) return d;
+                String dname = d.getName();
+                if (dname != null && dname.equalsIgnoreCase(btName)) return d;
+                String daddr = safeAddress(d);
+                if (daddr != null && btName.equalsIgnoreCase(daddr)) return d;
             }
             return null;
         } catch (Exception e) {
@@ -726,7 +729,9 @@ public class ZebraRfidDevice implements IRfidDevice, Readers.RFIDReaderEventHand
                 String name = device.getName();
                 if (name == null) continue;
                 if (name.toUpperCase(Locale.US).contains(RFD_NAME_PATTERN)) {
-                    if (btName == null || btName.isEmpty() || name.equalsIgnoreCase(btName)) {
+                    if (btName == null || btName.isEmpty()
+                            || name.equalsIgnoreCase(btName)
+                            || btName.equalsIgnoreCase(device.getAddress())) {
                         return device;
                     }
                 }
@@ -859,6 +864,14 @@ public class ZebraRfidDevice implements IRfidDevice, Readers.RFIDReaderEventHand
                 readers.Dispose();
             } catch (Exception ignored) {}
             readers = null;
+        }
+    }
+
+    private String safeAddress(ReaderDevice d) {
+        try {
+            return d.getAddress();
+        } catch (Exception e) {
+            return null;
         }
     }
 

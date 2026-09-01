@@ -1,0 +1,42 @@
+<ion-content class="login-page">
+  <div class="login-wrapper">
+    <div class="login-card">
+      <div class="login-logo">
+        <img src="assets/logos/rfid-logo-light.png" alt="Neo RFID" />
+        <!-- <h1>Neo RFID</h1> -->
+        <p>Sign in to continue</p>
+      </div>
+
+      <div class="login-form">
+        <div class="input-group">
+          <ion-icon name="person-outline"></ion-icon>
+          <input
+            type="text"
+            placeholder="Username"
+            [(ngModel)]="userName"
+            autocomplete="username"
+          />
+        </div>
+
+        <div class="input-group">
+          <ion-icon name="lock-closed-outline"></ion-icon>
+          <input
+            type="password"
+            placeholder="Password"
+            [(ngModel)]="password"
+            autocomplete="current-password"
+          />
+        </div>
+
+        <button class="login-btn" (click)="login()" [disabled]="loading">
+          <ion-spinner *ngIf="loading" name="crescent"></ion-spinner>
+          <span *ngIf="!loading">Sign In</span>
+        </button>
+      </div>
+
+      <div class="login-footer">
+        <p>RFID Inventory Management System</p>
+      </div>
+    </div>
+  </div>
+</ion-content>

@@ -4,14 +4,26 @@ import { Haptics } from '@capacitor/haptics';
 import { Subscription } from 'rxjs';
 import * as XLSX from 'xlsx';
 import { HardwareRfidService } from '../services/hardware-rfid.service';
+import { ToastrService } from '../services/toastr/toastr.service';
+
+interface DistancePreset {
+  label: string;
+  shortLabel: string;
+  dbm: number;
+}
 
 const RING_CIRCUMFERENCE = 2 * Math.PI * 84;
 const REGION_START_MHZ = 865.0;
 const REGION_STEP_MHZ = 0.2;
 
+// Staleness / out-of-range handling (seconds)
+const STALE_AFTER_S = 2;      // begin fading the % after this long without a read
+const OUT_OF_RANGE_AFTER_S = 5; // show "Out of range"/0% after this long without a read
+
 export interface LocateTarget {
   epc: string;
   proximity: number;
+  outOfRange: boolean;
   targetRssi: number | undefined;
   bestRssi: number | undefined;
   lastChannelIndex: number | undefined;
@@ -36,6 +48,17 @@ export class TagLocatorPage implements OnDestroy {
   targets: LocateTarget[] = [];
   newEpc = '';
 
+  scanMode: 'single' | 'multi' = 'multi';
+  maxTags = 25;
+  scanPower = 30;
+  distancePresets: DistancePreset[] = [
+    { label: 'Close (1m)', shortLabel: '1m', dbm: 12 },
+    { label: 'Medium (2m)', shortLabel: '2m', dbm: 18 },
+    { label: 'Far (5m)', shortLabel: '5m', dbm: 24 },
+    { label: 'Max (10m+)', shortLabel: 'Max', dbm: 30 },
+  ];
+  singleFoundEpc: string | null = null;
+
   private nowTick = Date.now();
   private tickTimer: any = null;
   private pageActive = false;
@@ -44,7 +67,8 @@ export class TagLocatorPage implements OnDestroy {
 
   constructor(
     private hardwareRfid: HardwareRfidService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private toastr: ToastrService
   ) {}
 
   ionViewDidEnter() {
@@ -71,6 +95,10 @@ export class TagLocatorPage implements OnDestroy {
             .map((s: string) => s.trim().toUpperCase())
             .filter((s: string) => s.length > 0);
         }
+        const mode = params ? params['mode'] : null;
+        if (mode === 'multi') {
+          this.scanMode = 'multi';
+        }
       });
     }
     if (this.pendingEpcs.length > 0 && !this.locating) {
@@ -84,10 +112,19 @@ export class TagLocatorPage implements OnDestroy {
       this.tickTimer = setInterval(() => {
         this.nowTick = Date.now();
         for (const t of this.targets) {
-          t.lastSeenAgo =
-            this.locateMode && t.lastSeenAt > 0
-              ? Math.max(0, Math.round((this.nowTick - t.lastSeenAt) / 1000))
-              : null;
+          if (!this.locateMode) continue;
+          const ago = t.lastSeenAt > 0 ? (this.nowTick - t.lastSeenAt) / 1000 : Infinity;
+          t.lastSeenAgo = t.lastSeenAt > 0 ? Math.max(0, Math.round(ago)) : null;
+          if (t.lastSeenAt > 0 && !t.outOfRange && ago > OUT_OF_RANGE_AFTER_S) {
+            // Tag stopped being reported: mark out of range and reset the gauge.
+            t.outOfRange = true;
+            t.proximity = 0;
+          } else if (t.lastSeenAt > 0 && ago > STALE_AFTER_S) {
+            // No reads for a while: fade the % back toward 0 so it doesn't
+            // stick at the last in-range value (e.g. 42%).
+            const fade = (ago - STALE_AFTER_S) / (OUT_OF_RANGE_AFTER_S - STALE_AFTER_S);
+            t.proximity = Math.max(0, Math.round(t.proximity * (1 - fade)));
+          }
         }
       }, 1000);
     }
@@ -116,16 +153,25 @@ export class TagLocatorPage implements OnDestroy {
     }
   }
 
-  addTarget(epcInput?: string, silent = false) {
+  addTarget(epcInput?: string, silent = false, skipCap = false) {
     const raw = (epcInput ?? this.newEpc).trim().toUpperCase();
     if (!raw) return;
     if (this.targets.some((t) => t.epc === raw)) {
       if (!silent) this.newEpc = '';
       return;
     }
+    if (!skipCap && this.targets.length >= this.maxTags) {
+      this.toastr.danger(`Limit reached (${this.maxTags} tags)`);
+      return;
+    }
+    // Single mode only tracks one active target: replace instead of append.
+    if (!skipCap && this.scanMode === 'single' && this.targets.length >= 1) {
+      this.targets = [];
+    }
     this.targets.push({
       epc: raw,
       proximity: 0,
+      outOfRange: false,
       targetRssi: undefined,
       bestRssi: undefined,
       lastChannelIndex: undefined,
@@ -150,11 +196,26 @@ export class TagLocatorPage implements OnDestroy {
       const sheet = wb.Sheets[wb.SheetNames[0]];
       if (!sheet) return;
       const rows: any[] = XLSX.utils.sheet_to_json(sheet);
+      let imported = 0;
+      let rejected = 0;
       for (const row of rows) {
         const epc =
           row.EPC || row.epc || row.TagID || row.tagid ||
           row.RFIDCode || row.rfidcode || row.A;
-        if (epc) this.addTarget(String(epc).trim(), true);
+        if (!epc) continue;
+        const val = String(epc).trim();
+        if (!val) continue;
+        if (this.targets.length + imported >= this.maxTags) {
+          rejected++;
+          continue;
+        }
+        this.addTarget(val, true, true);
+        imported++;
+      }
+      if (rejected > 0) {
+        this.toastr.warning(`Import limited: added ${imported}, skipped ${rejected} (max ${this.maxTags})`);
+      } else if (imported > 0) {
+        this.toastr.success(`Imported ${imported} tag(s)`);
       }
       (event.target as HTMLInputElement).value = '';
       this.newEpc = '';
@@ -170,12 +231,14 @@ export class TagLocatorPage implements OnDestroy {
 
   async startLocator() {
     if (this.targets.length === 0) return;
+    this.singleFoundEpc = null;
     try {
       await this.hardwareRfid.ensureConnected();
       await this.hardwareRfid.forceStopInventory();
-      await this.hardwareRfid.forceStartInventoryContinuous();
+      await this.hardwareRfid.forceStartInventoryContinuous({ power: this.scanPower });
       for (const t of this.targets) {
         t.proximity = 0;
+        t.outOfRange = false;
         t.targetRssi = undefined;
         t.bestRssi = undefined;
         t.lastChannelIndex = undefined;
@@ -197,10 +260,73 @@ export class TagLocatorPage implements OnDestroy {
   stopLocator() {
     this.locateMode = false;
     this.locating = false;
+    this.singleFoundEpc = null;
     for (const t of this.targets) {
       t.proximity = 0;
+      t.outOfRange = false;
     }
     this.hardwareRfid.forceStopInventory().catch(() => {});
+  }
+
+  onScanModeChange() {
+    this.singleFoundEpc = null;
+    if (this.scanMode === 'single' && this.targets.length > 1) {
+      this.targets = [this.targets[0]];
+      this.newEpc = '';
+    }
+  }
+
+  onDistancePresetChange(dbm: number) {
+    this.scanPower = dbm;
+  }
+
+  isPresetActive(dbm: number): boolean {
+    return this.scanPower === dbm;
+  }
+
+  get targetLimitReached(): boolean {
+    return this.targets.length >= this.maxTags;
+  }
+
+  // ── Color coding / ranking ───────────────────────────────────────────
+
+  tagColors: string[] = [
+    '#3880ff', '#22c55e', '#f59e0b', '#ec4899',
+    '#8b5cf6', '#14b8a6', '#f43f5e', '#eab308',
+  ];
+
+  colorFor(target: LocateTarget): string {
+    const idx = this.targets.indexOf(target);
+    if (idx < 0) return this.tagColors[0];
+    return this.tagColors[idx % this.tagColors.length];
+  }
+
+  rgba(hex: string, alpha: number): string {
+    const h = hex.replace('#', '');
+    const r = parseInt(h.substring(0, 2), 16);
+    const g = parseInt(h.substring(2, 4), 16);
+    const b = parseInt(h.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  get proximityRanked(): LocateTarget[] {
+    return [...this.targets].sort(
+      (a, b) =>
+        (b.outOfRange ? -1 : b.proximity) - (a.outOfRange ? -1 : a.proximity)
+    );
+  }
+
+  rankOf(epc: string): number {
+    const idx = this.proximityRanked.findIndex((t) => t.epc === epc);
+    return idx < 0 ? 0 : idx + 1;
+  }
+
+  get closestTarget(): LocateTarget | null {
+    return this.targets.length > 1 ? this.proximityRanked[0] ?? null : null;
+  }
+
+  get closestRank(): number {
+    return this.targets.length > 1 ? 1 : 0;
   }
 
   ringOffset(target: LocateTarget): number {
@@ -209,6 +335,7 @@ export class TagLocatorPage implements OnDestroy {
 
   signalLabel(target: LocateTarget): string {
     if (!this.locateMode) return '';
+    if (target.outOfRange) return 'Out of range';
     if (target.proximity <= 0) return 'Searching...';
     if (target.proximity >= 75) return 'Very close';
     if (target.proximity >= 40) return 'Near';
@@ -267,6 +394,7 @@ export class TagLocatorPage implements OnDestroy {
       t.targetReads++;
       t.lastSeenAt = Date.now();
       t.lastSeenAgo = 0;
+      t.outOfRange = false;
       if (t.bestRssi == null || rssi > t.bestRssi) {
         t.bestRssi = rssi;
       }
@@ -278,6 +406,11 @@ export class TagLocatorPage implements OnDestroy {
       const pct = Math.max(0, Math.min(100, ((rssi + 90) / 60) * 100));
       t.proximity = Math.round(pct);
       this.maybeVibrate(t.proximity, t);
+      if (this.scanMode === 'single' && this.targets.length === 1 && pct >= 75 && this.locating) {
+        this.singleFoundEpc = t.epc;
+        this.stopLocator();
+        this.toastr.success('Tag located');
+      }
     }
   }
 
