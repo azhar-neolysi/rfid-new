@@ -65,6 +65,11 @@
           <input type="file" accept=".xlsx,.xls,.csv" hidden
             (change)="onFileSelected($event)" />
         </label>
+        <a href="assets/templates/tag-locator.xlsx" download
+          class="upload-btn pill pill--upload" title="Download Template" (click)="downloadTemplate('tag-locator.xlsx', $event)">
+          <ion-icon name="download-outline"></ion-icon>
+          Template
+        </a>
       </div>
 
       <!-- Target chips -->

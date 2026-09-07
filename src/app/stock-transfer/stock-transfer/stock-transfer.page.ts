@@ -13,6 +13,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { HardwareRfidService } from 'src/app/services/hardware-rfid.service';
 import { ToastrService } from 'src/app/services/toastr/toastr.service';
+import { BarcodeService } from 'src/app/services/barcode.service';
 @Component({
   selector: 'app-stock-transfer',
   templateUrl: './stock-transfer.page.html',
@@ -57,7 +58,8 @@ export class StockTransferPage implements OnInit, OnDestroy {
     private datePipe: DatePipe,
     private router: Router,
     private hardwareRfid: HardwareRfidService,
-    private toast: ToastrService
+    private toast: ToastrService,
+    private barcodeService: BarcodeService
   ) {}
 
   ngOnInit() {
@@ -102,6 +104,14 @@ export class StockTransferPage implements OnInit, OnDestroy {
     this.stockForm.controls.printName.setValue(null);
     this.stockForm.controls.brand.setValue(null);
     this.stockForm.controls.category.setValue(null);
+  }
+
+  async scanBarcode() {
+    const code = await this.barcodeService.scan();
+    if (code) {
+      this.stockForm.controls.barcode.setValue(code);
+      this.getProduct();
+    }
   }
 
   ref_List() {

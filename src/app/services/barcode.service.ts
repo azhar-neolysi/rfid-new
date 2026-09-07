@@ -10,6 +10,7 @@ import { AlertController } from '@ionic/angular';
 @Injectable({ providedIn: 'root' })
 export class BarcodeService {
   private scannerActive = false;
+  private prepared = false;
 
   constructor(private alertCtrl: AlertController) {}
 
@@ -19,7 +20,6 @@ export class BarcodeService {
 
   async scan(): Promise<string | null> {
     if (!this.isSupported()) {
-      await this.showAlert('Not available', 'Barcode scanning is only available on Android devices.');
       return null;
     }
 
@@ -38,6 +38,10 @@ export class BarcodeService {
     }
 
     try {
+      if (!this.prepared) {
+        await BarcodeScanner.prepare();
+        this.prepared = true;
+      }
       this.scannerActive = true;
       await BarcodeScanner.hideBackground();
 

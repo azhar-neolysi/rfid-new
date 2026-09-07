@@ -1,0 +1,62 @@
+/* iOS places the subtitle above the title */
+ion-card-header.ios {
+  display: flex;
+  flex-flow: column-reverse;
+}
+ion-icon {
+  color: var(--brand-navy);
+}
+fa-icon {
+  color: var(--brand-red);
+  font-size: 50px;
+}
+.heading {
+  text-align: center;
+  font-weight: 600;
+  color: #ffffff;
+}
+ion-grid {
+  margin: 0;
+  padding: 0;
+  ion-row {
+    margin: 0;
+    padding: 0;
+    ion-col {
+      margin: 0;
+      padding: 0;
+    }
+  }
+}
+ion-card {
+  ion-card-content {
+    ion-icon {
+      font-size: 30px;
+      color: var(--brand-red);
+      margin-right: 10px;
+      margin-bottom: 0;
+    }
+    ion-label {
+      font-size: 25px;
+      color: var(--brand-navy);
+    }
+  }
+}
+#chart {
+  max-width: 380px;
+  margin: 35px auto;
+  padding: 0;
+}
+//--------------chart---------------//
+ion-content {
+  --background: var(--brand-bg);
+
+  .title {
+    color: var(--brand-navy);
+    text-align: center;
+  }
+}
+.chart-container {
+  canvas {
+    height: 500px;
+  }
+}

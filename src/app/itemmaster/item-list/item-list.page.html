@@ -38,7 +38,7 @@
     <ion-grid>
       <ion-row>
         <ion-col>
-          <ion-input inputmode="none" [(ngModel)]="barcodeScan" (ionInput)="search($event)" class="container__input"
+          <ion-input [(ngModel)]="barcodeScan" (ionInput)="search($event)" class="container__input"
             type="text" id="tagId" name="tagId" expand="full" placeholder="Barcode" autofocus="true" />
         </ion-col>
         <ion-col size="auto">

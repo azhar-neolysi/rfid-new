@@ -1,0 +1,88 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button> </ion-menu-button>
+      <!-- <ion-icon name="add-sharp" slot="end"></ion-icon> -->
+    </ion-buttons>
+    <ion-title>Employees</ion-title>
+    <ion-buttons slot="end" class="addbtn" (click)="addEmp()">
+      <!-- <ion-menu-button> </ion-menu-button> -->
+      <ion-icon name="add-sharp" slot="end"></ion-icon>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content [fullscreen]="true">
+  <ion-card>
+    <ion-input
+      (ionChange)="search($event)"
+      class="container__input"
+      type="text"
+      id="tagId"
+      name="tagId"
+      expand="full"
+      placeholder="Tag ID"
+    />
+  </ion-card>
+
+  <ion-card *ngFor="let emp of empList">
+    <ion-card-header>
+      <ion-row>
+        <ion-col>
+          <ion-card-title
+            ><b>Employee Id:</b>
+            <ion-label>{{emp.employeeId}}</ion-label></ion-card-title
+          >
+          <ion-card-title
+            ><b>Name:</b
+            ><ion-label
+              >{{emp.firstName}} {{emp.lastName}}</ion-label
+            ></ion-card-title
+          >
+          <ion-card-title
+            ><b>Gender:</b>
+            <ion-label>{{emp.gender}}</ion-label></ion-card-title
+          >
+          <ion-card-title
+            ><b>Email:</b>
+            <ion-label>{{emp.email}}</ion-label>
+          </ion-card-title>
+        </ion-col>
+        <ion-col size="auto"
+          ><ion-button color="danger" (click)="deleteEmp(emp.empmasterId)"
+            ><ion-icon name="trash-sharp"></ion-icon></ion-button
+        ></ion-col>
+      </ion-row>
+      <ion-grid>
+        <ion-row>
+          <ion-col>
+            <ion-card-title
+              ><b>Mobile No:</b
+              ><ion-label>{{emp.mobileNo}}</ion-label></ion-card-title
+            >
+            <ion-card-title
+              ><b>DoB:</b>
+              <ion-label
+                >{{emp.dob | date:'dd/MM/yyyy'}}</ion-label
+              ></ion-card-title
+            >
+            <ion-card-title
+              ><b>DoJ: </b
+              ><ion-label
+                >{{emp.doj | date:'dd/MM/yyyy'}}</ion-label
+              ></ion-card-title
+            >
+            <ion-card-title
+              ><b>Employee Id:</b>
+              <ion-label>{{emp.employeeId}}</ion-label></ion-card-title
+            >
+          </ion-col>
+          <ion-col size="auto"
+            ><ion-button (click)="editEmp(emp.employeeId)" >
+              <ion-icon name="create-sharp"></ion-icon></ion-button
+          ></ion-col>
+        </ion-row>
+      </ion-grid>
+      <!-- <ion-card-subtitle></ion-card-subtitle> -->
+    </ion-card-header>
+  </ion-card>
+</ion-content>

@@ -13,6 +13,9 @@
     </ion-buttons>
     <ion-title>Device Master</ion-title>
     <ion-buttons slot="end" (click)="excelUploadEnable()">
+      <a href="assets/templates/device.xlsx" download class="upload-tpl" (click)="$event.stopPropagation(); downloadTemplate('device.xlsx', $event)" title="Download Template">
+        <ion-icon name="document-text-outline" id="upload"></ion-icon>
+      </a>
       <ion-icon name="cloud-upload-sharp" id="upload"></ion-icon>
     </ion-buttons>
   </ion-toolbar>
@@ -33,6 +36,7 @@
         <label id="deviceCode" for="deviceCode" class="container__label"
           >Device ID</label
         >
+        <span *ngIf="deviceForm.controls.deviceCode.invalid && deviceForm.controls.deviceCode.touched" class="field-error">Device ID is required</span>
       </div>
       <div class="container">
         <input
@@ -47,6 +51,7 @@
         <label id="deviceName" for="deviceName" class="container__label"
           >Device Name</label
         >
+        <span *ngIf="deviceForm.controls.deviceName.invalid && deviceForm.controls.deviceName.touched" class="field-error">Device Name is required</span>
       </div>
       <div class="container">
         <input
@@ -64,6 +69,7 @@
           class="container__label"
           >IP Address</label
         >
+        <span *ngIf="deviceForm.controls.deviceIpaddress.invalid && deviceForm.controls.deviceIpaddress.touched" class="field-error">IP Address is required</span>
       </div>
       <div class="container">
         <input
@@ -81,6 +87,7 @@
           class="container__label"
           >MAC Address</label
         >
+        <span *ngIf="deviceForm.controls.deviceMacaddress.invalid && deviceForm.controls.deviceMacaddress.touched" class="field-error">MAC Address is required</span>
       </div>
       <div class="container">
         <input
@@ -98,6 +105,7 @@
           class="container__label"
           >IMEI</label
         >
+        <span *ngIf="deviceForm.controls.imei.invalid && deviceForm.controls.imei.touched" class="field-error">IMEI is required</span>
       </div>
       <div class="container">
         <input
@@ -115,6 +123,7 @@
           class="container__label"
           >Device Model</label
         >
+        <span *ngIf="deviceForm.controls.deviceModel.invalid && deviceForm.controls.deviceModel.touched" class="field-error">Device Model is required</span>
       </div>
       <div class="container">
         <input
@@ -129,6 +138,7 @@
         <label id="deviceType" for="deviceType" class="container__label"
           >Device Type</label
         >
+        <span *ngIf="deviceForm.controls.deviceType.invalid && deviceForm.controls.deviceType.touched" class="field-error">Device Type is required</span>
       </div>
       <div class="container">
         <input
@@ -160,6 +170,7 @@
           class="container__label"
           >Device Mfg</label
         >
+        <span *ngIf="deviceForm.controls.deviceManufacturer.invalid && deviceForm.controls.deviceManufacturer.touched" class="field-error">Device Mfg is required</span>
       </div>
       <div class="container">
         <input
@@ -168,7 +179,6 @@
           id="description"
           name="description"
           value=""
-          required
           formControlName="description"
         />
         <label id="description1" for="description" class="container__label"
@@ -188,6 +198,7 @@
         <label id="status" for="status" class="container__label"
           >status</label
         >
+        <span *ngIf="deviceForm.controls.status.invalid && deviceForm.controls.status.touched" class="field-error">Status is required</span>
       </div>
       <div class="container">
         <input
@@ -202,6 +213,7 @@
         <label id="devicePassword" for="devicePassword" class="container__label"
           >Password</label
         >
+        <span *ngIf="deviceForm.controls.devicePassword.invalid && deviceForm.controls.devicePassword.touched" class="field-error">Password is required</span>
       </div>
 
       <button class="form__submit" id="submit" type="button" value="submit" (click)="addDevice()">

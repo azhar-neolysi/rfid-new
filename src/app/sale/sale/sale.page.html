@@ -52,8 +52,10 @@
       appScanner
       (scanComplete)="onScan($event)"
       autofocus="true"
-      inputmode="none"
     ></ion-input>
+    <ion-button fill="clear" color="primary" class="scan-camera" (click)="scanBarcode()">
+      <ion-icon name="camera" slot="icon-only" size="large"></ion-icon>
+    </ion-button>
   </div>
 
   <ion-grid class="actions">

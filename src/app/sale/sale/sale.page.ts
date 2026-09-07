@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { isValidEpc } from 'src/app/shared/epc.utils';
 import { HardwareRfidService } from 'src/app/services/hardware-rfid.service';
 import { ToastrService } from 'src/app/services/toastr/toastr.service';
+import { BarcodeService } from 'src/app/services/barcode.service';
 
 @Component({
   selector: 'app-sale',
@@ -20,7 +21,8 @@ export class SalePage implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private hardwareRfid: HardwareRfidService,
-    private toast: ToastrService
+    private toast: ToastrService,
+    private barcodeService: BarcodeService
   ) {}
 
   ngOnInit() {
@@ -81,6 +83,13 @@ export class SalePage implements OnInit, OnDestroy {
     }
     this.tagId = value;
     this.editSale();
+  }
+
+  async scanBarcode() {
+    const code = await this.barcodeService.scan();
+    if (code) {
+      this.onScan(code);
+    }
   }
 
   clear() {

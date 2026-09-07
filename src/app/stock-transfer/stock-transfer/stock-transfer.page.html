@@ -41,7 +41,11 @@
         >
         <ion-grid>
           <ion-row>
-            <ion-col></ion-col>
+            <ion-col>
+              <ion-button fill="clear" color="primary" (click)="scanBarcode()">
+                <ion-icon name="camera" slot="icon-only"></ion-icon>
+              </ion-button>
+            </ion-col>
             <ion-col>
               <!-- <ion-button color="danger"
                 ><ion-icon slot="end" name="star"></ion-icon>

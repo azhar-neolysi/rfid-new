@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs';
 import * as XLSX from 'xlsx';
 import { HardwareRfidService } from '../services/hardware-rfid.service';
 import { ToastrService } from '../services/toastr/toastr.service';
+import { FileDownloadService } from '../services/file-download.service';
 
 interface DistancePreset {
   label: string;
@@ -68,8 +69,16 @@ export class TagLocatorPage implements OnDestroy {
   constructor(
     private hardwareRfid: HardwareRfidService,
     private route: ActivatedRoute,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private fileDownload: FileDownloadService
   ) {}
+
+  downloadTemplate(file: string, event: any) {
+    if (this.fileDownload.isNative()) {
+      event.preventDefault();
+    }
+    this.fileDownload.templateDownload(file);
+  }
 
   ionViewDidEnter() {
     this.pageActive = true;

@@ -1,0 +1,80 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button> </ion-menu-button>
+      <!-- <ion-icon name="add-sharp" slot="end"></ion-icon> -->
+    </ion-buttons>
+    <ion-title>Device Master</ion-title>
+    <ion-buttons slot="end" class="addbtn" (click)="addDevice()">
+      <!-- <ion-menu-button> </ion-menu-button> -->
+      <ion-icon name="add-sharp" slot="end"></ion-icon>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content [fullscreen]="true">
+  <ion-card>
+    <ion-input
+      (ionChange)="search($event)"
+      class="container__input"
+      type="text"
+      id="refName"
+      name="refName"
+      expand="full"
+      placeholder="Device ID"
+    />
+  </ion-card>
+
+  <ion-card *ngFor="let ref of deviceList">
+    <ion-card-header>
+      <ion-row>
+        <ion-col
+          ><ion-card-title
+            >Device ID:
+            <ion-label>{{ref.deviceCode}}</ion-label></ion-card-title
+          >
+          <ion-card-title
+            >Name: <ion-label>{{ref.deviceName}}</ion-label></ion-card-title
+          >
+          <ion-card-title
+            >Type: <ion-label>{{ref.deviceType}}</ion-label></ion-card-title
+          >
+          <ion-card-title
+            >Manufacturer:
+            <ion-label>{{ref.deviceManufacturer}}</ion-label></ion-card-title
+          >
+        </ion-col>
+        <ion-col size="auto"
+          ><ion-button color="danger" (click)="deleteDevice(ref.deviceMasterId)"
+            ><ion-icon name="trash-sharp"></ion-icon></ion-button
+        ></ion-col>
+      </ion-row>
+
+      <!-- <ion-card-subtitle></ion-card-subtitle> -->
+    </ion-card-header>
+
+    <ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col>
+            <ion-card-title
+              >Location:
+              <ion-label>{{ref.refLocation}}</ion-label></ion-card-title
+            >
+            <ion-card-title
+              >IP:
+              <ion-label>{{ref.deviceIpaddress}}</ion-label></ion-card-title
+            >
+            <ion-card-title
+              >MAC:
+              <ion-label>{{ref.deviceMacaddress}}</ion-label></ion-card-title
+            >
+          </ion-col>
+          <ion-col size="auto"
+            ><ion-button (click)="editDevice(ref.deviceMasterId)">
+              <ion-icon name="create-sharp"></ion-icon></ion-button
+          ></ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

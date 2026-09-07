@@ -8,6 +8,7 @@ import {
 import { DevicemasterService } from '../devicemaster.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import * as XLSX from 'xlsx';
+import { FileDownloadService } from '../../services/file-download.service';
 
 @Component({
   selector: 'app-devicemaster',
@@ -40,7 +41,13 @@ export class DevicemasterPage implements OnInit {
   deviceId: any;
   excelUpload = false;
   excelData: any;
-  constructor(private formBuilder: FormBuilder, private device: DevicemasterService, private route: ActivatedRoute, private router: Router) { }
+  constructor(private formBuilder: FormBuilder, private device: DevicemasterService, private route: ActivatedRoute, private router: Router, private fileDownload: FileDownloadService) { }
+  downloadTemplate(file: string, event: any) {
+    if (this.fileDownload.isNative()) {
+      event.preventDefault();
+    }
+    this.fileDownload.templateDownload(file);
+  }
 
   ngOnInit() {
     console.log(this.deviceForm.value);
@@ -76,10 +83,10 @@ export class DevicemasterPage implements OnInit {
           deviceManufacturer: this.deviceForm.value.deviceManufacturer,
           deviceIpaddress: this.deviceForm.value.deviceIpaddress,
           deviceMacaddress: this.deviceForm.value.deviceMacaddress,
-          devicePassword: this.deviceForm.value.devicePassword,
+          devicePassword: String(this.deviceForm.value.devicePassword),
           description: this.deviceForm.value.description,
-          refLocationId: null,
-          imei: this.deviceForm.value.imei,
+          refLocationId: this.deviceForm.value.refLocationId,
+          imei: String(this.deviceForm.value.imei),
           deviceModel: this.deviceForm.value.deviceModel,
           status: this.deviceForm.value.status
         };
@@ -107,7 +114,7 @@ export class DevicemasterPage implements OnInit {
           deviceMacaddress: this.deviceForm.value.deviceMacaddress,
           devicePassword: String(this.deviceForm.value.devicePassword),
           description: this.deviceForm.value.description,
-          refLocationId: null,
+          refLocationId: this.deviceForm.value.refLocationId,
           imei:String(this.deviceForm.value.imei),
           deviceModel: this.deviceForm.value.deviceModel,
           status: this.deviceForm.value.status
@@ -115,7 +122,7 @@ export class DevicemasterPage implements OnInit {
         console.log(data);
         this.device.addDevice(data).subscribe((res: any) => {
           console.log(res);
-          window.location.reload();
+          this.router.navigate(['devicemaster-list']);
         })
       }
 
@@ -136,6 +143,9 @@ export class DevicemasterPage implements OnInit {
       this.deviceForm.controls.deviceName.setValue(res.deviceName);
       this.deviceForm.controls.devicePassword.setValue(res.devicePassword);
       this.deviceForm.controls.deviceType.setValue(res.deviceType);
+      this.deviceForm.controls.imei.setValue(res.imei);
+      this.deviceForm.controls.deviceModel.setValue(res.deviceModel);
+      this.deviceForm.controls.status.setValue(res.status);
       this.deviceForm.controls.isActive.setValue(res.isActive);
       this.deviceForm.controls.isDeleted.setValue(res.isDeleted);
       this.deviceForm.controls.modifiedDate.setValue(res.modifiedDate);
@@ -161,29 +171,44 @@ export class DevicemasterPage implements OnInit {
   upload() {
     console.log(this.excelData);
     console.log(this.deviceForm.value);
-    this.excelData.forEach((element: any) => {
-      console.log(element);
-      // this.deviceForm.controls.createdDate.setValue(element.createdDate);
-      this.deviceForm.controls.description.setValue(element.description);
-      this.deviceForm.controls.deviceCode.setValue(element.deviceCode);
-      this.deviceForm.controls.deviceIpaddress.setValue(element.deviceIpaddress);
-      this.deviceForm.controls.deviceMacaddress.setValue(element.deviceMacaddress);
-      this.deviceForm.controls.deviceModel.setValue(element.deviceModel);
-      this.deviceForm.controls.imei.setValue(element.imei);
-      this.deviceForm.controls.deviceManufacturer.setValue(element.deviceManufacturer);
-      this.deviceForm.controls.deviceMasterId.setValue(element.deviceMasterId);
-      this.deviceForm.controls.deviceName.setValue(element.deviceName);
-      this.deviceForm.controls.devicePassword.setValue(element.devicePassword);
-      this.deviceForm.controls.deviceType.setValue(element.deviceType);
-      this.deviceForm.controls.status.setValue(element.status);
-      // this.deviceForm.controls.isActive.setValue(element.isActive);
-      // this.deviceForm.controls.isDeleted.setValue(element.isDeleted);
-      // this.deviceForm.controls.modifiedDate.setValue(element.modifiedDate);
-      // this.deviceForm.controls.refCreatedBy.setValue(element.refCreatedBy);
-      this.deviceForm.controls.refLocationId.setValue(element.locationId);
-      // this.deviceForm.controls.refModifiedBy.setValue(element.refModifiedBy);
-      // this.deviceForm.controls.refOrgId.setValue(element.refOrgId);
-      this.addDevice();
-    });
+    let index = 0;
+    const processNext = () => {
+      if (index >= this.excelData.length) {
+        this.router.navigate(['devicemaster-list']);
+        return;
+      }
+      const element = this.excelData[index];
+      const data: any = {
+        refOrgId: this.deviceForm.value.refOrgId,
+        createdDate: new Date(),
+        refCreatedBy: this.deviceForm.value.refCreatedBy,
+        modifiedDate: new Date(),
+        refModifiedBy: this.deviceForm.value.refModifiedBy,
+        isActive: true,
+        isDeleted: false,
+        deviceCode: element.deviceCode,
+        deviceName: element.deviceName,
+        deviceType: element.deviceType,
+        deviceManufacturer: element.deviceManufacturer,
+        deviceIpaddress: element.deviceIpaddress,
+        deviceMacaddress: element.deviceMacaddress,
+        devicePassword: String(element.devicePassword),
+        description: element.description,
+        refLocationId: element.locationId != null ? element.locationId : null,
+        imei: String(element.imei),
+        deviceModel: element.deviceModel,
+        status: element.status
+      };
+      this.device.addDevice(data).subscribe((res: any) => {
+        console.log(res);
+        index++;
+        processNext();
+      }, (err) => {
+        console.log(err);
+        index++;
+        processNext();
+      });
+    };
+    processNext();
   }
 }

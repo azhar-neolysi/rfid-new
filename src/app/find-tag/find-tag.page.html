@@ -16,6 +16,9 @@
     <ion-buttons slot="end" (click)="excelUploadEnable2()" *ngIf="excelUpload">
       <!-- <ion-icon name="cloud-upload-sharp" ></ion-icon> -->
       <!-- <ion-icon name="search-outline" id="upload" *ngIf="!excelUpload"></ion-icon> -->
+      <a href="assets/templates/find-tag.xlsx" download class="upload-tpl" (click)="$event.stopPropagation(); downloadTemplate('find-tag.xlsx', $event)" title="Download Template">
+        <ion-icon name="document-text-outline" id="upload"></ion-icon>
+      </a>
       <ion-icon name="cloud-upload-sharp" id="upload"></ion-icon>
     </ion-buttons>
   </ion-toolbar>

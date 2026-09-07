@@ -171,17 +171,7 @@ public class RFIDScannerPlugin extends Plugin {
     @PluginMethod
     public void getAvailableReaders(PluginCall call) {
         Log.d(TAG, "getAvailableReaders() called");
-        java.util.List<DeviceDetector.ReaderInfo> list = DeviceDetector.listReaders(getContext());
-        com.getcapacitor.JSArray arr = new com.getcapacitor.JSArray();
-        for (DeviceDetector.ReaderInfo r : list) {
-            JSObject o = new JSObject();
-            o.put("name", r.name != null ? r.name : "");
-            o.put("address", r.address != null ? r.address : "");
-            o.put("type", r.type);
-            o.put("builtIn", r.builtIn);
-            arr.put(o);
-        }
-        call.resolve(new JSObject().put("readers", arr));
+        ensurePermissions(call, "getReadersInternal");
     }
 
     @PluginMethod
@@ -220,6 +210,20 @@ public class RFIDScannerPlugin extends Plugin {
         call.resolve(info);
     }
 
+    private void listReadersInternal(PluginCall call) {
+        java.util.List<DeviceDetector.ReaderInfo> list = DeviceDetector.listReaders(getContext());
+        com.getcapacitor.JSArray arr = new com.getcapacitor.JSArray();
+        for (DeviceDetector.ReaderInfo r : list) {
+            JSObject o = new JSObject();
+            o.put("name", r.name != null ? r.name : "");
+            o.put("address", r.address != null ? r.address : "");
+            o.put("type", r.type);
+            o.put("builtIn", r.builtIn);
+            arr.put(o);
+        }
+        call.resolve(new JSObject().put("readers", arr));
+    }
+
     private void ensurePermissions(PluginCall call, String nextStep) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (!hasRfidPermission(Manifest.permission.BLUETOOTH_CONNECT)) {
@@ -250,10 +254,17 @@ public class RFIDScannerPlugin extends Plugin {
     @PermissionCallback
     private void permFinal_pairReaderInternal(PluginCall call) { proceedAfterPermissions(call, "pairReaderInternal"); }
 
+    @PermissionCallback
+    private void permStep2_getReadersInternal(PluginCall call) { ensurePermissions(call, "getReadersInternal"); }
+
+    @PermissionCallback
+    private void permFinal_getReadersInternal(PluginCall call) { proceedAfterPermissions(call, "getReadersInternal"); }
+
     private void proceedAfterPermissions(PluginCall call, String nextStep) {
         switch (nextStep) {
             case "connectInternal": connectInternal(call); break;
             case "pairReaderInternal": pairReaderInternal(call); break;
+            case "getReadersInternal": listReadersInternal(call); break;
         }
     }
 

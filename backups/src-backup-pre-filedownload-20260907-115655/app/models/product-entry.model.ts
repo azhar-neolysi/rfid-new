@@ -1,0 +1,42 @@
+import { BaseEntity } from './base.model';
+
+export interface ProductEntry extends BaseEntity {
+  productEntryId: number;
+  refOrgId: string | null;
+  date: string | null;
+  productName: string | null;
+  printName: string | null;
+  rfidcode: string | null;
+  itemCode: string | null;
+  barCode: string | null;
+  eancode: string | null;
+  hsnsaccode: string | null;
+  rack: string | null;
+  manufactureDate: string | null;
+  expiryDate: string | null;
+  itemWeight: string | null;
+  gst: string | null;
+  discount: string | null;
+  quantity: string | null;
+  costRate: string | null;
+  salesRate: string | null;
+  mrp: string | null;
+  amount: string | null;
+  description: string | null;
+  refLocationId: string | null;
+  refRefListUomid: string | null;
+  openingQty: string | null;
+  closingQty: string | null;
+  mcDesc: string | null;
+  styleCode: string | null;
+  description1: string | null;
+  description2: string | null;
+  description3: string | null;
+  description4: string | null;
+  description5: string | null;
+  description6: string | null;
+  description7: string | null;
+  description8: string | null;
+  description9: string | null;
+  description10: string | null;
+}

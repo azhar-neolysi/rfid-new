@@ -6,6 +6,7 @@ import * as XLSX from 'xlsx';
 import { ProductService } from '../itemmaster/product.service';
 import { HardwareRfidService } from '../services/hardware-rfid.service';
 import { ToastrService } from '../services/toastr/toastr.service';
+import { FileDownloadService } from '../services/file-download.service';
 
 interface CountedTag {
   epc: string;
@@ -71,9 +72,6 @@ export class TagCountPage implements OnInit, OnDestroy {
 
   searchTerm = '';
 
-  importedEpcs: string[] = [];
-  importedFileName = '';
-
   private countedMap = new Map<string, CountedTag>();
   private missingIndex = new Map<string, number>();
   private productByEpc = new Map<string, any>();
@@ -88,7 +86,8 @@ export class TagCountPage implements OnInit, OnDestroy {
     private product: ProductService,
     private hardwareRfid: HardwareRfidService,
     private router: Router,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private fileDownload: FileDownloadService
   ) {}
 
   selectMode = false;
@@ -158,18 +157,6 @@ export class TagCountPage implements OnInit, OnDestroy {
   }
 
   get filteredMissingRows(): MissingRow[] {
-    if (this.importedEpcs.length > 0) {
-      const importedSet = new Set(this.importedEpcs);
-      const countedSet = new Set(this.countedMap.keys());
-      const rows = this.importedEpcs
-        .filter((epc) => !countedSet.has(epc))
-        .map((epc) => {
-          const product = this.productByEpc.get(epc);
-          return { epc, product };
-        });
-      if (!this.searchTerm) return rows;
-      return rows.filter((r) => this.matchesSearch(r.epc));
-    }
     if (!this.searchTerm) return this.missingRows;
     return this.missingRows.filter((r) => this.matchesSearch(r.epc));
   }
@@ -190,10 +177,6 @@ export class TagCountPage implements OnInit, OnDestroy {
   }
 
   get missingCount(): number {
-    if (this.importedEpcs.length > 0) {
-      const countedSet = new Set(this.countedMap.keys());
-      return this.importedEpcs.filter((epc) => !countedSet.has(epc)).length;
-    }
     return this.missingRows.length;
   }
 
@@ -207,48 +190,9 @@ export class TagCountPage implements OnInit, OnDestroy {
     return this.scanPower === dbm;
   }
 
-  // ── Import / Export ──────────────────────────────────────────────────
+  // ── Export ────────────────────────────────────────────────────────────
 
-  onImportFile(event: any) {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.readAsBinaryString(file);
-    reader.onload = () => {
-      const wb = XLSX.read(reader.result, { type: 'binary' });
-      const sheet = wb.Sheets[wb.SheetNames[0]];
-      if (!sheet) return;
-      const rows: any[] = XLSX.utils.sheet_to_json(sheet);
-      const epcs: string[] = [];
-      for (const row of rows) {
-        const epc =
-          row.EPC || row.epc || row.TagID || row.tagid ||
-          row.RFIDCode || row.rfidcode || row.A;
-        if (epc) {
-          const val = String(epc).trim();
-          if (val && !epcs.includes(val)) {
-            epcs.push(val);
-          }
-        }
-      }
-      if (epcs.length > this.maxTags) {
-        this.toastr.danger(`Import limit exceeded: found ${epcs.length}, max ${this.maxTags}`);
-      } else {
-        this.importedEpcs = epcs;
-        this.importedFileName = file.name;
-        this.toastr.success(`Imported ${epcs.length} tag(s) from ${file.name}`);
-      }
-      (event.target as HTMLInputElement).value = '';
-    };
-  }
-
-  clearImport() {
-    this.importedEpcs = [];
-    this.importedFileName = '';
-  }
-
-  exportExcel() {
-    if (!this.countedRows.length) return;
+  async exportExcel() {
     const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
     const counted = this.countedRows.map((r) => ({
       EPC: r.epc,
@@ -291,7 +235,48 @@ export class TagCountPage implements OnInit, OnDestroy {
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(counted), 'Counted');
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(missing), 'Missing');
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(unknown), 'Unknown');
-    XLSX.writeFile(wb, `tag-count-${stamp}.xlsx`);
+    const fileName = `tag-count-${stamp}.xlsx`;
+
+    if (this.fileDownload.isNative()) {
+      const base64 = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
+      await this.fileDownload.exportFile(base64, fileName);
+      this.toastr.success('Choose where to save the report');
+      return;
+    }
+
+    const out = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([out], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+
+    // Prefer native share on device if the WebView supports it
+    const nav = navigator as any;
+    if (typeof nav.share === 'function' && typeof nav.canShare === 'function') {
+      const file = new File([blob], fileName, {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      if (nav.canShare({ files: [file] })) {
+        nav
+          .share({ files: [file], title: fileName })
+          .then(() => {})
+          .catch(() => this.downloadBlob(blob, fileName));
+        this.toastr.success('Choose where to save the report');
+        return;
+      }
+    }
+    this.downloadBlob(blob, fileName);
+  }
+
+  private downloadBlob(blob: Blob, fileName: string) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    this.toastr.success(`Exported ${fileName}`);
   }
 
   // ── Lifecycle ────────────────────────────────────────────────────────
@@ -389,12 +374,6 @@ export class TagCountPage implements OnInit, OnDestroy {
     }
 
     // New unique tag
-    if (this.scanMode === 'multi' && this.countedRows.length >= this.maxTags) {
-      this.stopCount();
-      this.toastr.warning(`Tag limit reached (${this.maxTags})`);
-      return;
-    }
-
     const product = this.productByEpc.get(epc);
     const entry: CountedTag = {
       epc,

@@ -12,6 +12,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { ToastController } from '@ionic/angular';
 import { HardwareRfidService } from '../../services/hardware-rfid.service';
+import { FileDownloadService } from '../../services/file-download.service';
+import { normalizeExcelDate } from '../../services/excel-date.util';
+import { BarcodeService } from '../../services/barcode.service';
 @Component({
   selector: 'app-rfid-master',
   templateUrl: './rfid-master.page.html',
@@ -42,10 +45,10 @@ export class RfidMasterPage implements OnInit, OnDestroy {
     style: ['', [Validators.required]],
     size: ['', [Validators.required]],
     encodingType: ['', [Validators.required]],
-    sysMemoryId: ['', [Validators.required]],
-    systemId: ['', [Validators.required]],
-    userMemoryId: ['', [Validators.required]],
-    memorySize: ['', [Validators.required]],
+    sysMemoryId: [''],
+    systemId: [''],
+    userMemoryId: [''],
+    memorySize: [''],
     isRewritable: [true],
     isAssigned: [false],
     descritpion1: [''],
@@ -67,7 +70,9 @@ export class RfidMasterPage implements OnInit, OnDestroy {
     private router: Router,
     private datePipe: DatePipe,
     private toast: ToastController,
-    private hardwareRfid: HardwareRfidService
+    private hardwareRfid: HardwareRfidService,
+    private fileDownload: FileDownloadService,
+    private barcodeService: BarcodeService
   ) {
     this.maxDate = new Date().toISOString().split('T')[0];
     this.rfidForm.controls.date.setValue(this.maxDate)
@@ -124,6 +129,12 @@ export class RfidMasterPage implements OnInit, OnDestroy {
       },
       error: () => { },
     });
+  }
+  async scanBarcodeTag() {
+    const code = await this.barcodeService.scan();
+    if (code) {
+      this.onTagScanned(code);
+    }
   }
   onTagScanned(epc: string) {
     if (!epc) return;
@@ -215,6 +226,12 @@ export class RfidMasterPage implements OnInit, OnDestroy {
   excelUploadEnable() {
     this.excelUpload = !this.excelUpload ? true : false;
   }
+  downloadTemplate(file: string, event: any) {
+    if (this.fileDownload.isNative()) {
+      event.preventDefault();
+    }
+    this.fileDownload.templateDownload(file);
+  }
   getRFIDById() {
     this.rfid.getRFID(this.rfid_Id).subscribe({
       next: (res: any) => {
@@ -243,8 +260,12 @@ export class RfidMasterPage implements OnInit, OnDestroy {
     this.rfidForm.controls.frequency.setValue(this.rfidData.frequency);
     this.rfidForm.controls.isActive.setValue(this.rfidData.isActive);
     this.rfidForm.controls.isDeleted.setValue(this.rfidData.isDeleted);
-    this.rfidForm.controls.isAssigned.setValue(this.rfidData.isAssigned);
-    this.rfidForm.controls.isRewritable.setValue(this.rfidData.isRewritable);
+    this.rfidForm.controls.isAssigned.setValue(
+      this.toBool(this.rfidData.isAssigned)
+    );
+    this.rfidForm.controls.isRewritable.setValue(
+      this.toBool(this.rfidData.isRewritable)
+    );
     this.rfidForm.controls.memorySize.setValue(this.rfidData.memorySize);
     this.rfidForm.controls.modifiedDate.setValue(this.rfidData.modifiedDate);
     this.rfidForm.controls.refCreatedBy.setValue(this.rfidData.refCreatedBy);
@@ -273,44 +294,138 @@ export class RfidMasterPage implements OnInit, OnDestroy {
       var workbook = XLSX.read(fileReader.result, { type: 'binary' });
       var sheetNames = workbook.SheetNames;
       this.excelData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetNames[0]]);
+      console.log(this.excelData)
     };
   }
-  upload() {
-    this.excelData.forEach((element: any) => {
-      // this.referenceForm.controls.refName.setValue(res.name);
-      this.rfidForm.controls.createdDate.setValue(new Date());
-      this.rfidForm.controls.date.setValue(element.Date);
-      this.rfidForm.controls.descritpion1.setValue(element.Descritpion1);
-      this.rfidForm.controls.descritpion2.setValue(element.Descritpion2);
-      this.rfidForm.controls.descritpion3.setValue(element.Descritpion3);
-      this.rfidForm.controls.encodingType.setValue(element.EncodingType);
-      this.rfidForm.controls.frequency.setValue(element.Frequency);
-      this.rfidForm.controls.isActive.setValue(true);
-      this.rfidForm.controls.isDeleted.setValue(false);
-      this.rfidForm.controls.isAssigned.setValue(element.isAssigned === 1 ? true : false);
-      this.rfidForm.controls.isRewritable.setValue(element.isRewritable === 1 ? true : false);
-      this.rfidForm.controls.memorySize.setValue(element.MemorySize);
-      this.rfidForm.controls.modifiedDate.setValue(null);
-      this.rfidForm.controls.refCreatedBy.setValue(null);
-      this.rfidForm.controls.refModifiedBy.setValue(null);
-      this.rfidForm.controls.refOrgId.setValue(null);
-      this.rfidForm.controls.size.setValue(String(element.Size));
-      this.rfidForm.controls.style.setValue(element.Style);
-      this.rfidForm.controls.sysMemoryId.setValue(String(element.SysMemoryId));
-      this.rfidForm.controls.systemId.setValue(String(element.SystemId));
-      this.rfidForm.controls.tagID.setValue(String(element.TagID));
-      this.rfidForm.controls.tagModel.setValue(element.TagModel);
-      this.rfidForm.controls.tagSize.setValue(String(element.TagSize));
-      this.rfidForm.controls.tagStatus.setValue(element.TagStatus);
-      this.rfidForm.controls.type.setValue(element.Type);
-      this.rfidForm.controls.userMemoryId.setValue(
-        String(element.UserMemoryId)
-      );
-      this.addRFID();
-    });
+  private str(v: any): string {
+    return v === null || v === undefined ? '' : String(v).trim();
   }
+
+  private normalizeDate(v: any): string {
+    return normalizeExcelDate(v, this.maxDate) || this.maxDate;
+  }
+
+  private toBool(v: any): boolean {
+    return v === true || v === 'true' || v === 1 || v === '1' || String(v).toLowerCase() === 'true';
+  }
+
+  upload() {
+    if (!this.excelData || this.excelData.length === 0) {
+      this.showToast('danger', 'No rows found in the selected file');
+      return;
+    }
+    this.rfid_Id = null;
+    const rows = [...this.excelData];
+    const total = rows.length;
+    let saved = 0;
+    let failed = 0;
+
+    const processNext = (index: number) => {
+      if (index >= total) {
+        const msg =
+          failed === 0
+            ? `Saved ${saved} of ${total} rows`
+            : `Saved ${saved} of ${total} rows (${failed} failed)`;
+        this.showToast(failed === 0 ? 'success' : 'warning', msg);
+        this.router.navigate(['rfid-list']);
+        return;
+      }
+
+      const element = rows[index];
+      let err: any = null;
+
+      try {
+        const data: any = {
+          refOrgId: null,
+          createdDate: new Date(),
+          refCreatedBy: null,
+          modifiedDate: null,
+          refModifiedBy: null,
+          isActive: true,
+          isDeleted: false,
+          date: this.normalizeDate(element.Date),
+          tagId: this.str(element.TagID),
+          tagSize: this.str(element.TagSize),
+          tagModel: this.str(element.TagModel),
+          tagStatus: this.str(element.TagStatus),
+          frequency: this.str(element.Frequency),
+          type: this.str(element.Type),
+          style: this.str(element.Style),
+          size: this.str(element.Size),
+          encodingType: this.str(element.EncodingType),
+          sysMemoryId: this.str(element.SysMemoryId),
+          systemId: this.str(element.SystemId),
+          userMemoryId: this.str(element.UserMemoryId),
+          memorySize: this.str(element.MemorySize),
+          isRewritable:
+            element.isRewritable === 1 || element.isRewritable === true || element.isRewritable === 'true',
+          isAssigned: element.isAssigned === 1 || element.isAssigned === true || element.isAssigned === 'true',
+          descritpion1: this.str(element.Descritpion1),
+          descritpion2: this.str(element.Descritpion2),
+          descritpion3: this.str(element.Descritpion3),
+        };
+
+        if (!data.tagId) {
+          throw new Error('Tag ID is required');
+        }
+
+        const exists = this.existingByTag.get(String(data.tagId).toUpperCase());
+        if (exists) {
+          failed++;
+          console.warn(`[RFIDMaster] row ${index + 1} skipped (duplicate tagId)`);
+          processNext(index + 1);
+          return;
+        }
+        const key = String(data.tagId).toUpperCase();
+        this.existingByTag.set(key, data);
+
+        this.rfid.addRFID(data).subscribe({
+          next: () => {
+            saved++;
+            processNext(index + 1);
+          },
+          error: (e: any) => {
+            err = e;
+            failed++;
+            console.error(`[RFIDMaster] row ${index + 1} save failed`, e);
+            processNext(index + 1);
+          },
+        });
+      } catch (e) {
+        err = e;
+        failed++;
+        console.error(`[RFIDMaster] row ${index + 1} invalid`, e);
+        processNext(index + 1);
+      }
+    };
+
+    processNext(0);
+  }
+  private missingFields(): string[] {
+    const labels: { key: string; label: string }[] = [
+      { key: 'tagID', label: 'Tag ID' },
+      { key: 'tagSize', label: 'Tag Size' },
+      { key: 'tagModel', label: 'Tag Model' },
+      { key: 'tagStatus', label: 'Tag Status' },
+      { key: 'frequency', label: 'Frequency' },
+      { key: 'type', label: 'Type' },
+      { key: 'style', label: 'Style' },
+      { key: 'size', label: 'Size' },
+      { key: 'encodingType', label: 'Encoding Type' },
+    ];
+    const missing: string[] = [];
+    const value: any = this.rfidForm.value;
+    labels.forEach((f) => {
+      const v = value[f.key];
+      if (v === null || v === undefined || String(v).trim() === '') {
+        missing.push(f.label);
+      }
+    });
+    return missing;
+  }
+
   addRFID() {
-    if ((this, this.rfidForm.valid)) {
+    if (this.rfidForm.valid) {
       if (this.rfid_Id) {
         const data = {
           rfidmasterId: this.rfidForm.value.rfidmasterId,
@@ -335,8 +450,8 @@ export class RfidMasterPage implements OnInit, OnDestroy {
           systemId: this.rfidForm.value.systemId,
           userMemoryId: this.rfidForm.value.userMemoryId,
           memorySize: this.rfidForm.value.memorySize,
-          isRewritable: this.rfidForm.value.isRewritable,
-          isAssigned: this.rfidForm.value.isAssigned,
+          isRewritable: this.toBool(this.rfidForm.value.isRewritable),
+          isAssigned: this.toBool(this.rfidForm.value.isAssigned),
           descritpion1: this.rfidForm.value.descritpion1,
           descritpion2: this.rfidForm.value.descritpion2,
           descritpion3: this.rfidForm.value.descritpion3,
@@ -373,10 +488,8 @@ export class RfidMasterPage implements OnInit, OnDestroy {
           systemId: this.rfidForm.value.systemId,
           userMemoryId: this.rfidForm.value.userMemoryId,
           memorySize: this.rfidForm.value.memorySize,
-          isRewritable: this.rfidForm.value.isRewritable,
-          isAssigned: this.rfidForm.value.isAssigned,
-          // isRewritable: this.rfidForm.value.isRewritable === 1 ? true : false,
-          // isAssigned: this.rfidForm.value.isAssigned === 1 ? true : false,
+          isRewritable: this.toBool(this.rfidForm.value.isRewritable),
+          isAssigned: this.toBool(this.rfidForm.value.isAssigned),
           descritpion1: this.rfidForm.value.descritpion1,
           descritpion2: this.rfidForm.value.descritpion2,
           descritpion3: this.rfidForm.value.descritpion3,
@@ -392,8 +505,12 @@ export class RfidMasterPage implements OnInit, OnDestroy {
         });
       }
     } else {
-      console.log(this, this.rfidForm.valid);
-      return;
+      const missing = this.missingFields();
+      const msg =
+        missing.length > 0
+          ? `Please fill: ${missing.join(', ')}`
+          : 'Please complete the required fields';
+      this.showToast('danger', msg);
     }
   }
 }

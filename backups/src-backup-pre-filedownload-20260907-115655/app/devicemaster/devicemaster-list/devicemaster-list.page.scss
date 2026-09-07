@@ -1,0 +1,52 @@
+ion-row{
+  text-align: center;
+  align-items: center;
+}
+ion-card{
+  border: 2px solid var(--brand-navy);
+}
+.addbtn{
+  font-size: 25px;
+  color: white;
+}
+ion-label{
+  color: var(--brand-navy);
+}
+
+ion-card-title{
+   text-align: justify;
+ion-label{
+  margin-left: 7px;
+}
+}
+
+input {
+  margin-top: 10px;
+    width: 100%;
+    // height: 100%;
+    padding: 1em;
+    border: 1px solid var(--brand-navy);
+    background-color: transparent;
+    color: #000000;
+    font-weight: bold;
+
+  }
+// ion-card:focus{
+//   border: 3px solid var(--brand-navy);
+// }
+// input:focus{
+//   border: 1px solid var(--brand-navy);
+// }
+// ion-card{
+//   ion-card-header{
+//     ion-row{
+//       ion-col{
+//         // width: 30%;
+//         ion-button{
+//           align-items: end;
+//         }
+//       }
+//     }
+//   }
+// }
+

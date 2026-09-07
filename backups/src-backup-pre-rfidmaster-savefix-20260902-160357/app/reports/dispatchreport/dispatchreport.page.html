@@ -1,0 +1,51 @@
+
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button> </ion-menu-button>
+    </ion-buttons>
+    <ion-title>Delivery Stock Report</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content [fullscreen]="true">
+  <div class="pagewrap">
+    <form class="form" id="form">
+      <div class="container">
+        <input
+          class="container__input"
+          type="date"
+          id="username"
+          name="username"
+          value=""
+          required
+        />
+        <label id="userLabel" for="username" class="container__label"
+          >From Date</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="date"
+          id="pass"
+          name="text"
+          value=""
+          required
+        />
+        <label id="passLabel" for="pass" class="container__label"
+          >To Date</label
+        >
+      </div>
+
+         <button class="form__submit" id="submit" type="button" value="submit">
+        Search
+      </button>
+    </form>
+  </div>
+</ion-content>
+<ion-footer>
+  <ion-button expand="block">Export to PDF</ion-button>
+  <!-- <button class="export" id="submit" type="button" value="submit">
+    Export to PDF
+  </button> -->
+</ion-footer>

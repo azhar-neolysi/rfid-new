@@ -1,0 +1,175 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button> </ion-menu-button>
+    </ion-buttons>
+    <ion-title>Sale Entry</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content [fullscreen]="true">
+  <div class="pagewrap">
+    <form class="form" id="form" [formGroup]="salesForm">
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="productName"
+          name="productName"
+          value=""
+          required
+          formControlName="productName"
+
+        />
+        <label
+          id="productName"
+          for="productName"
+          class="container__label"
+          >Product Name</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="printName"
+          name="printName"
+          value=""
+          required
+          formControlName="printName"
+
+        />
+        <label
+          id="printName"
+          for="printName"
+          class="container__label"
+          >Print Name</label
+        >
+      </div>
+      <!-- <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="brand"
+          name="brand"
+          value=""
+          required
+          formControlName="brand"
+
+        />
+        <label
+          id="brand"
+          for="brand"
+          class="container__label"
+          >Brand</label
+        >
+      </div> -->
+      <!-- <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="category"
+          name="category"
+          value=""
+          required
+          formControlName="category"
+
+        />
+        <label
+          id="category"
+          for="category"
+          class="container__label"
+          >Category</label
+        >
+      </div>
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="mrp"
+          name="mrp"
+          value=""
+          required
+          formControlName="mrp"
+
+        />
+        <label
+          id="mrp"
+          for="mrp"
+          class="container__label"
+          >MRP</label
+        >
+      </div> -->
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="saleRate"
+          name="saleRate"
+          value=""
+          required
+          formControlName="saleRate"
+
+        />
+        <label
+          id="saleRate"
+          for="saleRate"
+          class="container__label"
+          >Sales Rate</label
+        >
+      </div>
+
+      <div class="container">
+        <input
+          class="container__input"
+          type="number"
+          id="currentStock"
+          name="currentStock"
+          value=""
+          required
+          formControlName="currentStock"
+        />
+        <label id="currentStock" for="currentStock" class="container__label"
+          >Quantity</label
+        >
+      </div>
+      <!-- <div class="container">
+        <input
+          class="container__input"
+          type="date"
+          id="salesDate"
+          name="salesDate"
+          value=""
+          required
+          formControlName="salesDate"
+        />
+        <label id="salesDate" for="salesDate" class="container__label"
+          >Sales Date</label
+        >
+      </div> -->
+      <div class="container">
+        <input
+          class="container__input"
+          type="text"
+          id="description"
+          name="description"
+          value=""
+          required
+          formControlName="description"
+        />
+        <label id="description" for="description" class="container__label"
+          >Description</label
+        >
+      </div>
+
+      <button
+        class="form__submit"
+        id="submit"
+        type="button"
+        value="submit"
+        (click)="saleEntry()"
+      >
+        Submit
+      </button>
+    </form>
+  </div>
+</ion-content>

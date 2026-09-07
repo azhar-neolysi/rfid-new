@@ -9,6 +9,7 @@ import {
 import { Platform, AlertController, MenuController } from '@ionic/angular';
 import * as XLSX from 'xlsx';
 import { ProductService } from '../itemmaster/product.service';
+import { FileDownloadService } from '../services/file-download.service';
 
 @Component({
   selector: 'app-find-tag',
@@ -34,12 +35,19 @@ export class FindTagPage implements OnInit, AfterViewInit {
   notFoundBarcode: any[] = [];
   extraArray: any[] = [];
   excelUpload2: boolean;
-  excelData: never[];
+  excelData: any[];
   constructor(
     public alertController: AlertController,
     private renderer: Renderer2,
-    private product: ProductService
+    private product: ProductService,
+    private fileDownload: FileDownloadService
   ) {}
+  downloadTemplate(file: string, event: any) {
+    if (this.fileDownload.isNative()) {
+      event.preventDefault();
+    }
+    this.fileDownload.templateDownload(file);
+  }
   ngOnInit() {}
   ngAfterViewInit() {
     this.renderer.selectRootElement(this.myInput.nativeElement).focus();
@@ -171,26 +179,42 @@ export class FindTagPage implements OnInit, AfterViewInit {
       var sheetNames = workbook.SheetNames;
       this.excelData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetNames[0]]);
       console.log(this.excelData);
+      let processed = 0;
+      const total = this.excelData.length;
       this.excelData.forEach((item: any) => {
+        const tag = item.tags ?? item.Tag ?? item.tag ?? item.barcode ?? item.Barcode;
+        if (tag === null || tag === undefined || String(tag).trim() === '') {
+          processed++;
+          return;
+        }
         const data = {
-          barcode: item.tags,
+          barcode: tag,
           rfidcode: null,
         };
         this.product.searchProduct(data).subscribe((res: any) => {
-          console.log(item.tags);
+          console.log(tag);
           console.log(res);
           console.log(this.scannedTags);
-          if (res.length !== 0) {
+          if (res && res.length !== 0) {
             res.forEach((element: any) => {
-              this.scannedTags.push(element.rfidcode);
+              if (element && element.rfidcode && !this.scannedTags.includes(element.rfidcode)) {
+                this.scannedTags.push(element.rfidcode);
+              }
               console.log(this.scannedTags);
             });
           } else {
-            this.notFoundBarcode.push(item.tags);
+            if (!this.notFoundBarcode.includes(tag)) {
+              this.notFoundBarcode.push(tag);
+            }
             console.log(this.notFoundBarcode);
           }
+          processed++;
+        }, () => {
+          if (!this.notFoundBarcode.includes(tag)) {
+            this.notFoundBarcode.push(tag);
+          }
+          processed++;
         });
-        // this.scannedTags.push(item.tags);
       });
       console.log(this.scannedTags);
     };

@@ -21,6 +21,8 @@ import { ToastrService } from 'src/app/services/toastr/toastr.service';
 import { ProductEntry } from 'src/app/models/product-entry.model';
 import { HardwareRfidService } from 'src/app/services/hardware-rfid.service';
 import { BarcodeService } from 'src/app/services/barcode.service';
+import { FileDownloadService } from 'src/app/services/file-download.service';
+import { normalizeExcelDate } from 'src/app/services/excel-date.util';
 
 @Component({
   selector: 'app-itemmaster',
@@ -78,7 +80,7 @@ export class ItemmasterPage implements OnInit, OnDestroy {
     15: [''], 16: [''], 17: [''], 18: [''], 19: [''], 20: [''],
   });
 
-  productId: number;
+  productId: any;
   excelUpload = false;
   excelData: any[];
   segments: any[] = [];
@@ -105,7 +107,8 @@ export class ItemmasterPage implements OnInit, OnDestroy {
     private alertController: AlertController,
     private toast: ToastrService,
     private hardwareRfid: HardwareRfidService,
-    private barcodeService: BarcodeService
+    private barcodeService: BarcodeService,
+    private fileDownload: FileDownloadService
   ) {
     this.maxDate = new Date().toISOString().split('T')[0];
     this.productForm.controls.date.setValue(this.maxDate);
@@ -124,7 +127,7 @@ export class ItemmasterPage implements OnInit, OnDestroy {
       })
     );
     this.route.params.subscribe((param) => {
-      this.productId = Number(param['id']);
+      this.productId = param['id'];
       if (this.productId) {
         this.getProduct();
       }
@@ -140,11 +143,11 @@ export class ItemmasterPage implements OnInit, OnDestroy {
     this.hardwareRfid
       .ensureConnected()
       .then(() => this.hardwareRfid.startTriggerScan())
-      .catch(() => {});
+      .catch(() => { });
   }
   ionViewDidLeave() {
     this.pageActive = false;
-    this.hardwareRfid.stopTriggerScan().catch(() => {});
+    this.hardwareRfid.stopTriggerScan().catch(() => { });
   }
 
   clear() {
@@ -358,11 +361,15 @@ export class ItemmasterPage implements OnInit, OnDestroy {
       { key: 'mrp', label: 'MRP' },
       { key: 'amount', label: 'Product Amount' },
     ];
+    const missing: string[] = [];
     for (const field of fields) {
-      if (!(this.productForm.value as any)[field.key]) {
-        this.toast.danger(`Enter ${field.label}`);
-        return;
+      const v = (this.productForm.value as any)[field.key];
+      if (v === null || v === undefined || String(v).trim() === '') {
+        missing.push(field.label);
       }
+    }
+    if (missing.length > 0) {
+      this.toast.danger(`Please fill: ${missing.join(', ')}`);
     }
   }
 
@@ -429,7 +436,7 @@ export class ItemmasterPage implements OnInit, OnDestroy {
           refReferenceListId: element.refList,
           productEntryReferenceListMappingId: element.id,
           isActive: true,
-          createdDate: this.productForm.value.refCreatedBy,
+          createdDate: new Date(),
           modifiedDate: new Date(),
           isDeleted: false,
         };
@@ -552,6 +559,19 @@ export class ItemmasterPage implements OnInit, OnDestroy {
     this.excelUpload = !this.excelUpload;
   }
 
+  async downloadTemplate(file: string, event: Event) {
+    if (this.fileDownload.isNative()) {
+      event.preventDefault();
+      const saved = await this.fileDownload.templateDownload(file);
+      if (saved) {
+        this.toast.success('Template downloaded to Downloads/RFID');
+      } else {
+        this.toast.danger('Could not download the template');
+      }
+      return;
+    }
+  }
+
   onFileSelected(event: any) {
     this.excelDataRaw = [];
     const file: any = event.target.files[0];
@@ -561,7 +581,7 @@ export class ItemmasterPage implements OnInit, OnDestroy {
       const workbook = XLSX.read(fileReader.result, { type: 'binary' });
       const sheetNames = workbook.SheetNames;
       this.excelDataRaw = XLSX.utils.sheet_to_json(workbook.Sheets[sheetNames[0]]);
-
+      console.log(this.excelDataRaw);
       if (this.productForm.value.uploadType === 'uan') {
         this.groupByEancode();
       } else {
@@ -591,27 +611,187 @@ export class ItemmasterPage implements OnInit, OnDestroy {
   }
 
   upload() {
-    this.excelData.forEach((productData: any) => {
-      console.log(productData);
-      this.refList.getReferenceListbyName(productData.uom).subscribe((res0: any[]) => {
-        console.log(res0);
-        this.productForm.controls.refRefListUomid.setValue(res0[0].referenceListId);
-        this.refList.getReferenceListbyName(productData.color).subscribe((res1: any[]) => {
-          this.selectedSegment.push({ ref: res1[0].referencename, refList: res1[0].referenceListId });
-          this.refList.getReferenceListbyName(productData.size).subscribe((res2: any[]) => {
-            this.selectedSegment.push({ ref: res2[0].referencename, refList: res2[0].referenceListId });
-            this.refList.getReferenceListbyName(productData.pattern).subscribe((res3: any[]) => {
-              this.selectedSegment.push({ ref: res3[0].referencename, refList: res3[0].referenceListId });
-              this.populateFormFromExcelRow(productData);
-              this.addProduct();
-            });
-          });
+    if (!this.excelData || this.excelData.length === 0) {
+      this.toast.danger('No rows found in the selected file');
+      return;
+    }
+    const rows = [...this.excelData];
+    const total = rows.length;
+    let saved = 0;
+    let failed = 0;
+
+    const processNext = (index: number) => {
+      if (index >= total) {
+        const msg =
+          failed === 0
+            ? `Uploaded ${saved} of ${total} rows`
+            : `Uploaded ${saved} of ${total} rows (${failed} failed)`;
+        this.toast[failed === 0 ? 'success' : 'warning'](msg);
+        this.excelData = [];
+        return;
+      }
+
+      const productData = rows[index];
+      this.selectedSegment = [];
+
+      const setUom = (res0: any[]) => {
+        if (!res0 || !res0.length) {
+          this.toast.warning(
+            `Row ${index + 1}: UOM '${productData.uom}' not found`
+          );
+          failed++;
+          processNext(index + 1);
+          return;
+        }
+        this.productForm.controls.refRefListUomid.setValue(
+          res0[0].referenceListId
+        );
+        this.refList
+          .getReferenceListbyName(productData.color)
+          .subscribe((res1: any[]) => setColor(res1));
+      };
+
+      const setColor = (res1: any[]) => {
+        if (!res1 || !res1.length) {
+          this.toast.warning(
+            `Row ${index + 1}: Color '${productData.color}' not found`
+          );
+          failed++;
+          processNext(index + 1);
+          return;
+        }
+        this.selectedSegment.push({
+          ref: res1[0].referencename,
+          refList: res1[0].referenceListId,
         });
+        this.refList
+          .getReferenceListbyName(productData.size)
+          .subscribe((res2: any[]) => setSize(res2));
+      };
+
+      const setSize = (res2: any[]) => {
+        if (!res2 || !res2.length) {
+          this.toast.warning(
+            `Row ${index + 1}: Size '${productData.size}' not found`
+          );
+          failed++;
+          processNext(index + 1);
+          return;
+        }
+        this.selectedSegment.push({
+          ref: res2[0].referencename,
+          refList: res2[0].referenceListId,
+        });
+        this.refList
+          .getReferenceListbyName(productData.pattern)
+          .subscribe((res3: any[]) => setPattern(res3));
+      };
+
+      const setPattern = (res3: any[]) => {
+        if (!res3 || !res3.length) {
+          this.toast.warning(
+            `Row ${index + 1}: Pattern '${productData.pattern}' not found`
+          );
+          failed++;
+          processNext(index + 1);
+          return;
+        }
+        this.selectedSegment.push({
+          ref: res3[0].referencename,
+          refList: res3[0].referenceListId,
+        });
+        this.populateFormFromExcelRow(productData);
+        this.addProductForUpload(index, () => {
+          saved++;
+          processNext(index + 1);
+        }, () => {
+          failed++;
+          processNext(index + 1);
+        });
+      };
+
+      this.refList
+        .getReferenceListbyName(productData.uom)
+        .subscribe((res0: any[]) => setUom(res0));
+    };
+
+    processNext(0);
+  }
+
+  private addProductForUpload(
+    index: number,
+    onSuccess: () => void,
+    onError: () => void
+  ) {
+    if (this.productForm.valid) {
+      const data = this.buildProductData();
+      this.product.addProduct(data as any).subscribe({
+        next: (res: any) => {
+          this.productForm.controls.productId.setValue(res.productEntryId);
+          this.saveSegmentMappingsForUpload(onSuccess, onError);
+        },
+        error: (err) => {
+          console.error(`[ProductUpload] row ${index + 1} save failed`, err);
+          onError();
+        },
+      });
+    } else {
+      const missingFields: string[] = [];
+      const value: any = this.productForm.value;
+      [
+        'productName', 'printName', 'itemCode', 'barCode', 'eancode',
+        'hsnsaccode', 'rack', 'quantity', 'costRate', 'salesRate', 'mrp', 'amount',
+      ].forEach((k) => {
+        if (value[k] === null || value[k] === undefined || String(value[k]).trim() === '') {
+          missingFields.push(k);
+        }
+      });
+      console.error(`[ProductUpload] row ${index + 1} invalid: ${missingFields.join(', ')}`);
+      onError();
+    }
+  }
+
+  private saveSegmentMappingsForUpload(onSuccess: () => void, onError: () => void) {
+    if (this.selectedSegment.length === 0) {
+      onSuccess();
+      return;
+    }
+    const total = this.selectedSegment.length;
+    let completed = 0;
+    let failed = 0;
+    const finish = () => {
+      if (completed + failed < total) return;
+      if (failed > 0) {
+        onError();
+      } else {
+        onSuccess();
+      }
+    };
+    this.selectedSegment.forEach((element: any) => {
+      const data = {
+        refOrgid: this.productForm.value.refOrgId,
+        refCreatedBy: this.productForm.value.refCreatedBy,
+        refModifiedBy: this.productForm.value.refModifiedBy,
+        refproductEntryId: this.productForm.value.productId,
+        refReferenceListId: element.refList,
+      };
+      this.segment.productSegmentMapping(data).subscribe({
+        next: () => {
+          completed++;
+          finish();
+        },
+        error: () => {
+          failed++;
+          finish();
+        },
       });
     });
   }
 
   private populateFormFromExcelRow(d: any) {
+    this.productForm.controls.date.setValue(
+      normalizeExcelDate(d.date, this.maxDate)
+    );
     this.productForm.controls.amount.setValue(d.amount);
     this.productForm.controls.barCode.setValue(String(d.barCode));
     this.productForm.controls.closingQty.setValue(d.closingQty);
@@ -619,12 +799,12 @@ export class ItemmasterPage implements OnInit, OnDestroy {
     this.productForm.controls.description.setValue(d.description);
     this.productForm.controls.discount.setValue(d.discount);
     this.productForm.controls.eancode.setValue(String(d.eancode));
-    this.productForm.controls.expiryDate.setValue(this.datePipe.transform(d.expiryDate, 'yyyy-MM-dd'));
+    this.productForm.controls.expiryDate.setValue(normalizeExcelDate(d.expiryDate, null));
     this.productForm.controls.gst.setValue(d.gst);
     this.productForm.controls.hsnsaccode.setValue(String(d.hsnsaccode));
     this.productForm.controls.itemWeight.setValue(d.itemWeight);
     this.productForm.controls.itemCode.setValue(d.itemCode);
-    this.productForm.controls.manufactureDate.setValue(this.datePipe.transform(d.manufactureDate, 'yyyy-MM-dd'));
+    this.productForm.controls.manufactureDate.setValue(normalizeExcelDate(d.manufactureDate, null));
     this.productForm.controls.mcDesc.setValue(d.mcdescription);
     this.productForm.controls.mrp.setValue(d.mrp);
     this.productForm.controls.openingQty.setValue(d.openingQty);
@@ -632,6 +812,7 @@ export class ItemmasterPage implements OnInit, OnDestroy {
     this.productForm.controls.productName.setValue(d.productName);
     this.productForm.controls.quantity.setValue(d.quantity);
     this.productForm.controls.rack.setValue(d.rack);
+    this.productForm.controls.rfidcode.setValue(d.rfidcode || null);
     this.productForm.controls.salesRate.setValue(d.salesRate);
     this.productForm.controls.styleCode.setValue(d.stylecode);
   }

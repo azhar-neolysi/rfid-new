@@ -12,6 +12,8 @@ import { DatePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import * as XLSX from 'xlsx';
 import { ToastrService } from 'src/app/services/toastr/toastr.service';
+import { FileDownloadService } from 'src/app/services/file-download.service';
+import { normalizeExcelDate } from 'src/app/services/excel-date.util';
 @Component({
   selector: 'app-add-employee',
   templateUrl: './add-employee.page.html',
@@ -26,7 +28,7 @@ export class AddEmployeePage implements OnInit {
     dob: ['', [Validators.required]],
     doj: ['', [Validators.required]],
     email: ['', [Validators.required, Validators.email]],
-    mobileNo: ['', [Validators.required]],
+    mobileNo: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
     gender: ['Male', [Validators.required]],
     // role: ['', [Validators.required]],
     // location: ['', [Validators.required]],
@@ -72,7 +74,7 @@ export class AddEmployeePage implements OnInit {
   editEmpID: any;
   userID: any;
   excelUpload: boolean;
-  excelData: never[];
+  excelData: any[];
   // datePipe = new DatePipe('en-US');
   // return datePipe.transform(date, format);
   constructor(
@@ -83,7 +85,8 @@ export class AddEmployeePage implements OnInit {
     private datePipe: DatePipe,
     private route: ActivatedRoute,
     private router:Router,
-    private toast: ToastrService
+    private toast: ToastrService,
+    private fileDownload: FileDownloadService
   ) {}
 
   ngOnInit() {
@@ -108,14 +111,14 @@ export class AddEmployeePage implements OnInit {
         if (this.empForm.value.password === this.empForm.value.confirmpassword) {
           const data = {
             employeeId: this.empForm.value.employeeId,
-            refOrgId: null,
-            refLocationId: null,
-            refRoleId: null,
+            refOrgId: this.empForm.value.refOrgId,
+            refLocationId: this.empForm.value.refLocationId,
+            refRoleId: this.empForm.value.refRoleId,
             isActive: true,
             isDeleted: false,
-            refCreatedBy: null,
+            refCreatedBy: this.empForm.value.refCreatedBy,
             createdDate: new Date(),
-            refModifiedBy: null,
+            refModifiedBy: this.empForm.value.refModifiedBy,
             modifiedDate: new Date(),
             value: null,
             firstName: this.empForm.value.firstName,
@@ -126,7 +129,7 @@ export class AddEmployeePage implements OnInit {
             doj: this.empForm.value.doj,
             email: this.empForm.value.email,
             mobileNo: String(this.empForm.value.mobileNo),
-            empStatus: '',
+            empStatus: this.empForm.value.status,
             noticePeriod: this.empForm.value.notice,
             nationality: this.empForm.value.nationality,
           };
@@ -142,16 +145,18 @@ export class AddEmployeePage implements OnInit {
           this.toast.danger('Password Mismatch');
         }
       } else {
-        if (this.empForm.value.password === this.empForm.value.confirmpassword) {
+        if (!this.empForm.value.password) {
+          this.toast.danger('Password is required');
+        } else if (this.empForm.value.password === this.empForm.value.confirmpassword) {
           const data = {
-            refOrgId: null,
-            refLocationId: null,
-            refRoleId: null,
+            refOrgId: this.empForm.value.refOrgId,
+            refLocationId: this.empForm.value.refLocationId,
+            refRoleId: this.empForm.value.refRoleId,
             isActive: true,
             isDeleted: false,
-            refCreatedBy: null,
+            refCreatedBy: this.empForm.value.refCreatedBy,
             createdDate: new Date(),
-            refModifiedBy: null,
+            refModifiedBy: this.empForm.value.refModifiedBy,
             modifiedDate: new Date(),
             value: null,
             firstName: this.empForm.value.firstName,
@@ -162,7 +167,7 @@ export class AddEmployeePage implements OnInit {
             doj: this.empForm.value.doj,
             email: this.empForm.value.email,
             mobileNo: String(this.empForm.value.mobileNo),
-            empStatus: '',
+            empStatus: this.empForm.value.status,
             noticePeriod: this.empForm.value.notice,
             nationality: this.empForm.value.nationality,
           };
@@ -273,6 +278,12 @@ export class AddEmployeePage implements OnInit {
   excelUploadEnable() {
     this.excelUpload = !this.excelUpload ? true : false;
   }
+  downloadTemplate(file: string, event: any) {
+    if (this.fileDownload.isNative()) {
+      event.preventDefault();
+    }
+    this.fileDownload.templateDownload(file);
+  }
   onFileSelected(event: any) {
     this.excelData = [];
     const file: any = event.target.files[0];
@@ -285,30 +296,93 @@ export class AddEmployeePage implements OnInit {
     };
   }
   upload() {
-    this.excelData.forEach((element: any) => {
-      this.empForm.controls.employeeId.setValue(element.employeeId);
-      this.empForm.controls.description.setValue(element.description);
-      this.empForm.controls.dob.setValue(
-        this.datePipe.transform(element.dob, 'yyyy-MM-dd')
-      );
-      this.empForm.controls.doj.setValue(
-        this.datePipe.transform(element.doj, 'yyyy-MM-dd')
-      );
-      this.empForm.controls.email.setValue(element.email);
-      this.empForm.controls.firstName.setValue(element.firstName);
-      this.empForm.controls.gender.setValue(element.gender);
-      this.empForm.controls.isActive.setValue(element.isActive);
-      this.empForm.controls.lastName.setValue(element.lastName);
-      this.empForm.controls.mobileNo.setValue(element.mobileNo);
-      this.empForm.controls.nationality.setValue(element.nationality);
-      this.empForm.controls.notice.setValue(element.noticePeriod);
-      this.empForm.controls.refCreatedBy.setValue(element.refCreatedBy);
-      this.empForm.controls.refLocationId.setValue(element.refLocationId);
-      this.empForm.controls.refModifiedBy.setValue(element.refModifiedBy);
-      this.empForm.controls.refOrgId.setValue(element.refOrgId);
-      this.empForm.controls.refRoleId.setValue(element.refRoleId);
-      this.empForm.controls.status.setValue(element.status);
-      this.addEmployee();
+    const rows = [...this.excelData];
+    const total = rows.length;
+    let index = 0;
+    const processNext = () => {
+      if (index >= total) {
+        this.toast.success(`Uploaded ${total} employee(s)`);
+        this.router.navigate(['employee']);
+        return;
+      }
+      const element = rows[index];
+      const data = {
+        refOrgId: this.empForm.value.refOrgId,
+        refLocationId: element.refLocationId,
+        refRoleId: element.refRoleId,
+        isActive: true,
+        isDeleted: false,
+        refCreatedBy: this.empForm.value.refCreatedBy,
+        createdDate: new Date(),
+        refModifiedBy: null,
+        modifiedDate: new Date(),
+        value: null,
+        firstName: element.firstName,
+        lastName: element.lastName,
+        gender: element.gender,
+        dob: normalizeExcelDate(element.dob, null),
+        doj: normalizeExcelDate(element.doj, null),
+        email: element.email,
+        mobileNo: String(element.mobileNo),
+        empStatus: element.empStatus || element.status || 'Working',
+        noticePeriod: element.noticePeriod,
+        nationality: element.nationality,
+      };
+      this.emp.addEmployee(data).subscribe({
+        next: (res: any) => {
+          this.empID = res.employeeId;
+          index++;
+          this.createUserForUpload(() => processNext());
+        },
+        error: (err) => {
+          console.log(err);
+          index++;
+          processNext();
+        },
+      });
+    };
+    processNext();
+  }
+
+  private createUserForUpload(onDone: () => void) {
+    const data = {
+      refOrgid: null,
+      isActive: true,
+      refCreatedBy: null,
+      createdDate: new Date(),
+      refModifiedBy: null,
+      modifiedDate: null,
+      userName: this.empForm.value.userName,
+      email: this.empForm.value.email,
+      mobileNo: String(this.empForm.value.mobileNo),
+      password: this.empForm.value.password,
+      processing: '',
+      comments: this.empForm.value.description,
+      passwordHash: '',
+      passwordSalt: '',
+      emailVerified: false,
+      isDeleted: false,
+    };
+    this.user.createUser(data).subscribe({
+      next: (res: any) => {
+        this.userID = res.userId;
+        const mdata = {
+          refOrgid: null,
+          refEmpId: this.empID,
+          refUserId: this.userID,
+          isActive: true,
+          refCreatedBy: null,
+          createdDate: new Date(),
+          refModifiedBy: null,
+          modifiedDate: new Date(),
+          isDeleted: false,
+        };
+        this.user.createMapp(mdata).subscribe({
+          next: () => onDone(),
+          error: () => onDone(),
+        });
+      },
+      error: () => onDone(),
     });
   }
 }
