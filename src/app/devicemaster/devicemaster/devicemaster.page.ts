@@ -9,6 +9,7 @@ import { DevicemasterService } from '../devicemaster.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import * as XLSX from 'xlsx';
 import { FileDownloadService } from '../../services/file-download.service';
+import { ToastrService } from '../../services/toastr/toastr.service';
 
 @Component({
   selector: 'app-devicemaster',
@@ -41,12 +42,17 @@ export class DevicemasterPage implements OnInit {
   deviceId: any;
   excelUpload = false;
   excelData: any;
-  constructor(private formBuilder: FormBuilder, private device: DevicemasterService, private route: ActivatedRoute, private router: Router, private fileDownload: FileDownloadService) { }
-  downloadTemplate(file: string, event: any) {
+  constructor(private formBuilder: FormBuilder, private device: DevicemasterService, private route: ActivatedRoute, private router: Router, private fileDownload: FileDownloadService, private toast: ToastrService) { }
+  async downloadTemplate(file: string, event: any) {
     if (this.fileDownload.isNative()) {
       event.preventDefault();
+      const saved = await this.fileDownload.templateDownload(file);
+      if (saved) {
+        this.toast.success('Template downloaded to Downloads/RFID');
+      } else {
+        this.toast.danger('Could not download the template');
+      }
     }
-    this.fileDownload.templateDownload(file);
   }
 
   ngOnInit() {

@@ -1,0 +1,20 @@
+<ion-content [fullscreen]="true" class="scan-content">
+  <div class="scan-overlay">
+    <div class="scan-top"></div>
+    <div class="scan-middle">
+      <div class="scan-top-left"></div>
+      <div class="scan-frame">
+        <div class="scan-line"></div>
+      </div>
+      <div class="scan-top-right"></div>
+    </div>
+    <div class="scan-bottom">
+      <p class="scan-hint" [class.success]="scanSuccess">
+        {{ scanSuccess ? 'Code scanned' : 'Align barcode within frame' }}
+      </p>
+      <ion-button fill="clear" class="cancel-btn" (click)="cancel()">
+        Cancel
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

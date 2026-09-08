@@ -115,7 +115,7 @@ export class TagingPage implements OnInit, OnDestroy {
     this.tagId = null;
   }
   async scanBarcode() {
-    const code = await this.barcodeService.scan();
+    const code = await this.barcodeService.scanWithModal();
     if (code) {
       this.tagId = code;
       this.navigateToProduct(code);

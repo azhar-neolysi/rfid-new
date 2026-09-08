@@ -86,7 +86,7 @@ export class SalePage implements OnInit, OnDestroy {
   }
 
   async scanBarcode() {
-    const code = await this.barcodeService.scanWithModal();
+    const code = await this.barcodeService.scan();
     if (code) {
       this.onScan(code);
     }

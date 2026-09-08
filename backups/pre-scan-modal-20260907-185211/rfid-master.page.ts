@@ -131,7 +131,7 @@ export class RfidMasterPage implements OnInit, OnDestroy {
     });
   }
   async scanBarcodeTag() {
-    const code = await this.barcodeService.scanWithModal();
+    const code = await this.barcodeService.scan();
     if (code) {
       this.onTagScanned(code);
     }
@@ -226,16 +226,11 @@ export class RfidMasterPage implements OnInit, OnDestroy {
   excelUploadEnable() {
     this.excelUpload = !this.excelUpload ? true : false;
   }
-  async downloadTemplate(file: string, event: any) {
+  downloadTemplate(file: string, event: any) {
     if (this.fileDownload.isNative()) {
       event.preventDefault();
-      const saved = await this.fileDownload.templateDownload(file);
-      if (saved) {
-        this.showToast('success', 'Template downloaded to Downloads/RFID');
-      } else {
-        this.showToast('danger', 'Could not download the template');
-      }
     }
+    this.fileDownload.templateDownload(file);
   }
   getRFIDById() {
     this.rfid.getRFID(this.rfid_Id).subscribe({

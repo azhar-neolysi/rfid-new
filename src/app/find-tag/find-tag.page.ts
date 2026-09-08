@@ -10,6 +10,7 @@ import { Platform, AlertController, MenuController } from '@ionic/angular';
 import * as XLSX from 'xlsx';
 import { ProductService } from '../itemmaster/product.service';
 import { FileDownloadService } from '../services/file-download.service';
+import { ToastrService } from '../services/toastr/toastr.service';
 
 @Component({
   selector: 'app-find-tag',
@@ -40,13 +41,19 @@ export class FindTagPage implements OnInit, AfterViewInit {
     public alertController: AlertController,
     private renderer: Renderer2,
     private product: ProductService,
-    private fileDownload: FileDownloadService
+    private fileDownload: FileDownloadService,
+    private toast: ToastrService
   ) {}
-  downloadTemplate(file: string, event: any) {
+  async downloadTemplate(file: string, event: any) {
     if (this.fileDownload.isNative()) {
       event.preventDefault();
+      const saved = await this.fileDownload.templateDownload(file);
+      if (saved) {
+        this.toast.success('Template downloaded to Downloads/RFID');
+      } else {
+        this.toast.danger('Could not download the template');
+      }
     }
-    this.fileDownload.templateDownload(file);
   }
   ngOnInit() {}
   ngAfterViewInit() {

@@ -117,7 +117,10 @@ public class UrovoRfidDevice implements IRfidDevice {
             rfidManager = null;
         }
         initialized = false;
-        USDKManager.getInstance().release();
+        USDKManager instance = USDKManager.getInstance();
+        if (instance != null) {
+            instance.release();
+        }
         Log.d(TAG, "Disconnected");
     }
 

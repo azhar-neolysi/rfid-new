@@ -107,7 +107,7 @@ export class StockTransferPage implements OnInit, OnDestroy {
   }
 
   async scanBarcode() {
-    const code = await this.barcodeService.scanWithModal();
+    const code = await this.barcodeService.scan();
     if (code) {
       this.stockForm.controls.barcode.setValue(code);
       this.getProduct();

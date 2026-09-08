@@ -1,15 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Capacitor, registerPlugin } from '@capacitor/core';
-
-interface NativeDownloadPlugin {
-  save(options: {
-    fileName: string;
-    base64: string;
-    mimeType: string;
-  }): Promise<{ uri: string; path: string }>;
-}
-
-const NativeDownload = registerPlugin<NativeDownloadPlugin>('NativeDownload');
+import { Capacitor } from '@capacitor/core';
+import { Directory, Filesystem } from '@capacitor/filesystem';
 
 @Injectable({ providedIn: 'root' })
 export class FileDownloadService {
@@ -24,7 +15,7 @@ export class FileDownloadService {
       if (!res.ok) throw new Error(`Template request failed (${res.status})`);
       const buffer = await res.arrayBuffer();
       const base64 = this.arrayBufferToBase64(buffer);
-      await this.saveToDownloads(base64, file);
+      await this.saveToDocuments(base64, file);
       return true;
     } catch (err) {
       console.error('[FileDownload] template download failed', err);
@@ -35,7 +26,7 @@ export class FileDownloadService {
   async exportFile(base64: string, fileName: string): Promise<boolean> {
     if (!this.isNative()) return false;
     try {
-      await this.saveToDownloads(base64, fileName);
+      await this.saveToDocuments(base64, fileName);
       return true;
     } catch (err) {
       console.error('[FileDownload] export failed', err);
@@ -43,18 +34,20 @@ export class FileDownloadService {
     }
   }
 
-  private async saveToDownloads(base64: string, fileName: string): Promise<void> {
-    await NativeDownload.save({
-      fileName,
-      base64,
-      mimeType: this.getMimeType(fileName),
+  private async saveToDocuments(base64: string, fileName: string): Promise<void> {
+    const permissions = await Filesystem.checkPermissions();
+    if (permissions.publicStorage !== 'granted') {
+      const requested = await Filesystem.requestPermissions();
+      if (requested.publicStorage !== 'granted') {
+        throw new Error('Storage permission was not granted');
+      }
+    }
+    await Filesystem.writeFile({
+      path: `RFID/${fileName}`,
+      data: base64,
+      directory: Directory.Documents,
+      recursive: true,
     });
-  }
-
-  private getMimeType(fileName: string): string {
-    return fileName.toLowerCase().endsWith('.xlsx')
-      ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      : 'application/octet-stream';
   }
 
   private arrayBufferToBase64(buffer: ArrayBuffer): string {

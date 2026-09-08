@@ -34,11 +34,16 @@ export class AddSegmentPage implements OnInit {
     private toast: ToastrService,
     private fileDownload: FileDownloadService
   ) {}
-  downloadTemplate(file: string, event: any) {
+  async downloadTemplate(file: string, event: any) {
     if (this.fileDownload.isNative()) {
       event.preventDefault();
+      const saved = await this.fileDownload.templateDownload(file);
+      if (saved) {
+        this.toast.success('Template downloaded to Downloads/RFID');
+      } else {
+        this.toast.danger('Could not download the template');
+      }
     }
-    this.fileDownload.templateDownload(file);
   }
 
   ngOnInit() {}

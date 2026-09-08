@@ -1,7 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { App } from '@capacitor/app';
-import { Haptics } from '@capacitor/haptics';
 import { Subscription } from 'rxjs';
 import * as XLSX from 'xlsx';
 import { ProductService } from '../itemmaster/product.service';
@@ -240,12 +239,8 @@ export class TagCountPage implements OnInit, OnDestroy {
 
     if (this.fileDownload.isNative()) {
       const base64 = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
-      const saved = await this.fileDownload.exportFile(base64, fileName);
-      if (saved) {
-        this.toastr.success(`Report saved to Downloads/RFID as ${fileName}`);
-      } else {
-        this.toastr.danger('Could not export the report');
-      }
+      await this.fileDownload.exportFile(base64, fileName);
+      this.toastr.success('Choose where to save the report');
       return;
     }
 
@@ -361,7 +356,6 @@ export class TagCountPage implements OnInit, OnDestroy {
     if (!epc) return;
     const now = Date.now();
     this.totalReads++;
-    Haptics.vibrate({ duration: 40 }).catch(() => {});
     const existing = this.countedMap.get(epc);
     if (existing) {
       existing.reads++;

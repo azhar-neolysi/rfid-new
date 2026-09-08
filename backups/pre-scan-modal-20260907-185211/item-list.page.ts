@@ -112,7 +112,7 @@ export class ItemListPage implements OnInit, OnDestroy {
     activeElement.blur();
   }
   async scanBarcode() {
-    const code = await this.barcodeService.scanWithModal();
+    const code = await this.barcodeService.scan();
     if (code) {
       this.barcodeScan = code;
       this.navigateToProduct(code);

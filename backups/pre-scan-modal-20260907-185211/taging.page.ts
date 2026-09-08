@@ -1,55 +1,55 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { ProductService } from '../product.service';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { AlertController } from '@ionic/angular';
-import { HardwareRfidService } from '../../services/hardware-rfid.service';
-import { ToastrService } from 'src/app/services/toastr/toastr.service';
-import { BarcodeService } from 'src/app/services/barcode.service';
+import { Subscription } from 'rxjs';
+import { ProductService } from '../itemmaster/product.service';
+import { HardwareRfidService } from '../services/hardware-rfid.service';
+import { IonInput, AlertController } from '@ionic/angular';
+import { ToastrService } from '../services/toastr/toastr.service';
+import { BarcodeService } from '../services/barcode.service';
 
 @Component({
-  selector: 'app-item-list',
-  templateUrl: './item-list.page.html',
-  styleUrls: ['./item-list.page.scss'],
+  selector: 'app-taging',
+  templateUrl: './taging.page.html',
+  styleUrls: ['./taging.page.scss'],
 })
-export class ItemListPage implements OnInit, OnDestroy {
-
+export class TagingPage implements OnInit, OnDestroy {
+  @ViewChild('myInput', { static: false, read: IonInput }) myInput: IonInput;
   readerConnected = false;
-  pageActive = false;
   products: any = [];
   productsTemp: any = [];
-  barcodeScan: any;
+  tagId: string | null = null;
+  pageActive = false;
   private subs: Subscription[] = [];
   constructor(
     private product: ProductService,
     private router: Router,
-    private toast: ToastrService,
-    private alertCtrl: AlertController,
     private hardwareRfid: HardwareRfidService,
+    private alertCtrl: AlertController,
+    private toast: ToastrService,
     private barcodeService: BarcodeService
   ) {}
 
-  async ngOnInit() {
+  ngOnInit() {
     this.readerConnected = this.hardwareRfid.isConnected;
     this.subs.push(
       this.hardwareRfid.connected$.subscribe(() => { this.readerConnected = true; }),
       this.hardwareRfid.disconnected$.subscribe(() => { this.readerConnected = false; }),
       this.hardwareRfid.tagRead$.subscribe((event) => {
         if (!this.pageActive) return;
-        this.barcodeScan = event.epc;
-        if (this.barcodeScan) {
-          this.navigateToProduct(this.barcodeScan);
+        this.tagId = event.epc;
+        if (this.tagId) {
+          this.navigateToProduct(this.tagId);
         }
       })
     );
-   await this.getProducts();
+    this.getProducts();
   }
   ngOnDestroy() {
     this.subs.forEach(s => s.unsubscribe());
   }
   ionViewDidEnter() {
     this.pageActive = true;
-    this.barcodeScan = null;
+    this.tagId = null;
     this.hardwareRfid
       .ensureConnected()
       .then(() => this.hardwareRfid.startTriggerScan())
@@ -60,7 +60,7 @@ export class ItemListPage implements OnInit, OnDestroy {
     this.hardwareRfid.stopTriggerScan().catch(() => {});
   }
   getProducts() {
-    this.product.GetLastProducts().subscribe({
+    this.product.getProducts().subscribe({
       next: (res: any) => {
         this.products = res;
         this.productsTemp = res;
@@ -111,10 +111,13 @@ export class ItemListPage implements OnInit, OnDestroy {
     const activeElement = document.activeElement as HTMLElement;
     activeElement.blur();
   }
+  clear() {
+    this.tagId = null;
+  }
   async scanBarcode() {
-    const code = await this.barcodeService.scanWithModal();
+    const code = await this.barcodeService.scan();
     if (code) {
-      this.barcodeScan = code;
+      this.tagId = code;
       this.navigateToProduct(code);
     }
   }

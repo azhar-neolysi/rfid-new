@@ -73,11 +73,16 @@ export class TagLocatorPage implements OnDestroy {
     private fileDownload: FileDownloadService
   ) {}
 
-  downloadTemplate(file: string, event: any) {
+  async downloadTemplate(file: string, event: any) {
     if (this.fileDownload.isNative()) {
       event.preventDefault();
+      const saved = await this.fileDownload.templateDownload(file);
+      if (saved) {
+        this.toastr.success('Template downloaded to Downloads/RFID');
+      } else {
+        this.toastr.danger('Could not download the template');
+      }
     }
-    this.fileDownload.templateDownload(file);
   }
 
   ionViewDidEnter() {

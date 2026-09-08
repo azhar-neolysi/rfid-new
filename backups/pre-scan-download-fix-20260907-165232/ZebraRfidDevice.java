@@ -31,10 +31,6 @@ import com.zebra.rfid.api3.SESSION;
 import com.zebra.rfid.api3.START_TRIGGER_TYPE;
 import com.zebra.rfid.api3.STOP_TRIGGER_TYPE;
 import com.zebra.rfid.api3.HANDHELD_TRIGGER_EVENT_TYPE;
-import com.zebra.rfid.api3.INVENTORY_STATE;
-import com.zebra.rfid.api3.RegionInfo;
-import com.zebra.rfid.api3.RegulatoryConfig;
-import com.zebra.rfid.api3.SL_FLAG;
 import com.zebra.rfid.api3.STATUS_EVENT_TYPE;
 import com.zebra.rfid.api3.TagAccess;
 import com.zebra.rfid.api3.TagData;
@@ -82,9 +78,7 @@ public class ZebraRfidDevice implements IRfidDevice, Readers.RFIDReaderEventHand
         public void eventReadNotify(RfidReadEvents rfidReadEvents) {
             try {
                 if (reader == null) return;
-                Log.d(TAG, "eventReadNotify fired");
                 TagData[] tags = reader.Actions.getReadTags(100);
-                Log.d(TAG, "getReadTags returned " + (tags == null ? 0 : tags.length));
                 if (tags == null || tags.length == 0) return;
 
                 // Copy the batch on the SDK thread, then emit on the main
@@ -100,10 +94,6 @@ public class ZebraRfidDevice implements IRfidDevice, Readers.RFIDReaderEventHand
                     });
                 }
                 if (batch.isEmpty()) return;
-
-                Log.d(TAG, "eventReadNotify: " + batch.size() + " tags in batch");
-                Object[] sample = batch.get(0);
-                Log.d(TAG, "  sample EPC=" + sample[0] + " rssi=" + sample[1] + " ant=" + sample[2]);
 
                 // Single-tap mode (handheld, non-continuous): a quick trigger
                 // press should yield exactly ONE tag, then re-arm for the next tap.
@@ -273,8 +263,6 @@ public class ZebraRfidDevice implements IRfidDevice, Readers.RFIDReaderEventHand
         continuousMode = false;
         applyHandheldTriggers();
         try { reader.Actions.Inventory.stop(); } catch (Exception ignored) {}
-        logInventoryConfig("startInventory");
-        Log.d(TAG, "startInventory: issuing Inventory.perform() (handheld)");
         reader.Actions.Inventory.perform();
         inventoryRunningNative = true;
     }
@@ -298,8 +286,6 @@ public class ZebraRfidDevice implements IRfidDevice, Readers.RFIDReaderEventHand
             reader.Config.setUniqueTagReport(false);
         } catch (Exception e) { Log.w(TAG, "setUniqueTagReport: " + e.getMessage()); }
         applyImmediateTriggers();
-        logInventoryConfig("startInventoryContinuous");
-        Log.d(TAG, "startInventoryContinuous: issuing Inventory.perform() (immediate)");
         reader.Actions.Inventory.perform();
         inventoryRunningNative = true;
     }
@@ -526,7 +512,6 @@ public class ZebraRfidDevice implements IRfidDevice, Readers.RFIDReaderEventHand
             // link is already up (the reader beeps on connect).
             Log.w(TAG, "configureReader warning: " + e.getMessage());
         }
-        Log.d(TAG, "configureReader complete");
         connected.set(true);
         final String name = candidate.getName();
         Log.d(TAG, "Connected to: " + name);
@@ -787,68 +772,11 @@ public class ZebraRfidDevice implements IRfidDevice, Readers.RFIDReaderEventHand
             Log.w(TAG, "addEventsListener (may already be attached): " + e.getMessage());
         }
         try {
-            configureRegion();
-        } catch (Exception e) { Log.w(TAG, "configureRegion: " + e.getMessage()); }
-        try {
             applyHandheldTriggers();
         } catch (Exception e) { Log.w(TAG, "applyHandheldTriggers: " + e.getMessage()); }
         try {
             setMaxPower();
         } catch (Exception e) { Log.w(TAG, "setMaxPower: " + e.getMessage()); }
-        try {
-            // Match the HH reference app: default RF mode table + Tari so the
-            // radio actually transmits on the RFD40+.
-            Antennas.AntennaRfConfig config = reader.Config.Antennas.getAntennaRfConfig(1);
-            config.setrfModeTableIndex(0);
-            config.setTari(0);
-            reader.Config.Antennas.setAntennaRfConfig(1, config);
-        } catch (Exception e) { Log.w(TAG, "antennaRfConfig rfMode/Tari: " + e.getMessage()); }
-        try {
-            // Full singulation setup (state A + SL_ALL) as the reference app
-            // applies it; missing SL/inventory state can yield zero reads.
-            Antennas.SingulationControl singulation = reader.Config.Antennas.getSingulationControl(1);
-            singulation.Action.setInventoryState(INVENTORY_STATE.INVENTORY_STATE_A);
-            singulation.Action.setSLFlag(SL_FLAG.SL_ALL);
-            reader.Config.Antennas.setSingulationControl(1, singulation);
-        } catch (Exception e) { Log.w(TAG, "singulation state/SL: " + e.getMessage()); }
-        try {
-            // A leftover prefilter (e.g. from 123Scan) silently drops every tag.
-            reader.Actions.PreFilters.deleteAll();
-        } catch (Exception e) { Log.w(TAG, "deleteAll PreFilters: " + e.getMessage()); }
-    }
-
-    /**
-     * A reader with no region configured cannot transmit. Mirror the HH sample:
-     * read the current regulatory config and, if unset, program the first
-     * supported region so the radio comes up on a legal channel plan.
-     */
-    private void configureRegion() throws Exception {
-        RegulatoryConfig regCfg = null;
-        try {
-            regCfg = reader.Config.getRegulatoryConfig();
-        } catch (Exception e) {
-            Log.w(TAG, "getRegulatoryConfig: " + e.getMessage());
-        }
-        String region = null;
-        if (regCfg != null) {
-            try { region = regCfg.getRegion(); } catch (Exception ignored) {}
-        }
-        Log.d(TAG, "configureRegion: current=" + region + " (null/empty means unset)");
-        if (region != null && !region.isEmpty()) return;
-        RegionInfo regionInfo = reader.ReaderCapabilities.SupportedRegions.getRegionInfo(0);
-        if (regionInfo == null) {
-            Log.w(TAG, "configureRegion: no supported regions available");
-            return;
-        }
-        RegulatoryConfig target = new RegulatoryConfig();
-        target.setRegion(regionInfo.getRegionCode());
-        target.setIsHoppingOn(regionInfo.isHoppingConfigurable());
-        target.setEnabledChannels(regionInfo.getSupportedChannels());
-        target.setStandardName(regionInfo.getName());
-        reader.Config.setRegulatoryConfig(target);
-        Log.d(TAG, "configureRegion: configured region=" + regionInfo.getName()
-                + " code=" + regionInfo.getRegionCode()
-                + " channels=" + (regionInfo.getSupportedChannels() != null ? regionInfo.getSupportedChannels().length : 0));
     }
 
     private void applyHandheldTriggers() throws Exception {
@@ -877,49 +805,6 @@ public class ZebraRfidDevice implements IRfidDevice, Readers.RFIDReaderEventHand
         Antennas.AntennaRfConfig config = reader.Config.Antennas.getAntennaRfConfig(1);
         config.setTransmitPowerIndex(levels.length - 1);
         reader.Config.Antennas.setAntennaRfConfig(1, config);
-    }
-
-    /** Log the radio config read back from the board to diagnose empty scans. */
-    private void logInventoryConfig(String label) {
-        try {
-            int[] levels = reader.ReaderCapabilities.getTransmitPowerLevelValues();
-            Log.d(TAG, label + " readback[powerLevels] ok n=" + (levels != null ? levels.length : -1));
-        } catch (Exception e) {
-            Log.w(TAG, label + " readback[powerLevels] failed: " + e.getMessage());
-        }
-        try {
-            Antennas.AntennaRfConfig config = reader.Config.Antennas.getAntennaRfConfig(1);
-            Integer tx = config != null ? config.getTransmitPowerIndex() : null;
-            Long rfMode = config != null ? config.getrfModeTableIndex() : null;
-            Long tari = config != null ? config.getTari() : null;
-            Log.d(TAG, label + " readback[antennaRfConfig] txIndex=" + tx + " rfMode=" + rfMode + " tari=" + tari);
-        } catch (Exception e) {
-            Log.w(TAG, label + " readback[antennaRfConfig] failed: " + e.getMessage());
-        }
-        try {
-            RegulatoryConfig regCfg = reader.Config.getRegulatoryConfig();
-            String region = regCfg != null ? regCfg.getRegion() : null;
-            Log.d(TAG, label + " readback[region] region=" + region);
-        } catch (Exception e) {
-            Log.w(TAG, label + " readback[region] failed: " + e.getMessage());
-        }
-        try {
-            Antennas.SingulationControl sing = reader.Config.Antennas.getSingulationControl(1);
-            String session = sing != null && sing.getSession() != null ? sing.getSession().toString() : "?";
-            Log.d(TAG, label + " readback[singulation] session=" + session);
-        } catch (Exception e) {
-            Log.w(TAG, label + " readback[singulation] failed: " + e.getMessage());
-        }
-        try {
-            Log.d(TAG, label + " readback[triggers] start=" + getEnumName(reader.Config.getStartTrigger())
-                    + " stop=" + getEnumName(reader.Config.getStopTrigger()));
-        } catch (Exception e) {
-            Log.w(TAG, label + " readback[triggers] failed: " + e.getMessage());
-        }
-    }
-
-    private String getEnumName(Object o) {
-        return o != null ? o.toString() : "?";
     }
 
     private void setPowerLevel(int powerDbm) throws Exception {

@@ -1,0 +1,101 @@
+:host {
+  --scan-color: #ffffff;
+  --scan-success: #2dd36f;
+}
+
+.scan-content {
+  --background: transparent;
+}
+
+.scan-overlay {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  pointer-events: none;
+
+  ion-button,
+  p {
+    pointer-events: auto;
+  }
+}
+
+.scan-top,
+.scan-bottom {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.scan-top {
+  justify-content: flex-end;
+  padding-bottom: 16px;
+}
+
+.scan-bottom {
+  justify-content: flex-start;
+  padding-top: 16px;
+}
+
+.scan-middle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 240px;
+}
+
+.scan-top-left,
+.scan-top-right {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.55);
+  height: 100%;
+}
+
+.scan-frame {
+  width: 260px;
+  height: 240px;
+  border: 2px solid var(--scan-color);
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--scan-color);
+  box-shadow: 0 0 8px var(--scan-color);
+  animation: scanMove 2s ease-in-out infinite;
+}
+
+@keyframes scanMove {
+  0%,
+  100% {
+    top: 8px;
+  }
+  50% {
+    top: calc(100% - 10px);
+  }
+}
+
+.scan-hint {
+  color: var(--scan-color);
+  font-size: 15px;
+  margin: 0 0 12px;
+  text-align: center;
+  font-weight: 500;
+
+  &.success {
+    color: var(--scan-success);
+  }
+}
+
+.cancel-btn {
+  --color: var(--scan-color);
+  font-size: 15px;
+  text-transform: none;
+  letter-spacing: normal;
+}

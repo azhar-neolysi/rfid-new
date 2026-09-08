@@ -1,12 +1,6 @@
-import { Component, OnInit, Optional } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import {
-  Platform,
-  AlertController,
-  NavController,
-  IonRouterOutlet,
-} from '@ionic/angular';
-import { App } from '@capacitor/app';
+import { Platform, AlertController, NavController } from '@ionic/angular';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { HardwareRfidService } from './services/hardware-rfid.service';
 import { AuthService } from './services/auth.service';
@@ -160,15 +154,8 @@ export class AppComponent implements OnInit {
     private alertController: AlertController,
     private hardwareRfid: HardwareRfidService,
     private auth: AuthService,
-    private router: Router,
-    @Optional() private routerOutlet?: IonRouterOutlet
-  ) {
-    this.platform.backButton.subscribeWithPriority(-1, () => {
-      if (!this.routerOutlet?.canGoBack()) {
-        App.exitApp();
-      }
-    });
-  }
+    private router: Router
+  ) {}
 
   openReaders(): void {
     this.router.navigate(['/readers']);

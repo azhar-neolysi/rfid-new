@@ -159,7 +159,7 @@ export class ItemmasterPage implements OnInit, OnDestroy {
   }
 
   async scanBarcode(field: 'barCode' | 'eancode' | 'rfidcode' = 'barCode') {
-    const code = await this.barcodeService.scanWithModal();
+    const code = await this.barcodeService.scan();
     if (code) {
       this.productForm.controls[field].setValue(code);
     }

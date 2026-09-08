@@ -5,66 +5,17 @@ import {
   SupportedFormat,
   ScanResult,
 } from '@capacitor-community/barcode-scanner';
-import { AlertController, ModalController } from '@ionic/angular';
-import { ScanPage } from '../scan/scan.page';
+import { AlertController } from '@ionic/angular';
 
 @Injectable({ providedIn: 'root' })
 export class BarcodeService {
   private scannerActive = false;
   private prepared = false;
 
-  constructor(
-    private alertCtrl: AlertController,
-    private modalCtrl: ModalController,
-  ) {}
+  constructor(private alertCtrl: AlertController) {}
 
   isSupported(): boolean {
     return Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android';
-  }
-
-  /**
-   * Opens the full-screen scan modal. Returns the scanned content, or null
-   * if cancelled/failed. Auto-closes on successful read.
-   */
-  async scanWithModal(): Promise<string | null> {
-    if (!this.isSupported()) {
-      return null;
-    }
-
-    const permission = await BarcodeScanner.checkPermission({ force: true });
-    if (!permission.granted) {
-      if (permission.denied) {
-        await this.showAlert(
-          'Permission Denied',
-          'Camera permission was permanently denied. Please enable it in app settings.',
-        );
-        await BarcodeScanner.openAppSettings();
-      } else {
-        await this.showAlert('Permission Required', 'Camera permission is needed to scan barcodes.');
-      }
-      return null;
-    }
-
-    try {
-      if (!this.prepared) {
-        await BarcodeScanner.prepare();
-        this.prepared = true;
-      }
-    } catch (err: any) {
-      console.error('[BarcodeService] prepare error:', err);
-      return null;
-    }
-
-    const modal = await this.modalCtrl.create({
-      component: ScanPage,
-      cssClass: 'scan-modal',
-      backdropDismiss: false,
-      animated: true,
-    });
-    await modal.present();
-
-    const { data } = await modal.onWillDismiss();
-    return typeof data === 'string' ? data : null;
   }
 
   async scan(): Promise<string | null> {
